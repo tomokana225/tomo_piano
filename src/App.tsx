@@ -180,6 +180,9 @@ const App: React.FC = () => {
                         </div>
                         <h1 className="text-4xl md:text-5xl font-extrabold" style={{color: 'var(--primary-color)'}}>{uiConfig.mainTitle}</h1>
                         <p className="text-md md:text-lg mt-2 text-gray-600 dark:text-gray-300">{uiConfig.subtitle}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 max-w-md mx-auto">
+                            URLをコピペするか、ツイキャスアプリの右上にある共有ボタンから、ブラウザでサイトを読み込むと大きな画面で閲覧できます。
+                        </p>
                         <div className="mt-6 flex flex-wrap justify-center items-center gap-4">
                             {uiConfig.twitcastingUrl && (
                                 <a 
