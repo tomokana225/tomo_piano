@@ -15,6 +15,14 @@ const backgroundPresets = [
   { name: 'レコード', url: 'https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5b?q=80&w=1974&auto=format&fit=crop' },
 ];
 
+const colorPresets = [
+    { name: 'デフォルトピンク', primaryColor: '#ec4899', backgroundColor: '#f3f4f6', darkBackgroundColor: '#111827' },
+    { name: 'オーシャンシアン', primaryColor: '#06b6d4', backgroundColor: '#f0f9ff', darkBackgroundColor: '#082f49' },
+    { name: 'フォレストグリーン', primaryColor: '#16a34a', backgroundColor: '#f0fdf4', darkBackgroundColor: '#14532d' },
+    { name: 'サンセットオレンジ', primaryColor: '#f97316', backgroundColor: '#fff7ed', darkBackgroundColor: '#431407' },
+    { name: 'ロイヤルパープル', primaryColor: '#8b5cf6', backgroundColor: '#f5f3ff', darkBackgroundColor: '#2e1065' },
+];
+
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConfig }) => {
     const [config, setConfig] = useState<UiConfig>(uiConfig);
@@ -56,11 +64,38 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         setIsSaving(false);
         setTimeout(() => setSaveStatus('idle'), 3000);
     };
+
+    const applyColorPreset = (preset: typeof colorPresets[0]) => {
+        setConfig(prev => ({
+            ...prev,
+            primaryColor: preset.primaryColor,
+            backgroundColor: preset.backgroundColor,
+            darkBackgroundColor: preset.darkBackgroundColor
+        }));
+    };
     
     const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'list', 'ranking', 'requests', 'blog', 'suggest', 'setlist'];
 
     return (
         <div>
+            <h3 className="text-lg font-semibold mb-4">テーマプリセット</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
+                {colorPresets.map(preset => (
+                    <button
+                        key={preset.name}
+                        onClick={() => applyColorPreset(preset)}
+                        className="rounded-lg border-2 border-transparent hover:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition p-2 text-left bg-gray-100 dark:bg-gray-800 shadow-sm"
+                    >
+                        <div className="flex">
+                            <div className="w-1/3 h-16 rounded-l-md" style={{ backgroundColor: preset.darkBackgroundColor }}></div>
+                            <div className="w-2/3 h-16 rounded-r-md" style={{ backgroundColor: preset.backgroundColor }}></div>
+                        </div>
+                         <div className="w-full h-4 mt-2 rounded-md" style={{ backgroundColor: preset.primaryColor }}></div>
+                        <p className="text-sm font-semibold mt-2 text-center text-gray-700 dark:text-gray-300">{preset.name}</p>
+                    </button>
+                ))}
+            </div>
+
             <h3 className="text-lg font-semibold mb-4">基本設定</h3>
             <div className="space-y-4">
                 <div>

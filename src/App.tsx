@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -72,10 +73,15 @@ const App: React.FC = () => {
 
     const renderView = () => {
         if (isLoading) {
-            return <div className="flex justify-center items-center h-64"><LoadingSpinner className="w-12 h-12" /></div>;
+            return (
+                <div className="flex flex-col justify-center items-center h-64">
+                    <LoadingSpinner className="w-12 h-12" />
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">読み込み中...</p>
+                </div>
+            );
         }
         if (error) {
-            return <div className="text-center text-red-500">エラーが発生しました: {error}</div>;
+            return <div className="text-center text-red-500 dark:text-red-400 p-4 bg-red-100 dark:bg-red-900/50 rounded-lg">エラーが発生しました: {error}</div>;
         }
 
         switch (mode) {
@@ -84,7 +90,7 @@ const App: React.FC = () => {
             case 'list':
                 return <ListView songs={songs} />;
             case 'ranking':
-                // FIX: Removed `songs` and `requestRanking` props as they are not defined in RankingViewProps.
+                // FIX: Removed unused `requestRanking` and `songs` props from `RankingView` as they are not defined in its props interface.
                 return <RankingView songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
@@ -97,15 +103,18 @@ const App: React.FC = () => {
         }
     };
 
-    const navButtons = useMemo(() => [
-        { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
-        { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
-        { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
-        { mode: 'requests', icon: HeartIcon, config: uiConfig.navButtons.requests },
-        { mode: 'blog', icon: NewspaperIcon, config: uiConfig.navButtons.blog },
-        { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
-        { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
-    ].filter(btn => btn.config?.enabled), [uiConfig.navButtons]);
+    const navButtons = useMemo(() => {
+        if (!uiConfig.navButtons) return [];
+        return [
+            { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
+            { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
+            { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
+            { mode: 'requests', icon: HeartIcon, config: uiConfig.navButtons.requests },
+            { mode: 'blog', icon: NewspaperIcon, config: uiConfig.navButtons.blog },
+            { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
+            { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
+        ].filter(btn => btn.config?.enabled)
+    }, [uiConfig.navButtons]);
 
     const backgroundStyle: React.CSSProperties =
         uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl
@@ -113,27 +122,44 @@ const App: React.FC = () => {
                 backgroundImage: `url(${uiConfig.backgroundImageUrl})`,
               }
             : {};
-    const backgroundColorStyle: React.CSSProperties =
-        uiConfig.backgroundType === 'color'
-            ? { backgroundColor: isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor }
-            : {};
+    
+    if (isLoading) {
+        return (
+            <div className="min-h-screen w-full flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900">
+                <LoadingSpinner className="w-12 h-12 text-cyan-500" />
+                <p className="mt-4 text-gray-600 dark:text-gray-400">読み込み中...</p>
+            </div>
+        )
+    }
+     if (error) {
+        return (
+             <div className="min-h-screen w-full flex flex-col justify-center items-center bg-gray-100 dark:bg-gray-900 p-4">
+                <div className="text-center text-red-500 dark:text-red-400 p-4 bg-red-100 dark:bg-red-900/50 rounded-lg">
+                    <h2 className="text-xl font-bold mb-2">エラー</h2>
+                    <p>データの読み込みに失敗しました。時間をおいて再度お試しください。</p>
+                    <p className="text-sm mt-2 font-mono">{error}</p>
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <>
             <div 
                 className="min-h-screen font-sans text-gray-900 dark:text-white transition-colors duration-300"
-                style={backgroundColorStyle}
+                style={{
+                    backgroundColor: uiConfig.backgroundType === 'color' 
+                        ? (isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor)
+                        : 'transparent'
+                }}
             >
                 {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
                     <div 
-                        className="absolute inset-0 bg-cover bg-center bg-fixed z-0"
+                        className="fixed inset-0 bg-cover bg-center bg-fixed z-0"
                         style={{ ...backgroundStyle, opacity: uiConfig.backgroundOpacity }}
                     />
                 )}
-                <div 
-                    className="absolute inset-0 bg-gradient-to-t from-gray-100/30 via-transparent to-transparent dark:from-black/30 dark:via-transparent dark:to-transparent z-0"
-                />
-
                 <div className="relative z-10 min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
                     <header className="text-center w-full max-w-4xl mb-8">
                         <div className="flex justify-end items-center mb-2">
@@ -143,30 +169,43 @@ const App: React.FC = () => {
                         </div>
                         <h1 className="text-4xl md:text-5xl font-extrabold" style={{color: 'var(--primary-color)'}}>{uiConfig.mainTitle}</h1>
                         <p className="text-md md:text-lg mt-2 text-gray-600 dark:text-gray-300">{uiConfig.subtitle}</p>
-                        <div className="mt-4 flex flex-wrap justify-center gap-3">
-                            {uiConfig.twitcastingUrl && <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-cyan-500 dark:text-cyan-400 hover:underline">ツイキャス</a>}
-                            {uiConfig.xUrl && <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-500 dark:text-blue-400 hover:underline">Xはこちらから</a>}
-                            { (uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) &&
-                                <button onClick={() => setIsSupportModalOpen(true)} className="text-sm font-semibold text-pink-500 dark:text-pink-400 hover:underline">サポート</button>
-                            }
+                        <div className="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            {uiConfig.twitcastingUrl && (
+                                <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm font-semibold text-white bg-cyan-500 dark:bg-cyan-600 rounded-full shadow-md hover:bg-cyan-600 dark:hover:bg-cyan-700 transition transform hover:scale-105">
+                                    ツイキャスはこちら
+                                </a>
+                            )}
+                            {uiConfig.xUrl && (
+                                <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm font-semibold text-white bg-gray-800 dark:bg-gray-200 dark:text-black rounded-full shadow-md hover:bg-black dark:hover:bg-white transition transform hover:scale-105">
+                                    Xはこちら
+                                </a>
+                            )}
+                            {(uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) && (
+                                <button onClick={() => setIsSupportModalOpen(true)} className="px-4 py-2 text-sm font-semibold text-white bg-pink-500 dark:bg-pink-600 rounded-full shadow-md hover:bg-pink-600 dark:hover:bg-pink-700 transition transform hover:scale-105">
+                                    配信者を支援
+                                </button>
+                            )}
                         </div>
                     </header>
                     
                     <nav className="w-full max-w-4xl mb-8">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                            {navButtons.map(button => (
-                                <NavButton
-                                    key={button.mode}
-                                    onClick={() => button.mode === 'suggest' ? setIsSuggestModalOpen(true) : setMode(button.mode as Mode)}
-                                    isActive={mode === button.mode}
-                                    IconComponent={button.icon}
-                                    label={button.config.label}
-                                />
-                            ))}
+                            {navButtons.map(button => {
+                                if (!button.config) return null; // Add a guard clause
+                                return (
+                                    <NavButton
+                                        key={button.mode}
+                                        onClick={() => button.mode === 'suggest' ? setIsSuggestModalOpen(true) : setMode(button.mode as Mode)}
+                                        isActive={mode === button.mode}
+                                        IconComponent={button.icon}
+                                        label={button.config.label}
+                                    />
+                                );
+                            })}
                         </div>
                     </nav>
 
-                    <main className="w-full">
+                    <main className="w-full max-w-5xl">
                         {renderView()}
                     </main>
 
