@@ -70,6 +70,7 @@ export interface UiConfig {
     supportIconUrl?: string;
     navButtons: {
         search: NavButtonConfig;
+        printGakufu: NavButtonConfig;
         list: NavButtonConfig;
         ranking: NavButtonConfig;
         requests: NavButtonConfig;

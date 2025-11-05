@@ -74,7 +74,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         }));
     };
     
-    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'list', 'ranking', 'requests', 'blog', 'suggest', 'setlist'];
+    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'printGakufu', 'list', 'ranking', 'blog', 'requests', 'suggest', 'setlist'];
 
     return (
         <div>
@@ -212,7 +212,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
 
             <h3 className="text-lg font-semibold mb-4 mt-8">ナビゲーションボタン設定</h3>
             <div className="space-y-3">
-                {navButtonKeys.map(key => (
+                {navButtonKeys.map(key => config.navButtons[key] && (
                     <div key={key} className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
                         <input type="checkbox" checked={config.navButtons[key].enabled} onChange={(e) => handleNavChange(key, 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
                         <div className="flex-grow">

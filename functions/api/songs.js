@@ -28,10 +28,11 @@ const DEFAULT_UI_CONFIG = {
     supportIconUrl: '',
     navButtons: {
         search: { label: '曲を検索', enabled: true },
+        printGakufu: { label: 'ぷりんと楽譜', enabled: true },
         list: { label: '曲リスト', enabled: true },
         ranking: { label: '人気曲', enabled: true },
-        requests: { label: 'リクエスト', enabled: true },
         blog: { label: 'お知らせ', enabled: true },
+        requests: { label: 'リクエスト', enabled: true },
         suggest: { label: 'おまかせ選曲', enabled: true },
         setlist: { label: 'セトリ提案', enabled: true },
     }

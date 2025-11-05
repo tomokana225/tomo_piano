@@ -18,6 +18,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     supportIconUrl: '',
     navButtons: {
         search: { label: 'Search', enabled: true },
+        printGakufu: { label: 'ぷりんと楽譜', enabled: true },
         list: { label: 'List', enabled: true },
         ranking: { label: 'Ranking', enabled: true },
         requests: { label: 'Requests', enabled: true },

@@ -193,7 +193,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
                 );
             case 'notFound':
                 const printGakufuUrl = `https://www.print-gakufu.com/search/result/score___keyword__${encodeURIComponent(searchResult.searchTerm)}/`;
-                const printGakufuSubUrl = `https://www.print-gakufu.com/search/result/score___keyword__${encodeURIComponent(searchResult.searchTerm)}___subscription/`;
                 return (
                     <div className="text-center text-gray-700 dark:text-gray-300 mt-8 p-6 bg-gray-200 dark:bg-gray-800 rounded-lg animate-fade-in">
                         <p className="mb-4">「<span className="font-bold text-cyan-500 dark:text-cyan-400">{searchResult.searchTerm}</span>」は見つかりませんでした。</p>
@@ -211,14 +210,6 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
                                 className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-green-500 hover:bg-green-600 rounded-lg font-semibold text-white transition-transform transform hover:scale-105"
                             >
                                <DocumentTextIcon className="w-5 h-5" /> ぷりんと楽譜で探す
-                            </a>
-                            <a 
-                                href={printGakufuSubUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-green-700 hover:bg-green-800 rounded-lg font-semibold text-white transition-transform transform hover:scale-105"
-                            >
-                               <DocumentTextIcon className="w-5 h-5" /> ぷりんと楽譜(サブスク)
                             </a>
                         </div>
                     </div>

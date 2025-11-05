@@ -14,7 +14,8 @@ import { SuggestSongModal } from './features/suggest/SuggestSongModal';
 import { SupportModal } from './features/support/SupportModal';
 import { 
     SearchIcon, MusicNoteIcon, ChartBarIcon, HeartIcon, NewspaperIcon, 
-    LightBulbIcon, MenuIcon, SunIcon, MoonIcon, TwitcasIcon, XSocialIcon
+    LightBulbIcon, MenuIcon, SunIcon, MoonIcon, TwitcasIcon, XSocialIcon,
+    DocumentTextIcon
 } from './components/ui/Icons';
 
 
@@ -101,15 +102,29 @@ const App: React.FC = () => {
 
     const navButtons = useMemo(() => {
         if (!uiConfig.navButtons) return [];
-        return [
-            { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
-            { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
-            { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
-            { mode: 'requests', icon: HeartIcon, config: uiConfig.navButtons.requests },
-            { mode: 'blog', icon: NewspaperIcon, config: uiConfig.navButtons.blog },
-            { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
-            { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
-        ].filter(btn => btn.config?.enabled)
+        
+        const buttonConfigs: { [key: string]: any } = {
+            search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
+            printGakufu: { 
+                href: 'https://www.print-gakufu.com/search/result/score___subscription/', 
+                icon: DocumentTextIcon, 
+                config: uiConfig.navButtons.printGakufu 
+            },
+            list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
+            ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
+            blog: { mode: 'blog', icon: NewspaperIcon, config: uiConfig.navButtons.blog },
+            requests: { mode: 'requests', icon: HeartIcon, config: uiConfig.navButtons.requests },
+            suggest: { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
+            setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
+        };
+
+        const buttonOrder: (keyof typeof uiConfig.navButtons)[] = [
+            'search', 'printGakufu', 'list', 'ranking', 'blog', 'requests', 'suggest', 'setlist'
+        ];
+
+        return buttonOrder
+            .map(key => buttonConfigs[key])
+            .filter(btn => btn && btn.config?.enabled);
     }, [uiConfig.navButtons]);
 
     const backgroundStyle: React.CSSProperties =
@@ -213,14 +228,22 @@ const App: React.FC = () => {
                     </header>
                     
                     <nav className="w-full max-w-4xl mb-8">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-3">
                             {navButtons.map(button => {
-                                if (!button.config) return null; // Add a guard clause
+                                if (!button.config) return null;
+                                const isExternal = 'href' in button;
                                 return (
                                     <NavButton
-                                        key={button.mode}
-                                        onClick={() => button.mode === 'suggest' ? setIsSuggestModalOpen(true) : setMode(button.mode as Mode)}
-                                        isActive={mode === button.mode}
+                                        key={button.config.label}
+                                        onClick={isExternal ? () => {} : () => {
+                                            if (button.mode === 'suggest') {
+                                                setIsSuggestModalOpen(true);
+                                            } else if (button.mode) {
+                                                setMode(button.mode as Mode);
+                                            }
+                                        }}
+                                        href={isExternal ? (button as any).href : undefined}
+                                        isActive={!isExternal && mode === (button as any).mode}
                                         IconComponent={button.icon}
                                         label={button.config.label}
                                     />
