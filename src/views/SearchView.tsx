@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -192,12 +192,35 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
                     </div>
                 );
             case 'notFound':
+                const printGakufuUrl = `https://www.print-gakufu.com/search/result/score___keyword__${encodeURIComponent(searchResult.searchTerm)}/`;
+                const printGakufuSubUrl = `https://www.print-gakufu.com/search/result/score___keyword__${encodeURIComponent(searchResult.searchTerm)}___subscription/`;
                 return (
                     <div className="text-center text-gray-700 dark:text-gray-300 mt-8 p-6 bg-gray-200 dark:bg-gray-800 rounded-lg animate-fade-in">
                         <p className="mb-4">「<span className="font-bold text-cyan-500 dark:text-cyan-400">{searchResult.searchTerm}</span>」は見つかりませんでした。</p>
-                        <button onClick={() => setIsRequestModalOpen(true)} className="flex items-center justify-center gap-2 mx-auto px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold text-white transition-transform transform hover:scale-105">
-                           <PlusIcon className="w-5 h-5" /> この曲をリクエストする
-                        </button>
+                        <div className="flex flex-wrap justify-center items-center gap-4">
+                            <button 
+                                onClick={() => setIsRequestModalOpen(true)} 
+                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold text-white transition-transform transform hover:scale-105"
+                            >
+                               <PlusIcon className="w-5 h-5" /> この曲をリクエストする
+                            </button>
+                            <a 
+                                href={printGakufuUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-green-500 hover:bg-green-600 rounded-lg font-semibold text-white transition-transform transform hover:scale-105"
+                            >
+                               <DocumentTextIcon className="w-5 h-5" /> ぷりんと楽譜で探す
+                            </a>
+                            <a 
+                                href={printGakufuSubUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-green-700 hover:bg-green-800 rounded-lg font-semibold text-white transition-transform transform hover:scale-105"
+                            >
+                               <DocumentTextIcon className="w-5 h-5" /> ぷりんと楽譜(サブスク)
+                            </a>
+                        </div>
                     </div>
                 );
             case 'related':

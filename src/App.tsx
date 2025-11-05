@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
-import { Mode } from './types';
+import { Mode, Song } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
@@ -88,7 +87,7 @@ const App: React.FC = () => {
             case 'list':
                 return <ListView songs={songs} />;
             case 'ranking':
-                return <RankingView songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
+                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'blog':

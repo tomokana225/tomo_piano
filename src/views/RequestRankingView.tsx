@@ -1,6 +1,3 @@
-
-
-// FIX: Import useState from React to resolve 'Cannot find name' errors.
 import React, { useState } from 'react';
 import { RequestRankingItem } from '../types';
 import { HeartIcon, YouTubeIcon, DocumentTextIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
@@ -90,6 +87,7 @@ const RequestForm: React.FC<{
 
 
 export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings }) => {
+    const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
     const getMedal = (rank: number) => {
         if (rank === 1) return '🥇';
@@ -121,22 +119,29 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
             {rankingList.length > 0 ? (
                 <div className="space-y-3">
                     {rankingList.map((item, index) => {
+                        const isExpanded = expandedItem === item.id;
                         const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(item.id)}`;
                         const printGakufuUrl = `https://www.print-gakufu.com/search/result/keyword__${encodeURIComponent(item.id)}/`;
 
                         return (
-                            <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg flex items-center justify-between shadow-md">
-                                <div className="flex items-center gap-4 flex-grow min-w-0">
-                                    <div className="text-2xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
-                                    <div className="flex-grow min-w-0">
-                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">{item.id}</h3>
+                            <div key={item.id} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-md overflow-hidden">
+                                <div className="flex items-center justify-between">
+                                    <button onClick={() => setExpandedItem(isExpanded ? null : item.id)} className="flex items-center gap-3 flex-grow min-w-0 text-left">
+                                        <div className="text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
+                                        <div className="flex-grow min-w-0">
+                                            <h3 className="font-bold text-base text-gray-900 dark:text-white">{item.id}</h3>
+                                        </div>
+                                    </button>
+                                    <div className="flex items-center gap-3 ml-2 flex-shrink-0">
+                                        <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
+                                        <ActionButton href={printGakufuUrl} title="ぷりんと楽譜で検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 ml-4 flex-shrink-0">
-                                    <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
-                                    <ActionButton href={printGakufuUrl} title="ぷりんと楽譜で検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
-                                    <div className="text-lg font-semibold text-pink-600 dark:text-pink-400 w-12 text-right">{item.count}票</div>
-                                </div>
+                                {isExpanded && (
+                                    <div className="pl-11 pt-2 animate-fade-in">
+                                        <p className="text-base font-semibold text-pink-600 dark:text-pink-400">いいね数: {item.count}票</p>
+                                    </div>
+                                )}
                             </div>
                         )
                     })}

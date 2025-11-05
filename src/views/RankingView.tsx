@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
-import { RankingItem, ArtistRankingItem, RankingPeriod } from '../types';
-import { YouTubeIcon, DocumentTextIcon } from '../components/ui/Icons';
+import { Song, RankingItem, ArtistRankingItem, RankingPeriod } from '../types';
+import { YouTubeIcon, DocumentTextIcon, ChevronDownIcon } from '../components/ui/Icons';
 
 interface RankingViewProps {
+    songs: Song[];
     songRanking: RankingItem[];
     artistRanking: ArtistRankingItem[];
     period: RankingPeriod;
@@ -23,47 +23,91 @@ const ActionButton: React.FC<{ href: string, title: string, icon: React.ReactNod
     </a>
 );
 
-const SongRankingTab: React.FC<{ songs: RankingItem[] }> = ({ songs }) => (
-    <div className="space-y-3 animate-fade-in-fast">
-        {songs.length > 0 ? songs.map((item, index) => {
-            const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
-            const printGakufuUrl = `https://www.print-gakufu.com/search/result/keyword__${encodeURIComponent(item.id)}/`;
-            return (
-                <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg flex items-center justify-between shadow-md">
-                    <div className="flex items-center gap-4 flex-grow min-w-0">
-                        <div className="text-2xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
-                        <div className="flex-grow min-w-0">
-                            <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">{item.id}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{item.artist}</p>
+const SongRankingTab: React.FC<{ songs: RankingItem[] }> = ({ songs }) => {
+    const [expandedSong, setExpandedSong] = useState<string | null>(null);
+
+    return (
+        <div className="space-y-3 animate-fade-in-fast">
+            {songs.length > 0 ? songs.map((item, index) => {
+                const isExpanded = expandedSong === item.id;
+                const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
+                const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${item.artist} ${item.id} 歌詞`)}`;
+                return (
+                    <div key={item.id} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-md overflow-hidden">
+                        <div className="flex items-center justify-between">
+                            <button onClick={() => setExpandedSong(isExpanded ? null : item.id)} className="flex items-center gap-3 flex-grow min-w-0 text-left">
+                                <div className="text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
+                                <div className="flex-grow min-w-0">
+                                    <h3 className="font-bold text-base text-gray-900 dark:text-white">{item.id}</h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.artist}</p>
+                                </div>
+                            </button>
+                            <div className="flex items-center gap-3 ml-2 flex-shrink-0">
+                                <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
+                                <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
+                            </div>
                         </div>
+                        {isExpanded && (
+                            <div className="pl-11 pt-2 animate-fade-in">
+                                <p className="text-base font-semibold text-cyan-600 dark:text-cyan-400">検索回数: {item.count}回</p>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex items-center gap-4 ml-4 flex-shrink-0">
-                        <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
-                        <ActionButton href={printGakufuUrl} title="ぷりんと楽譜で検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
-                        <div className="text-lg font-semibold text-cyan-600 dark:text-cyan-400 w-12 text-right">{item.count}回</div>
+                );
+            }) : <p className="text-center text-gray-500 dark:text-gray-400 mt-8">ランキングデータがありません。</p>}
+        </div>
+    );
+};
+
+const ArtistRankingTab: React.FC<{ artists: ArtistRankingItem[], songs: Song[] }> = ({ artists, songs }) => {
+    const [expandedArtist, setExpandedArtist] = useState<string | null>(null);
+    
+    return (
+        <div className="space-y-3 animate-fade-in-fast">
+            {artists.length > 0 ? artists.map((item, index) => {
+                const isExpanded = expandedArtist === item.id;
+                const artistSongs = songs.filter(s => s.artist === item.id).sort((a,b) => a.title.localeCompare(b.title, 'ja'));
+
+                return (
+                    <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                        <button onClick={() => setExpandedArtist(isExpanded ? null : item.id)} className="w-full p-3 flex items-center justify-between text-left">
+                            <div className="flex items-center gap-3">
+                                <div className="text-xl w-8 text-center">{getMedal(index + 1)}</div>
+                                <h3 className="font-bold text-base text-gray-900 dark:text-white">{item.id}</h3>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="text-base font-semibold text-cyan-600 dark:text-cyan-400">{item.count}回</div>
+                                <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                            </div>
+                        </button>
+                        {isExpanded && (
+                            <div className="pl-12 pr-4 pb-3 pt-1 bg-gray-50 dark:bg-gray-700/50 animate-fade-in">
+                                {artistSongs.length > 0 ? (
+                                    <ul className="space-y-2">
+                                        {artistSongs.map(song => (
+                                            <li key={song.title} className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-700 dark:text-gray-300">{song.title}</span>
+                                                <div className="flex items-center gap-3">
+                                                    <ActionButton href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`)}`} title="YouTube" icon={<YouTubeIcon className="w-5 h-5 text-red-600" />} />
+                                                    <ActionButton href={`https://www.google.com/search?q=${encodeURIComponent(`${song.artist} ${song.title} 歌詞`)}`} title="歌詞" icon={<DocumentTextIcon className="w-4 h-4" />} />
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">レパートリーに登録されている曲はありません。</p>
+                                )}
+                            </div>
+                        )}
                     </div>
-                </div>
-            );
-        }) : <p className="text-center text-gray-500 dark:text-gray-400 mt-8">ランキングデータがありません。</p>}
-    </div>
-);
-
-const ArtistRankingTab: React.FC<{ artists: ArtistRankingItem[] }> = ({ artists }) => (
-    <div className="space-y-3 animate-fade-in-fast">
-        {artists.length > 0 ? artists.map((item, index) => (
-            <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg flex items-center justify-between shadow-md">
-                <div className="flex items-center gap-4">
-                    <div className="text-2xl w-8 text-center">{getMedal(index + 1)}</div>
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">{item.id}</h3>
-                </div>
-                <div className="text-lg font-semibold text-cyan-600 dark:text-cyan-400">{item.count}回</div>
-            </div>
-        )) : <p className="text-center text-gray-500 dark:text-gray-400 mt-8">ランキングデータがありません。</p>}
-    </div>
-);
+                )
+            }) : <p className="text-center text-gray-500 dark:text-gray-400 mt-8">ランキングデータがありません。</p>}
+        </div>
+    );
+};
 
 
-export const RankingView: React.FC<RankingViewProps> = ({ songRanking, artistRanking, period, setPeriod }) => {
+export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, artistRanking, period, setPeriod }) => {
     const [activeTab, setActiveTab] = useState<'song' | 'artist'>('song');
 
     const TabButton: React.FC<{ tab: 'song' | 'artist', label: string }> = ({ tab, label }) => {
@@ -108,7 +152,7 @@ export const RankingView: React.FC<RankingViewProps> = ({ songRanking, artistRan
                 <TabButton tab="artist" label="アーティストランキング" />
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-b-lg shadow-lg">
-                {activeTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} />}
+                {activeTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} songs={songs} />}
             </div>
         </div>
     );
