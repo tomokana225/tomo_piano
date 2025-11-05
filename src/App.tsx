@@ -7,6 +7,7 @@ import { ListView } from './views/ListView';
 import { RankingView } from './views/RankingView';
 import { RequestRankingView } from './views/RequestRankingView';
 import { BlogView } from './views/BlogView';
+import { SetlistSuggestionView } from './views/SetlistSuggestionView';
 import { AdminModal } from './features/admin/AdminModal';
 import { SuggestSongModal } from './features/suggest/SuggestSongModal';
 import { SupportModal } from './features/support/SupportModal';
@@ -21,6 +22,7 @@ import {
     NewspaperIcon, 
     GiftIcon,
     VideoCameraIcon,
+    QueueListIcon,
 } from './components/ui/Icons';
 
 
@@ -33,6 +35,7 @@ const App: React.FC = () => {
         posts,
         adminPosts,
         uiConfig,
+        setlistSuggestions,
         isLoading, 
         error, 
         onSaveSongs,
@@ -41,6 +44,7 @@ const App: React.FC = () => {
         onDeletePost,
         logSearch,
         logRequest,
+        saveSetlistSuggestion,
         refreshRankings,
     } = useApi();
     
@@ -98,6 +102,8 @@ const App: React.FC = () => {
                 return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings}/>;
             case 'blog':
                 return <BlogView posts={posts} />;
+            case 'setlist':
+                return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} />;
             default:
                 return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
         }
@@ -109,6 +115,7 @@ const App: React.FC = () => {
         { mode: 'ranking', icon: TrendingUpIcon, config: 'ranking' },
         { mode: 'requests', icon: HeartIcon, config: 'requests' },
         { mode: 'blog', icon: NewspaperIcon, config: 'blog' },
+        { mode: 'setlist', icon: QueueListIcon, config: 'setlist' },
     ];
 
     const backgroundStyle: React.CSSProperties = {
@@ -154,7 +161,7 @@ const App: React.FC = () => {
                     )}
                 </div>
 
-                <nav className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-w-4xl mx-auto mb-8">
+                <nav className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-w-5xl mx-auto mb-8">
                    {navButtonsConfig.filter(b => uiConfig.navButtons[b.config]?.enabled).map(button => (
                         <NavButton 
                             key={button.mode}
@@ -177,6 +184,7 @@ const App: React.FC = () => {
                 songs={songs}
                 posts={adminPosts}
                 uiConfig={uiConfig}
+                setlistSuggestions={setlistSuggestions}
                 onSaveSongs={onSaveSongs}
                 onSavePost={onSavePost}
                 onDeletePost={onDeletePost}

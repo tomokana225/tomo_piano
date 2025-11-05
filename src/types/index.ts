@@ -41,6 +41,13 @@ export interface BlogPost {
   isUploading?: boolean;
 }
 
+export interface SetlistSuggestion {
+  id: string;
+  requester: string;
+  songs: string[];
+  createdAt: number;
+}
+
 export interface NavButtonConfig {
     label: string;
     enabled: boolean;
@@ -65,7 +72,8 @@ export interface UiConfig {
         requests: NavButtonConfig;
         blog: NavButtonConfig;
         suggest: NavButtonConfig;
+        setlist: NavButtonConfig;
     }
 }
 
-export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'blog';
+export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'blog' | 'setlist';

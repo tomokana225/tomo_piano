@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig } from '../types';
+import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig, SetlistSuggestion } from '../types';
 import { parseSongs } from '../utils/parser';
 
 // Default UI Config to prevent crashes before data loads
@@ -18,6 +18,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
         requests: { label: 'Requests', enabled: true },
         blog: { label: 'Blog', enabled: true },
         suggest: { label: 'Suggest', enabled: true },
+        setlist: { label: 'セトリ提案', enabled: true },
     }
 };
 
@@ -31,6 +32,7 @@ export const useApi = () => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [adminPosts, setAdminPosts] = useState<BlogPost[]>([]); // For admin panel
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
+    const [setlistSuggestions, setSetlistSuggestions] = useState<SetlistSuggestion[]>([]);
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -45,17 +47,19 @@ export const useApi = () => {
                 requestRankingRes,
                 postsRes,
                 adminPostsRes,
-                uiConfigRes
+                uiConfigRes,
+                setlistSuggestionsRes,
             ] = await Promise.all([
                 fetch('/api/songs'),
                 fetch('/api/get-ranking'),
                 fetch('/api/get-request-ranking'),
                 fetch('/api/songs?action=getBlogPosts'),
                 fetch('/api/songs?action=getAdminBlogPosts'),
-                fetch('/api/songs?action=getUiConfig')
+                fetch('/api/songs?action=getUiConfig'),
+                fetch('/api/songs?action=getSetlistSuggestions'),
             ]);
             
-            if (!songsRes.ok || !rankingRes.ok || !requestRankingRes.ok || !postsRes.ok || !uiConfigRes.ok || !adminPostsRes.ok) {
+            if (!songsRes.ok || !rankingRes.ok || !requestRankingRes.ok || !postsRes.ok || !uiConfigRes.ok || !adminPostsRes.ok || !setlistSuggestionsRes.ok) {
                 throw new Error('Failed to fetch initial data');
             }
 
@@ -65,6 +69,7 @@ export const useApi = () => {
             const postsData = await postsRes.json();
             const adminPostsData = await adminPostsRes.json();
             const uiConfigData = await uiConfigRes.json();
+            const setlistSuggestionsData = await setlistSuggestionsRes.json();
             
             setRawSongList(songsData.list || '');
             setSongs(parseSongs(songsData.list || ''));
@@ -74,6 +79,7 @@ export const useApi = () => {
             setPosts(postsData || []);
             setAdminPosts(adminPostsData || []);
             setUiConfig(uiConfigData || DEFAULT_UI_CONFIG);
+            setSetlistSuggestions(setlistSuggestionsData || []);
             
         } catch (err: any) {
             setError(err.message);
@@ -147,6 +153,14 @@ export const useApi = () => {
         await postData('/api/log-request', { term, requester });
     }, [postData]);
     
+    const saveSetlistSuggestion = useCallback(async (songs: string[], requester: string) => {
+        const result = await postData('/api/songs?action=saveSetlistSuggestion', { songs, requester });
+        if (result.success) {
+            fetchData();
+        }
+        return result.success;
+    }, [postData, fetchData]);
+
     const refreshRankings = useCallback(async () => {
         try {
             const [rankingRes, requestRankingRes] = await Promise.all([
@@ -177,6 +191,7 @@ export const useApi = () => {
         posts,
         adminPosts,
         uiConfig,
+        setlistSuggestions,
         isLoading,
         error,
         onSaveSongs,
@@ -185,6 +200,7 @@ export const useApi = () => {
         onDeletePost,
         logSearch,
         logRequest,
+        saveSetlistSuggestion,
         refreshRankings,
         refetchPosts: fetchData,
     };

@@ -23,6 +23,9 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
+    const [isLiking, setIsLiking] = useState<string | null>(null);
+    const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
+    const [likeMessage, setLikeMessage] = useState('');
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
 
@@ -134,6 +137,22 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
     
+    const showLikeMessage = (msg: string) => {
+        setLikeMessage(msg);
+        setTimeout(() => setLikeMessage(''), 3000);
+    };
+
+    const handleLike = async (songTitle: string) => {
+        if (likedSongs.has(songTitle)) return; // Already liked this session
+
+        setIsLiking(songTitle);
+        await logRequest(songTitle, ''); // Log anonymously
+        setLikedSongs(prev => new Set(prev).add(songTitle));
+        await refreshRankings();
+        setIsLiking(null);
+        showLikeMessage(`「${songTitle}」にいいねしました！`);
+    };
+
     const handleRequestSuccess = () => {
         refreshRankings();
     };
@@ -163,8 +182,17 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
                 return (
                     <div className="mt-6 animate-fade-in">
                         <h2 className="text-xl font-bold mb-4 text-center">「<span className="text-cyan-400">{searchResult.searchTerm}</span>」の検索結果: {searchResult.songs.length}件</h2>
+                        {likeMessage && <p className="text-center text-green-400 h-6 mb-2 flex items-center justify-center">{likeMessage}</p>}
                         <div className="space-y-3">
-                            {searchResult.songs.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
+                            {searchResult.songs.map((song, index) => 
+                                <SongCard 
+                                    key={`${song.title}-${index}`} 
+                                    song={song} 
+                                    onLike={handleLike}
+                                    isLiking={isLiking === song.title}
+                                    isLiked={likedSongs.has(song.title)}
+                                />
+                            )}
                         </div>
                     </div>
                 );
@@ -232,7 +260,11 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
                     </ul>
                 )}
             </form>
-            {renderResult()}
+
+            <div className="mt-6">
+                {renderResult()}
+            </div>
+            
             {isRequestModalOpen && searchResult?.searchTerm && (
                  <RequestSongModal 
                     isOpen={isRequestModalOpen}

@@ -1,3 +1,4 @@
+// FIX: Import useState from React to resolve 'Cannot find name' errors.
 import React, { useState } from 'react';
 import { RequestRankingItem } from '../types';
 import { HeartIcon, YouTubeIcon, DocumentTextIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
@@ -136,27 +137,6 @@ const RankingActions: React.FC<{
 
 
 export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings }) => {
-    const [likeVoterId, setLikeVoterId] = useState('');
-    const [isLiking, setIsLiking] = useState<string | null>(null);
-    const [likeMessage, setLikeMessage] = useState('');
-    
-    const showLikeMessage = (msg: string) => {
-        setLikeMessage(msg);
-        setTimeout(() => setLikeMessage(''), 3000);
-    };
-
-    const handleLike = async (songTitle: string) => {
-        if (!likeVoterId.trim()) {
-            alert('投票するには、まずツイキャスアカウント名を入力してください。');
-            document.getElementById('like_voter_id_input')?.focus();
-            return;
-        }
-        setIsLiking(songTitle);
-        await logRequest(songTitle, likeVoterId);
-        await refreshRankings();
-        setIsLiking(null);
-        showLikeMessage(`「${songTitle}」にいいねしました！`);
-    };
 
     const getMedal = (rank: number) => {
         if (rank === 1) return '🥇';
@@ -183,26 +163,8 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
             
             <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
             <RankingActions logRequest={logRequest} refreshRankings={refreshRankings} />
-
-            <div className="bg-gray-800/50 p-6 rounded-lg mb-8 border border-gray-700">
-                <h3 className="text-xl font-bold text-center mb-4">ランキングの曲に「いいね」して応援！</h3>
-                 <div className="mb-4">
-                    <label htmlFor="like_voter_id_input" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
-                    <input
-                        id="like_voter_id_input"
-                        type="text"
-                        value={likeVoterId}
-                        onChange={(e) => setLikeVoterId(e.target.value)}
-                        placeholder="@の後ろのIDを入力"
-                        required
-                        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
-                    />
-                    <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
-                </div>
-                 {likeMessage && <p className="text-center text-green-400 h-6 flex items-center justify-center">{likeMessage}</p>}
-            </div>
-
-            <h3 className="text-xl font-bold text-center mb-4">現在のリクエストランキング</h3>
+            
+            <h3 className="text-xl font-bold text-center my-8">現在のリクエストランキング</h3>
 
             {rankingList.length > 0 ? (
                 <div className="space-y-3">
@@ -221,9 +183,6 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
                                 <div className="flex items-center gap-4 ml-4 flex-shrink-0">
                                     <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
                                     <ActionButton href={printGakufuUrl} title="ぷりんと楽譜で検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
-                                     <button onClick={() => handleLike(item.id)} disabled={isLiking === item.id} className="p-2 rounded-full hover:bg-pink-500/20 disabled:cursor-not-allowed" title="いいね！">
-                                        {isLiking === item.id ? <LoadingSpinner className="w-5 h-5 text-pink-400" /> : <HeartIcon className="w-5 h-5 text-pink-400" />}
-                                    </button>
                                     <div className="text-lg font-semibold text-pink-400 w-12 text-right">{item.count}票</div>
                                 </div>
                             </div>

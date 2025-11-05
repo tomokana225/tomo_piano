@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Song, BlogPost, UiConfig } from '../../types';
+import { Song, BlogPost, UiConfig, SetlistSuggestion } from '../../types';
 import { XIcon } from '../../components/ui/Icons';
 import { SongListTab } from './SongListTab';
 import { BlogTab } from './BlogTab';
 import { SettingsTab } from './SettingsTab';
+import { SetlistSuggestionsTab } from './SetlistSuggestionsTab';
 
 interface AdminModalProps {
     isOpen: boolean;
@@ -11,13 +12,14 @@ interface AdminModalProps {
     songs: Song[];
     posts: BlogPost[];
     uiConfig: UiConfig;
+    setlistSuggestions: SetlistSuggestion[];
     onSaveSongs: (newSongList: string) => Promise<boolean>;
     onSavePost: (post: Partial<BlogPost>) => Promise<boolean>;
     onDeletePost: (id: string, imageUrl?: string) => Promise<boolean>;
     onSaveUiConfig: (config: UiConfig) => Promise<boolean>;
 }
 
-type AdminTab = 'songs' | 'blog' | 'settings';
+type AdminTab = 'songs' | 'blog' | 'settings' | 'setlists';
 
 export const AdminModal: React.FC<AdminModalProps> = (props) => {
     const { isOpen, onClose } = props;
@@ -45,12 +47,14 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                     <nav className="flex space-x-2">
                         <TabButton tab="songs" label="曲リスト管理" />
                         <TabButton tab="blog" label="ブログ管理" />
+                        <TabButton tab="setlists" label="セトリ提案" />
                         <TabButton tab="settings" label="アプリ設定" />
                     </nav>
                 </div>
                 <main className="flex-grow p-6 overflow-y-auto custom-scrollbar min-h-0">
                     {activeTab === 'songs' && <SongListTab {...props} />}
                     {activeTab === 'blog' && <BlogTab {...props} />}
+                    {activeTab === 'setlists' && <SetlistSuggestionsTab suggestions={props.setlistSuggestions} />}
                     {activeTab === 'settings' && <SettingsTab {...props} />}
                 </main>
             </div>

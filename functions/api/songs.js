@@ -30,6 +30,7 @@ const DEFAULT_UI_CONFIG = {
         requests: { label: 'リクエスト', enabled: true },
         blog: { label: 'ブログ', enabled: true },
         suggest: { label: 'おまかせ選曲', enabled: true },
+        setlist: { label: 'セトリ提案', enabled: true },
     }
 };
 
@@ -128,6 +129,13 @@ export async function onRequest(context) {
                     const posts = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                     return jsonResponse(posts);
                 }
+                 case 'getSetlistSuggestions': {
+                    const suggestionsRef = collection(db, 'setlistSuggestions');
+                    const q = query(suggestionsRef, orderBy('createdAt', 'desc'));
+                    const querySnapshot = await getDocs(q);
+                    const suggestions = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    return jsonResponse(suggestions);
+                }
                 default: { // Original song list GET logic
                     const songDocRef = doc(db, 'songlist/default');
                     const docSnap = await getDoc(songDocRef);
@@ -183,6 +191,19 @@ export async function onRequest(context) {
                     const docRef = doc(db, 'blogPosts', id);
                     await deleteDoc(docRef);
                     return jsonResponse({ success: true });
+                }
+                case 'saveSetlistSuggestion': {
+                    const { songs, requester } = body;
+                    if (!Array.isArray(songs) || songs.length === 0 || songs.length > 5 || typeof requester !== 'string' || !requester.trim()) {
+                        return jsonResponse({ error: "Invalid data provided." }, 400);
+                    }
+                    const suggestionRef = doc(collection(db, 'setlistSuggestions'));
+                    await setDoc(suggestionRef, {
+                        requester: requester.trim(),
+                        songs: songs.map(s => String(s)), // Sanitize
+                        createdAt: Date.now(),
+                    });
+                    return jsonResponse({ success: true, id: suggestionRef.id });
                 }
                 default: { // Original song list POST logic
                     const { list } = body;
