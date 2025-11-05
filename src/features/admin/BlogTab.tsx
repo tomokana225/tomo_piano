@@ -19,7 +19,6 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-    const [uploadProgress, setUploadProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -82,7 +81,6 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
         }
         setIsSaving(true);
         setSaveStatus('idle');
-        setUploadProgress(0);
 
         let postToSave = { ...selectedPost };
 

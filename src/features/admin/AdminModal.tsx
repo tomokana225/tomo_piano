@@ -12,8 +12,8 @@ interface AdminModalProps {
     posts: BlogPost[];
     uiConfig: UiConfig;
     onSaveSongs: (newSongList: string) => Promise<boolean>;
-    onSavePost: (post: Omit<BlogPost, 'createdAt'>) => Promise<boolean>;
-    onDeletePost: (id: string) => Promise<boolean>;
+    onSavePost: (post: Partial<BlogPost>) => Promise<boolean>;
+    onDeletePost: (id: string, imageUrl?: string) => Promise<boolean>;
     onSaveUiConfig: (config: UiConfig) => Promise<boolean>;
 }
 

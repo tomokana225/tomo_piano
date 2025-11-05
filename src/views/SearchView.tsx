@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Song, SearchResult } from '../types';
 import { SearchIcon, XIcon, ExternalLinkIcon, CheckCircleIcon, CloudUploadIcon } from '../components/ui/Icons';
 import { normalizeForSearch } from '../utils/normalization';
