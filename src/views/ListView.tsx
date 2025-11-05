@@ -23,6 +23,24 @@ export const ListView: React.FC<ListViewProps> = ({ songs }) => {
     const genres = useMemo(() => [...new Set(songs.map(s => s.genre).filter(Boolean))].sort((a: string, b: string) => a.localeCompare(b, 'ja')), [songs]);
     const sortedSongs = useMemo(() => [...songs].sort((a, b) => a.title.localeCompare(b.title, 'ja')), [songs]);
 
+    const countLabel = useMemo(() => {
+        switch (viewState.mode) {
+            case 'by_artist':
+                const artistSongsCount = songs.filter(s => s.artist === viewState.artist).length;
+                return `全${artistSongsCount}曲`;
+            case 'by_genre':
+                const genreSongsCount = songs.filter(s => s.genre === viewState.genre).length;
+                return `全${genreSongsCount}曲`;
+            case 'artist_select':
+                return `${artists.length}アーティスト`;
+            case 'genre_select':
+                return `${genres.length}ジャンル`;
+            case 'all':
+            default:
+                return `全${songs.length}曲`;
+        }
+    }, [viewState, songs, artists, genres]);
+
     const handleBack = () => {
         if (viewState.mode === 'by_artist') {
             setViewState({ mode: 'artist_select' });
@@ -102,7 +120,7 @@ export const ListView: React.FC<ListViewProps> = ({ songs }) => {
                     <ModeButton mode="artist_select" label="アーティスト別" />
                     <ModeButton mode="genre_select" label="ジャンル別" />
                 </div>
-                 <p className="text-center text-gray-500 dark:text-gray-400 mt-4">全{songs.length}曲</p>
+                 <p className="text-center text-gray-500 dark:text-gray-400 mt-4">{countLabel}</p>
              </div>
              
              {(viewState.mode === 'by_artist' || viewState.mode === 'by_genre') && (
