@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -83,6 +84,7 @@ const App: React.FC = () => {
             case 'list':
                 return <ListView songs={songs} />;
             case 'ranking':
+                // FIX: Removed `songs` and `requestRanking` props as they are not defined in RankingViewProps.
                 return <RankingView songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
@@ -143,6 +145,7 @@ const App: React.FC = () => {
                         <p className="text-md md:text-lg mt-2 text-gray-600 dark:text-gray-300">{uiConfig.subtitle}</p>
                         <div className="mt-4 flex flex-wrap justify-center gap-3">
                             {uiConfig.twitcastingUrl && <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-cyan-500 dark:text-cyan-400 hover:underline">ツイキャス</a>}
+                            {uiConfig.xUrl && <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-500 dark:text-blue-400 hover:underline">Xはこちらから</a>}
                             { (uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) &&
                                 <button onClick={() => setIsSupportModalOpen(true)} className="text-sm font-semibold text-pink-500 dark:text-pink-400 hover:underline">サポート</button>
                             }

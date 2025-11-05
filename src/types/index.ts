@@ -56,6 +56,7 @@ export interface UiConfig {
     subtitle: string;
     primaryColor: string;
     twitcastingUrl?: string;
+    xUrl?: string;
     ofuseUrl?: string;
     doneruUrl?: string;
     amazonWishlistUrl?: string;

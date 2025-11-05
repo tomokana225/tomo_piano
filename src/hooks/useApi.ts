@@ -7,6 +7,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     mainTitle: 'Song Request Search',
     subtitle: 'Check if I can play the song or if it\'s on Print Gakufu',
     primaryColor: '#ec4899',
+    xUrl: '',
     backgroundType: 'color',
     backgroundColor: '#f3f4f6',
     darkBackgroundColor: '#111827',
