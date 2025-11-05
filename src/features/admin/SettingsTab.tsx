@@ -94,9 +94,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                     </label>
                 </div>
                 {config.backgroundType === 'color' ? (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">背景色</label>
-                        <input type="color" name="backgroundColor" value={config.backgroundColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">背景色 (ライトテーマ)</label>
+                            <input type="color" name="backgroundColor" value={config.backgroundColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">背景色 (ダークテーマ)</label>
+                            <input type="color" name="darkBackgroundColor" value={config.darkBackgroundColor || '#111827'} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
+                        </div>
                     </div>
                 ) : (
                     <div className="space-y-4">

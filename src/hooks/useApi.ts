@@ -8,7 +8,8 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     subtitle: 'Check if I can play the song or if it\'s on Print Gakufu',
     primaryColor: '#ec4899',
     backgroundType: 'color',
-    backgroundColor: '#111827',
+    backgroundColor: '#f3f4f6',
+    darkBackgroundColor: '#111827',
     backgroundImageUrl: '',
     backgroundOpacity: 0.1,
     navButtons: {

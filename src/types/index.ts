@@ -61,6 +61,7 @@ export interface UiConfig {
     amazonWishlistUrl?: string;
     backgroundType: 'color' | 'image';
     backgroundColor: string;
+    darkBackgroundColor: string;
     backgroundImageUrl: string;
     backgroundOpacity: number;
     navButtons: {

@@ -18,7 +18,8 @@ const DEFAULT_UI_CONFIG = {
     doneruUrl: '',
     amazonWishlistUrl: '',
     backgroundType: 'image',
-    backgroundColor: '#111827',
+    backgroundColor: '#f3f4f6',
+    darkBackgroundColor: '#111827',
     backgroundImageUrl: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop',
     backgroundOpacity: 0.1,
     navButtons: {

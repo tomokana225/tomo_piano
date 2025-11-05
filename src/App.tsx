@@ -1,218 +1,178 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useApi } from './hooks/useApi';
-// FIX: Import `UiConfig` to resolve 'Cannot find name' error.
-import { Mode, UiConfig } from './types';
 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useApi } from './hooks/useApi';
+import { Mode } from './types';
+import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
 import { RankingView } from './views/RankingView';
 import { RequestRankingView } from './views/RequestRankingView';
 import { BlogView } from './views/BlogView';
 import { SetlistSuggestionView } from './views/SetlistSuggestionView';
+import { NavButton } from './components/ui/NavButton';
 import { AdminModal } from './features/admin/AdminModal';
 import { SuggestSongModal } from './features/suggest/SuggestSongModal';
 import { SupportModal } from './features/support/SupportModal';
-
-import { LoadingSpinner } from './components/ui/LoadingSpinner';
-import { NavButton } from './components/ui/NavButton';
 import { 
-    SearchIcon, 
-    ListBulletIcon, 
-    TrendingUpIcon, 
-    HeartIcon,
-    NewspaperIcon, 
-    GiftIcon,
-    VideoCameraIcon,
-    QueueListIcon,
-    SunIcon,
-    MoonIcon,
+    SearchIcon, MusicNoteIcon, ChartBarIcon, HeartIcon, NewspaperIcon, 
+    LightBulbIcon, MenuIcon, SunIcon, MoonIcon
 } from './components/ui/Icons';
 
-type Theme = 'light' | 'dark';
 
 const App: React.FC = () => {
     const { 
-        songs, 
-        songRankingList, 
-        artistRankingList, 
-        requestRankingList,
-        posts,
-        adminPosts,
-        uiConfig,
-        setlistSuggestions,
-        isLoading, 
-        error,
-        rankingPeriod,
-        setRankingPeriod,
-        onSaveSongs,
-        onSaveUiConfig,
-        onSavePost,
-        onDeletePost,
-        logSearch,
-        logRequest,
-        saveSetlistSuggestion,
-        refreshRankings,
+        songs, songRankingList, artistRankingList, requestRankingList, posts, adminPosts, uiConfig, setlistSuggestions,
+        isLoading, error, rankingPeriod, setRankingPeriod,
+        onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
+        logSearch, logRequest, saveSetlistSuggestion, refreshRankings
     } = useApi();
     
     const [mode, setMode] = useState<Mode>('search');
-    const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('theme') as Theme) || 'dark');
     const [searchTerm, setSearchTerm] = useState('');
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
     useEffect(() => {
-        if(uiConfig.primaryColor) {
-            document.documentElement.style.setProperty('--primary-color', uiConfig.primaryColor);
-        }
-        if(uiConfig.mainTitle) {
-            document.title = uiConfig.mainTitle;
-        }
-    }, [uiConfig]);
-
-    useEffect(() => {
-        const root = window.document.documentElement;
-        root.classList.remove(theme === 'dark' ? 'light' : 'dark');
-        root.classList.add(theme);
-        localStorage.setItem('theme', theme);
-    }, [theme]);
-
-    const handleAdminKey = useCallback((e: KeyboardEvent) => {
-        if (e.key === 'a' && e.ctrlKey && e.altKey) {
-            e.preventDefault();
-            const password = prompt('Enter admin password:');
-            // This is a simple, non-secure password check.
-            if (password === 'admin') {
-                setIsAdminModalOpen(true);
-            } else if (password) {
-                alert('Incorrect password.');
-            }
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setIsDarkMode(isDark);
+        if (isDark) {
+            document.documentElement.classList.add('dark');
         }
     }, []);
 
-    useEffect(() => {
-        window.addEventListener('keydown', handleAdminKey);
-        return () => window.removeEventListener('keydown', handleAdminKey);
-    }, [handleAdminKey]);
-    
-    const handleSongSelectFromSuggest = (text: string) => {
-        setMode('search');
-        setSearchTerm(text);
-        setIsSuggestModalOpen(false);
+    const toggleDarkMode = () => {
+        setIsDarkMode(prev => {
+            const newIsDark = !prev;
+            if (newIsDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            return newIsDark;
+        });
     };
+    
+    useEffect(() => {
+        document.documentElement.style.setProperty('--primary-color', uiConfig.primaryColor);
+    }, [uiConfig.primaryColor]);
+
+    const handleSuggestSelect = useCallback((text: string) => {
+        setSearchTerm(text);
+        setMode('search');
+        setIsSuggestModalOpen(false);
+    }, []);
+
+    const handleSetlistSuccess = useCallback(() => {
+        // After success, go to the search page.
+        setMode('search');
+    }, []);
 
     const renderView = () => {
+        if (isLoading) {
+            return <div className="flex justify-center items-center h-64"><LoadingSpinner className="w-12 h-12" /></div>;
+        }
+        if (error) {
+            return <div className="text-center text-red-500">エラーが発生しました: {error}</div>;
+        }
+
         switch (mode) {
             case 'search':
                 return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
             case 'list':
                 return <ListView songs={songs} />;
             case 'ranking':
-                return <RankingView songRankingList={songRankingList} artistRankingList={artistRankingList} requestRankingList={requestRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
+                return <RankingView songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'blog':
                 return <BlogView posts={posts} />;
             case 'setlist':
-                return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={() => setMode('search')} />;
+                 return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
                 return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
         }
     };
-    
-    const navButtonsConfig: { mode: Mode, icon: React.FC<{className?:string}>, config: keyof UiConfig['navButtons']}[] = [
-        { mode: 'search', icon: SearchIcon, config: 'search' },
-        { mode: 'list', icon: ListBulletIcon, config: 'list' },
-        { mode: 'ranking', icon: TrendingUpIcon, config: 'ranking' },
-        { mode: 'requests', icon: HeartIcon, config: 'requests' },
-        { mode: 'blog', icon: NewspaperIcon, config: 'blog' },
-        { mode: 'setlist', icon: QueueListIcon, config: 'setlist' },
-    ];
 
-    const backgroundStyle: React.CSSProperties = {
-        backgroundColor: uiConfig.backgroundType === 'color' ? uiConfig.backgroundColor : 'transparent',
-    };
-    
-    const hasSupportLinks = uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl;
+    const navButtons = useMemo(() => [
+        { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
+        { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
+        { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
+        { mode: 'requests', icon: HeartIcon, config: uiConfig.navButtons.requests },
+        { mode: 'blog', icon: NewspaperIcon, config: uiConfig.navButtons.blog },
+        { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
+        { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
+    ].filter(btn => btn.config?.enabled), [uiConfig.navButtons]);
 
-    if (isLoading) {
-        return (
-            <div className="bg-white dark:bg-[#111827] min-h-screen flex flex-col justify-center items-center text-gray-800 dark:text-white font-sans">
-                <LoadingSpinner className="w-12 h-12 text-cyan-400" />
-                <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">読み込み中...</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="bg-white dark:bg-[#111827] min-h-screen flex flex-col justify-center items-center text-gray-800 dark:text-white font-sans p-4">
-                <h2 className="text-2xl font-bold text-red-500 dark:text-red-400 mb-4">エラーが発生しました</h2>
-                <p className="text-gray-600 dark:text-gray-300 text-center">データの読み込みに失敗しました。時間をおいてページを再読み込みしてください。</p>
-                <p className="mt-2 text-xs text-gray-500 text-center">詳細: {error}</p>
-            </div>
-        );
-    }
+    const backgroundStyle: React.CSSProperties =
+        uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl
+            ? {
+                backgroundImage: `url(${uiConfig.backgroundImageUrl})`,
+              }
+            : {};
+    const backgroundColorStyle: React.CSSProperties =
+        uiConfig.backgroundType === 'color'
+            ? { backgroundColor: isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor }
+            : {};
 
     return (
-        <div style={backgroundStyle} className="bg-gray-100 dark:bg-transparent min-h-screen text-gray-800 dark:text-white font-sans transition-colors duration-500">
-             {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
+        <>
+            <div 
+                className="min-h-screen font-sans text-gray-900 dark:text-white transition-colors duration-300"
+                style={backgroundColorStyle}
+            >
+                {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
+                    <div 
+                        className="absolute inset-0 bg-cover bg-center bg-fixed z-0"
+                        style={{ ...backgroundStyle, opacity: uiConfig.backgroundOpacity }}
+                    />
+                )}
                 <div 
-                    className="absolute inset-0 bg-cover bg-center -z-10"
-                    style={{
-                        backgroundImage: `url(${uiConfig.backgroundImageUrl})`,
-                        opacity: uiConfig.backgroundOpacity,
-                    }}
+                    className="absolute inset-0 bg-gradient-to-t from-gray-100/30 via-transparent to-transparent dark:from-black/30 dark:via-transparent dark:to-transparent z-0"
                 />
-            )}
-             <div className="absolute inset-0 bg-black/50 -z-10" />
 
-            <div className="container mx-auto px-4 py-8 relative z-0">
-                 <div className="absolute top-4 right-4 z-10">
-                    <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="p-2 rounded-full bg-gray-200/50 dark:bg-gray-800/50 hover:bg-gray-300/70 dark:hover:bg-gray-700/70 transition-colors">
-                        {theme === 'light' ? <MoonIcon className="w-5 h-5 text-gray-800" /> : <SunIcon className="w-5 h-5 text-yellow-400" />}
-                    </button>
+                <div className="relative z-10 min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
+                    <header className="text-center w-full max-w-4xl mb-8">
+                        <div className="flex justify-end items-center mb-2">
+                            <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-gray-500/20">
+                                {isDarkMode ? <SunIcon className="w-5 h-5"/> : <MoonIcon className="w-5 h-5"/>}
+                            </button>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-extrabold" style={{color: 'var(--primary-color)'}}>{uiConfig.mainTitle}</h1>
+                        <p className="text-md md:text-lg mt-2 text-gray-600 dark:text-gray-300">{uiConfig.subtitle}</p>
+                        <div className="mt-4 flex flex-wrap justify-center gap-3">
+                            {uiConfig.twitcastingUrl && <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-cyan-500 dark:text-cyan-400 hover:underline">ツイキャス</a>}
+                            { (uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) &&
+                                <button onClick={() => setIsSupportModalOpen(true)} className="text-sm font-semibold text-pink-500 dark:text-pink-400 hover:underline">サポート</button>
+                            }
+                        </div>
+                    </header>
+                    
+                    <nav className="w-full max-w-4xl mb-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                            {navButtons.map(button => (
+                                <NavButton
+                                    key={button.mode}
+                                    onClick={() => button.mode === 'suggest' ? setIsSuggestModalOpen(true) : setMode(button.mode as Mode)}
+                                    isActive={mode === button.mode}
+                                    IconComponent={button.icon}
+                                    label={button.config.label}
+                                />
+                            ))}
+                        </div>
+                    </nav>
+
+                    <main className="w-full">
+                        {renderView()}
+                    </main>
+
+                    <footer className="text-center mt-12 text-xs text-gray-500 dark:text-gray-400 w-full">
+                        <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
+                    </footer>
                 </div>
-                <header className="text-center mb-8 animate-fade-in-down">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white" style={{ color: uiConfig.primaryColor }}>{uiConfig.mainTitle}</h1>
-                    <p className="text-gray-600 dark:text-gray-300 mt-2">{uiConfig.subtitle}</p>
-                </header>
-
-                <div className="max-w-5xl mx-auto flex justify-center flex-wrap gap-2 md:gap-4 mb-8">
-                     {uiConfig.twitcastingUrl && (
-                        <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg shadow-md transition-transform transform hover:scale-105 font-semibold text-sm text-white">
-                            <VideoCameraIcon className="w-4 h-4" /> 配信はこちら
-                        </a>
-                    )}
-                    {uiConfig.navButtons.suggest.enabled && (
-                        <button onClick={() => setIsSuggestModalOpen(true)} className="flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg shadow-md transition-transform transform hover:scale-105 font-semibold text-sm text-white">
-                            <GiftIcon className="w-4 h-4" /> {uiConfig.navButtons.suggest.label}
-                        </button>
-                    )}
-                    {hasSupportLinks && (
-                        <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center justify-center gap-2 px-4 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg shadow-md transition-transform transform hover:scale-105 font-semibold text-sm text-white">
-                            <HeartIcon className="w-4 h-4" /> サポート
-                        </button>
-                    )}
-                </div>
-
-                <nav className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 max-w-5xl mx-auto mb-8">
-                   {navButtonsConfig.filter(b => uiConfig.navButtons[b.config]?.enabled).map(button => (
-                        <NavButton 
-                            key={button.mode}
-                            onClick={() => { setMode(button.mode); if (button.mode !== 'search') setSearchTerm(''); }}
-                            isActive={mode === button.mode}
-                            IconComponent={button.icon}
-                            label={uiConfig.navButtons[button.config]?.label}
-                        />
-                   ))}
-                </nav>
-
-                <main>
-                    {renderView()}
-                </main>
             </div>
-            
+
             <AdminModal 
                 isOpen={isAdminModalOpen}
                 onClose={() => setIsAdminModalOpen(false)}
@@ -229,14 +189,14 @@ const App: React.FC = () => {
                 isOpen={isSuggestModalOpen}
                 onClose={() => setIsSuggestModalOpen(false)}
                 songs={songs}
-                onSelect={handleSongSelectFromSuggest}
+                onSelect={handleSuggestSelect}
             />
             <SupportModal 
                 isOpen={isSupportModalOpen}
                 onClose={() => setIsSupportModalOpen(false)}
                 uiConfig={uiConfig}
             />
-        </div>
+        </>
     );
 };
 
