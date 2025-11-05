@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BlogPost } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
-import { PlusIcon, XIcon } from '../../components/ui/Icons';
+import { PlusIcon } from '../../components/ui/Icons';
 
 interface BlogTabProps {
     posts: BlogPost[];
