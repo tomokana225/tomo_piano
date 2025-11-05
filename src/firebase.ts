@@ -1,8 +1,6 @@
 import { initializeApp, getApp, getApps, FirebaseApp } from 'firebase/app';
-import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 let app: FirebaseApp;
-let storage: FirebaseStorage;
 
 const initializeFirebase = async () => {
   if (getApps().length) {
@@ -24,12 +22,6 @@ const initializeFirebase = async () => {
       return;
     }
   }
-  
-  try {
-      storage = getStorage(app);
-  } catch (e) {
-      console.error("Failed to initialize Firebase Storage. Image uploads will not work.", e);
-  }
 };
 
-export { initializeFirebase, storage };
+export { initializeFirebase };

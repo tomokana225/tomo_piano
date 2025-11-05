@@ -1,33 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BlogPost } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { PlusIcon, XIcon } from '../../components/ui/Icons';
-import { storage } from '../../firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 interface BlogTabProps {
     posts: BlogPost[];
     onSavePost: (post: Partial<BlogPost>) => Promise<boolean>;
-    onDeletePost: (id: string, imageUrl?: string) => Promise<boolean>;
+    onDeletePost: (id: string) => Promise<boolean>;
 }
-
-const MAX_IMAGE_SIZE_MB = 5;
-const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
 export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePost }) => {
     const [selectedPost, setSelectedPost] = useState<Partial<BlogPost> | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        // If the selected post is being edited, refresh its data from the main posts list
+        // This ensures the editor has the latest data if it's updated in the background
         if (selectedPost?.id) {
             const updatedPost = posts.find(p => p.id === selectedPost.id);
             if (updatedPost) {
-                // Keep local changes if they exist (e.g., a selected image file)
-                setSelectedPost(prev => ({...prev, ...updatedPost}));
+                // Keep local unsaved changes by merging
+                setSelectedPost(prev => ({...updatedPost, ...prev}));
             } else {
+                // The post was deleted, so deselect it
                 setSelectedPost(null);
             }
         }
@@ -39,7 +36,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
     };
 
     const handleNewPost = () => {
-        setSelectedPost({ title: '', content: '', isPublished: false });
+        setSelectedPost({ title: '', content: '', isPublished: false, imageUrl: '' });
         setSaveStatus('idle');
     };
 
@@ -55,25 +52,6 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
         setSelectedPost(prev => ({ ...prev, [name]: checked }));
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!selectedPost) return;
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > MAX_IMAGE_SIZE_BYTES) {
-                alert(`画像ファイルが大きすぎます。${MAX_IMAGE_SIZE_MB}MB以下のファイルを選択してください。`);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-                return;
-            }
-            setSelectedPost(prev => ({ ...prev, imageFile: file, imageUrl: URL.createObjectURL(file) }));
-        }
-    };
-
-    const handleRemoveImage = () => {
-        if (!selectedPost) return;
-        setSelectedPost(prev => ({ ...prev, imageFile: undefined, imageUrl: undefined }));
-        if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-
     const handleSave = async () => {
         if (!selectedPost || !selectedPost.title) {
             alert('タイトルを入力してください。');
@@ -81,62 +59,27 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
         }
         setIsSaving(true);
         setSaveStatus('idle');
+        
+        const success = await onSavePost(selectedPost);
+        setSaveStatus(success ? 'success' : 'error');
 
-        let postToSave = { ...selectedPost };
-        const originalPost = posts.find(p => p.id === postToSave.id);
-        const oldImageUrl = originalPost?.imageUrl;
-
-        try {
-            // 1. Handle image upload if a new file is selected
-            if (postToSave.imageFile) {
-                const imageRef = ref(storage, `blog_images/${postToSave.id || Date.now()}/${postToSave.imageFile.name}`);
-                await uploadBytes(imageRef, postToSave.imageFile);
-                postToSave.imageUrl = await getDownloadURL(imageRef);
-            }
-
-            // 2. Clean up client-side properties before saving to Firestore
-            delete postToSave.imageFile;
-            delete postToSave.isUploading;
-
-            // 3. Save post metadata to Firestore
-            const success = await onSavePost(postToSave);
-            if (!success) {
-                throw new Error("Failed to save post data to Firestore.");
-            }
-            
-            // 4. Handle old image deletion *after* successful save
-            const newImageUrl = postToSave.imageUrl;
-            if (oldImageUrl && oldImageUrl !== newImageUrl) {
-                // This happens if image was replaced or removed
-                try {
-                    const oldImageRef = ref(storage, oldImageUrl);
-                    await deleteObject(oldImageRef);
-                } catch (e) {
-                    console.warn("Old image deletion failed, but post was saved. URL:", oldImageUrl, e);
-                }
-            }
-
-            setSaveStatus('success');
-            if (!selectedPost.id) {
-                setSelectedPost(null); // Clear form after new post creation
-            }
-
-        } catch (error) {
-            console.error("Save process failed:", error);
-            setSaveStatus('error');
-        } finally {
-            setIsSaving(false);
-            setTimeout(() => setSaveStatus('idle'), 3000);
+        if (success && !selectedPost.id) {
+            setSelectedPost(null); // Clear form after new post creation
         }
-    };
 
+        setIsSaving(false);
+        setTimeout(() => setSaveStatus('idle'), 3000);
+    };
 
     const handleDelete = async () => {
         if (!selectedPost || !selectedPost.id) return;
         if (window.confirm('本当にこの記事を削除しますか？')) {
             setIsDeleting(true);
-            const originalPost = posts.find(p => p.id === selectedPost.id);
-            const success = await onDeletePost(selectedPost.id, originalPost?.imageUrl);
+            
+            // The logic to delete the image from storage is now removed.
+            // We only need to delete the Firestore document.
+            const success = await onDeletePost(selectedPost.id);
+
             if (success) {
                 setSelectedPost(null);
             } else {
@@ -194,16 +137,14 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                                 <textarea name="content" value={selectedPost.content || ''} onChange={handleInputChange} rows={10} className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 custom-scrollbar focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">アイキャッチ画像 ({MAX_IMAGE_SIZE_MB}MBまで)</label>
+                                <label className="block text-sm font-medium text-gray-300">アイキャッチ画像URL</label>
+                                <input type="text" name="imageUrl" value={selectedPost.imageUrl || ''} onChange={handleInputChange} placeholder="https://example.com/image.png" className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                                 {selectedPost.imageUrl && (
-                                    <div className="mb-2 relative w-fit">
-                                        <img src={selectedPost.imageUrl} alt="preview" className="max-h-40 rounded-md" />
-                                        <button onClick={handleRemoveImage} className="absolute top-1 right-1 bg-black/50 rounded-full p-1 text-white hover:bg-black/80">
-                                            <XIcon className="w-4 h-4"/>
-                                        </button>
+                                    <div className="mt-2 relative">
+                                        <p className="text-xs text-gray-400 mb-1">プレビュー:</p>
+                                        <img src={selectedPost.imageUrl} alt="preview" className="max-h-40 rounded-md" onError={(e) => e.currentTarget.style.display = 'none'} onLoad={(e) => e.currentTarget.style.display = 'block'}/>
                                     </div>
                                 )}
-                                <input type="file" accept="image/*" onChange={handleImageChange} ref={fileInputRef} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100"/>
                             </div>
                              <div className="flex items-center gap-2">
                                 <input id="isPublished" name="isPublished" type="checkbox" checked={selectedPost.isPublished || false} onChange={handleCheckboxChange} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500" />

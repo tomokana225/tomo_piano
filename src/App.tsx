@@ -53,6 +53,7 @@ const App: React.FC = () => {
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [initialRequester, setInitialRequester] = useState('');
 
     useEffect(() => {
         if(uiConfig.primaryColor) {
@@ -87,6 +88,11 @@ const App: React.FC = () => {
         setIsSuggestModalOpen(false);
     };
 
+    const handleSetlistRequestStart = (requester: string) => {
+        setInitialRequester(requester);
+        setMode('setlist');
+    };
+
     const renderView = () => {
         if (isLoading) return <div className="flex justify-center items-center mt-20"><LoadingSpinner className="w-12 h-12" /></div>;
         if (error) return <p className="text-center text-red-400 mt-20">Error: {error}</p>;
@@ -99,11 +105,11 @@ const App: React.FC = () => {
             case 'ranking':
                 return <RankingView songRankingList={songRankingList} artistRankingList={artistRankingList} />;
             case 'requests':
-                return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings}/>;
+                return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} onSetlistRequestStart={handleSetlistRequestStart} />;
             case 'blog':
                 return <BlogView posts={posts} />;
             case 'setlist':
-                return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} />;
+                return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} initialRequester={initialRequester} />;
             default:
                 return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
         }
@@ -143,7 +149,7 @@ const App: React.FC = () => {
                     <p className="text-gray-300 mt-2">{uiConfig.subtitle}</p>
                 </header>
 
-                <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8">
+                <div className="max-w-5xl mx-auto flex justify-center flex-wrap gap-2 md:gap-4 mb-8">
                      {uiConfig.twitcastingUrl && (
                         <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg shadow-md transition-transform transform hover:scale-105 font-semibold text-sm">
                             <VideoCameraIcon className="w-4 h-4" /> 配信はこちら
@@ -165,7 +171,7 @@ const App: React.FC = () => {
                    {navButtonsConfig.filter(b => uiConfig.navButtons[b.config]?.enabled).map(button => (
                         <NavButton 
                             key={button.mode}
-                            onClick={() => { setMode(button.mode); if (button.mode !== 'search') setSearchTerm(''); }}
+                            onClick={() => { setMode(button.mode); if (button.mode !== 'search') setSearchTerm(''); if (button.mode !== 'setlist') setInitialRequester(''); }}
                             isActive={mode === button.mode}
                             IconComponent={button.icon}
                             label={uiConfig.navButtons[button.config]?.label}

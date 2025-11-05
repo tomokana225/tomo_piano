@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UiConfig, NavButtonConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
-import { storage } from '../../firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface SettingsTabProps {
     uiConfig: UiConfig;
@@ -13,15 +11,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
     const [config, setConfig] = useState<UiConfig>(uiConfig);
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setConfig(uiConfig);
-        setImageFile(null);
-        setImagePreview(null);
     }, [uiConfig]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,14 +26,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         setConfig(prev => ({ ...prev, [name]: Number(value) }));
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
-        }
-    };
-    
     const handleNavChange = (key: keyof UiConfig['navButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
         setConfig(prev => ({
             ...prev,
@@ -58,40 +42,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
     const handleSave = async () => {
         setIsSaving(true);
         setSaveStatus('idle');
-
-        let configToSave = { ...config };
-
-        if (imageFile) {
-            setIsUploading(true);
-            try {
-                const imageRef = ref(storage, `background/app_background_${Date.now()}`);
-                await uploadBytes(imageRef, imageFile);
-                const downloadURL = await getDownloadURL(imageRef);
-                configToSave.backgroundImageUrl = downloadURL;
-                setImageFile(null);
-                setImagePreview(null);
-                 if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
-                }
-            } catch (error) {
-                console.error("Image upload failed:", error);
-                setSaveStatus('error');
-                setIsSaving(false);
-                setIsUploading(false);
-                return;
-            }
-            setIsUploading(false);
-        }
-
-        const success = await onSaveUiConfig(configToSave);
+        const success = await onSaveUiConfig(config);
         setSaveStatus(success ? 'success' : 'error');
         setIsSaving(false);
         setTimeout(() => setSaveStatus('idle'), 3000);
     };
     
-    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'list', 'ranking', 'requests', 'blog', 'suggest'];
-
-    const buttonText = isUploading ? '画像アップロード中...' : (isSaving ? '保存中...' : '設定を保存');
+    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'list', 'ranking', 'requests', 'blog', 'suggest', 'setlist'];
 
     return (
         <div>
@@ -135,12 +92,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                 ) : (
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">背景画像</label>
-                             <input type="file" accept="image/*" onChange={handleImageChange} ref={fileInputRef} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100"/>
-                            <div className="mt-2 text-xs text-gray-400">※新しい画像を保存すると、古い画像は上書きされます。</div>
-                            {(imagePreview || config.backgroundImageUrl) && (
+                             <label className="block text-sm font-medium text-gray-300">背景画像URL</label>
+                             <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="https://example.com/background.png" className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2"/>
+                            <p className="mt-2 text-xs text-gray-400">画像をご自身で用意し、公開URLを貼り付けてください。</p>
+                            {config.backgroundImageUrl && (
                                 <div className="mt-2">
-                                    <img src={imagePreview || config.backgroundImageUrl} alt="Preview" className="max-h-32 rounded-md border-2 border-gray-600"/>
+                                    <p className="text-xs text-gray-400 mb-1">プレビュー:</p>
+                                    <img src={config.backgroundImageUrl} alt="Preview" className="max-h-32 rounded-md border-2 border-gray-600" onError={(e) => e.currentTarget.style.display = 'none'} onLoad={(e) => e.currentTarget.style.display = 'block'}/>
                                 </div>
                             )}
                         </div>
@@ -185,11 +143,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                 {saveStatus === 'error' && <p className="text-red-400">保存に失敗しました。</p>}
                 <button
                     onClick={handleSave}
-                    disabled={isSaving || isUploading}
+                    disabled={isSaving}
                     className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                    {(isSaving || isUploading) && <LoadingSpinner className="w-5 h-5" />}
-                    {buttonText}
+                    {isSaving && <LoadingSpinner className="w-5 h-5" />}
+                    {isSaving ? '保存中...' : '設定を保存'}
                 </button>
             </div>
         </div>

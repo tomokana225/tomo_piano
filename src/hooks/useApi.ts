@@ -135,8 +135,8 @@ export const useApi = () => {
         return result.success;
     }, [postData, fetchData]);
 
-    const onDeletePost = useCallback(async (id: string, imageUrl?: string) => {
-        const result = await postData('/api/songs?action=deleteBlogPost', { id, imageUrl });
+    const onDeletePost = useCallback(async (id: string) => {
+        const result = await postData('/api/songs?action=deleteBlogPost', { id });
         if (result.success) {
             fetchData(); // Refetch all data
         }

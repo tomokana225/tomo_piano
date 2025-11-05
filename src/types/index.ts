@@ -36,9 +36,6 @@ export interface BlogPost {
   isPublished: boolean;
   createdAt: number;
   imageUrl?: string;
-  // Client-side only properties for upload management
-  imageFile?: File;
-  isUploading?: boolean;
 }
 
 export interface SetlistSuggestion {

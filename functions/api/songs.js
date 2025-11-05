@@ -5,8 +5,6 @@
 import { initializeApp, getApps } from 'firebase/app';
 // Use the "lite" version of Firestore for serverless environments to avoid timeouts
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from 'firebase/firestore/lite';
-import { getStorage, ref, deleteObject } from 'firebase/storage';
-
 
 // Default song list to be used if Firestore is empty
 const PLAYABLE_SONGS_EXAMPLE_STR = "夜に駆ける,YOASOBI,J-Pop,new\nPretender,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\nLemon,米津玄師,J-Pop\n紅蓮華,LiSA,Anime\nドライフラワー,優里,J-Pop\n白日,King Gnu (キングヌー),J-Rock\nマリーゴールド,あいみょん,J-Pop\n猫,DISH//,J-Rock\nうっせぇわ,Ado,J-Pop\n廻廻奇譚,Eve,Anime\n炎,LiSA,Anime\nCry Baby,Official髭男dism (オフィシャルヒゲダンディズム),Anime\nアイドル,YOASOBI,Anime,new\nKICK BACK,米津玄師,Anime\n新時代,Ado,Anime\n旅路,藤井風,J-Pop\n何なんw,藤井風,J-Pop\ngrace,藤井風,J-Pop\nきらり,藤井風,J-Pop\nSubtitle,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\n怪獣の花唄,Vaundy,J-Rock\nミックスナッツ,Official髭男dism (オフィシャルヒゲダンディズム),Anime\n水平線,back number,J-Pop\nシンデレラボーイ,Saucy Dog,J-Rock\nなんでもないや,RADWIMPS,Anime\nひまわりの約束,秦基博,J-Pop\nHANABI,Mr.Children,J-Pop\n天体観測,BUMP OF CHICKEN,J-Rock\n残酷な天使のテーゼ,高橋洋子,Anime\n千本桜,黒うさP,Vocaloid,,練習中";
@@ -80,16 +78,6 @@ export async function onRequest(context) {
     }
 
     const db = getFirestore(app);
-    let storage;
-    try {
-      if (env.FIREBASE_STORAGE_BUCKET) {
-        storage = getStorage(app);
-      } else {
-        console.warn("Firebase Storage is not configured (FIREBASE_STORAGE_BUCKET is missing). Image operations will be disabled.");
-      }
-    } catch(e) {
-      console.warn("Failed to initialize Firebase Storage:", e.message);
-    }
     const url = new URL(request.url);
     const action = url.searchParams.get('action');
 
@@ -172,22 +160,9 @@ export async function onRequest(context) {
                     return jsonResponse({ success: true, id: docRef.id });
                 }
                 case 'deleteBlogPost': {
-                    const { id, imageUrl } = body;
+                    const { id } = body;
                     if (!id) return jsonResponse({ error: "ID is required" }, 400);
 
-                    // Delete the associated image from storage if it exists
-                    if (imageUrl && storage) {
-                        try {
-                            const imageRef = ref(storage, imageUrl);
-                            await deleteObject(imageRef);
-                        } catch (e) {
-                            // Ignore 'object-not-found' errors, log others
-                            if (e.code !== 'storage/object-not-found') {
-                                console.warn(`Image deletion failed for post ${id}:`, e.message);
-                            }
-                        }
-                    }
-                    
                     const docRef = doc(db, 'blogPosts', id);
                     await deleteDoc(docRef);
                     return jsonResponse({ success: true });

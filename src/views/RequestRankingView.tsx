@@ -8,6 +8,7 @@ interface RequestRankingViewProps {
     rankingList: RequestRankingItem[];
     logRequest: (term: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
+    onSetlistRequestStart: (requester: string) => void;
 }
 
 const RequestForm: React.FC<{
@@ -82,34 +83,23 @@ const RequestForm: React.FC<{
 };
 
 
-const RankingActions: React.FC<{
-    logRequest: (term: string, requester: string) => Promise<void>;
-    refreshRankings: () => void;
-}> = ({ logRequest, refreshRankings }) => {
+const SuggestSetlistAction: React.FC<{
+    onSetlistRequestStart: (requester: string) => void;
+}> = ({ onSetlistRequestStart }) => {
     const [voterId, setVoterId] = useState('');
-    const [isRequestingSetlist, setIsRequestingSetlist] = useState(false);
-    const [actionMessage, setActionMessage] = useState('');
-
-    const showActionMessage = (msg: string) => {
-        setActionMessage(msg);
-        setTimeout(() => setActionMessage(''), 3000);
-    };
     
-    const handleRequestSetlist = async () => {
+    const handleStart = () => {
         if (!voterId.trim()) {
-            alert('リクエストするには、まずツイキャスアカウント名を入力してください。');
+            alert('提案するには、まずツイキャスアカウント名を入力してください。');
             return;
         }
-        setIsRequestingSetlist(true);
-        await logRequest('配信のセトリ', voterId);
-        refreshRankings();
-        setIsRequestingSetlist(false);
-        showActionMessage('「配信のセトリ」をリクエストしました！');
+        onSetlistRequestStart(voterId);
     };
 
     return(
         <div className="bg-gray-800/50 p-6 rounded-lg mb-8 border border-gray-700">
-            <h3 className="text-xl font-bold text-center mb-4">配信のセトリをリクエスト</h3>
+            <h3 className="text-xl font-bold text-center mb-2">セトリを提案する</h3>
+            <p className="text-center text-gray-400 mb-4 text-sm">次の配信で演奏してほしい曲のセットリスト（最大5曲）を提案できます。</p>
             <div className="mb-4">
                 <label htmlFor="voterId_input" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
                 <input
@@ -121,22 +111,16 @@ const RankingActions: React.FC<{
                     required
                     className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
                 />
-                <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
             </div>
-            {actionMessage ? (
-                <p className="text-center text-green-400 h-12 flex items-center justify-center">{actionMessage}</p>
-            ) : (
-                <button onClick={handleRequestSetlist} disabled={isRequestingSetlist} className="w-full h-12 flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg font-semibold transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed">
-                    {isRequestingSetlist ? <LoadingSpinner className="w-5 h-5"/> : <CloudUploadIcon className="w-5 h-5" />}
-                    {isRequestingSetlist ? '送信中...' : 'セトリをリクエスト'}
-                </button>
-            )}
+            <button onClick={handleStart} className="w-full h-12 flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg font-semibold transition-transform transform hover:scale-105">
+                曲を選んでセトリを提案
+            </button>
         </div>
     );
 };
 
 
-export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings }) => {
+export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings, onSetlistRequestStart }) => {
 
     const getMedal = (rank: number) => {
         if (rank === 1) return '🥇';
@@ -158,11 +142,11 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
                 リクエスト
             </h2>
              <p className="text-center text-gray-400 mb-8 text-sm">
-                リストにない曲はリクエスト！ランキングにある曲は「いいね」で応援！
+                リストにない曲はリクエスト！セットリストの提案もこちらから！
             </p>
             
             <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
-            <RankingActions logRequest={logRequest} refreshRankings={refreshRankings} />
+            <SuggestSetlistAction onSetlistRequestStart={onSetlistRequestStart} />
             
             <h3 className="text-xl font-bold text-center my-8">現在のリクエストランキング</h3>
 

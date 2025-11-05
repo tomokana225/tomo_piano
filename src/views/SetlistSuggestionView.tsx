@@ -8,13 +8,14 @@ const MAX_SONGS = 5;
 interface SetlistSuggestionViewProps {
     songs: Song[];
     onSave: (songs: string[], requester: string) => Promise<boolean>;
+    initialRequester?: string;
 }
 
-export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ songs, onSave }) => {
+export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ songs, onSave, initialRequester = '' }) => {
     const [selectedSongs, setSelectedSongs] = useState<Song[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [step, setStep] = useState<'selection' | 'confirmation' | 'success'>('selection');
-    const [requester, setRequester] = useState('');
+    const [requester, setRequester] = useState(initialRequester);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const draggedItem = useRef<Song | null>(null);
@@ -182,19 +183,26 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
                     ))}
                 </ol>
             </div>
-             <div>
-                <label htmlFor="requester_id" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
-                <input
-                    id="requester_id"
-                    type="text"
-                    value={requester}
-                    onChange={(e) => setRequester(e.target.value)}
-                    placeholder="@の後ろのIDを入力"
-                    required
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
-                />
-                 <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
-            </div>
+             {initialRequester ? (
+                <div className="mb-4">
+                    <label className="block text-sm text-left font-medium text-gray-300">提案者</label>
+                    <p className="w-full bg-gray-900/50 rounded-md py-2 px-3 mt-1">{requester}</p>
+                </div>
+            ) : (
+                <div>
+                    <label htmlFor="requester_id" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
+                    <input
+                        id="requester_id"
+                        type="text"
+                        value={requester}
+                        onChange={(e) => setRequester(e.target.value)}
+                        placeholder="@の後ろのIDを入力"
+                        required
+                        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
+                    />
+                    <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
+                </div>
+            )}
              <button
                 onClick={handleSubmit}
                 disabled={isSubmitting || !requester.trim()}
@@ -217,7 +225,11 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
 
     return (
         <div className="w-full max-w-5xl mx-auto animate-fade-in">
-            <h2 className="text-3xl font-bold text-center mb-6">配信のセトリを提案する</h2>
+            <h2 className="text-3xl font-bold text-center mb-2">
+                 {initialRequester ? 'セトリ提案' : '配信のセトリを提案する'}
+            </h2>
+            {initialRequester && <p className="text-center text-gray-400 mb-6">次の配信でリクエストしたい曲を選んでください（最大5曲）</p>}
+
             {step === 'selection' && renderSelectionStep()}
             {step === 'confirmation' && renderConfirmationStep()}
             {step === 'success' && renderSuccessStep()}
