@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 export interface SimpleIconProps {
@@ -116,5 +117,24 @@ export const MoonIcon: React.FC<SimpleIconProps> = ({ className }) => (
 export const SunIcon: React.FC<SimpleIconProps> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z" />
+    </svg>
+);
+
+export const PlayCircleIcon: React.FC<SimpleIconProps> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+export const XSocialIcon: React.FC<SimpleIconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+    </svg>
+);
+
+export const TwitcasIcon: React.FC<SimpleIconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M21.52 6.13c-.35 0-.7.02-1.05.05-1.25-.9-2.8-1.48-4.47-1.48-4.14 0-7.5 3.36-7.5 7.5s3.36 7.5 7.5 7.5c2.42 0 4.57-1.15 5.96-2.95.21.02.43.03.65.03 1.48 0 2.86-.38 4.07-1.05-.42-.07-.84-.17-1.25-.3-1.6-.54-2.93-1.65-3.74-3.11-.12-.21-.23-.44-.32-.67.79.16 1.6.24 2.41.24.89 0 1.76-.11 2.59-.32-1.1-1.35-2.64-2.42-4.45-2.95-.31-.09-.62-.16-.94-.22.42-1.02.65-2.13.65-3.29 0-.21 0-.42-.02-.62.01-.02.01-.03.02-.05zM8.5 12.25c0-3.31 2.69-6 6-6s6 2.69 6 6-2.69 6-6 6-6-2.69-6-6z"/>
     </svg>
 );

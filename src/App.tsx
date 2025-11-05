@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -17,7 +15,7 @@ import { SuggestSongModal } from './features/suggest/SuggestSongModal';
 import { SupportModal } from './features/support/SupportModal';
 import { 
     SearchIcon, MusicNoteIcon, ChartBarIcon, HeartIcon, NewspaperIcon, 
-    LightBulbIcon, MenuIcon, SunIcon, MoonIcon
+    LightBulbIcon, MenuIcon, SunIcon, MoonIcon, TwitcasIcon, XSocialIcon
 } from './components/ui/Icons';
 
 
@@ -169,20 +167,29 @@ const App: React.FC = () => {
                         </div>
                         <h1 className="text-4xl md:text-5xl font-extrabold" style={{color: 'var(--primary-color)'}}>{uiConfig.mainTitle}</h1>
                         <p className="text-md md:text-lg mt-2 text-gray-600 dark:text-gray-300">{uiConfig.subtitle}</p>
-                        <div className="mt-6 flex flex-wrap justify-center items-center gap-4">
+                        <div className="mt-6 flex flex-wrap justify-center items-center gap-6">
                             {uiConfig.twitcastingUrl && (
-                                <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm font-semibold text-white bg-cyan-500 dark:bg-cyan-600 rounded-full shadow-md hover:bg-cyan-600 dark:hover:bg-cyan-700 transition transform hover:scale-105">
-                                    ツイキャスはこちら
+                                <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 group">
+                                    <div className="w-10 h-10 rounded-full bg-cyan-500 group-hover:bg-cyan-600 transition-colors flex items-center justify-center shadow-md">
+                                        <TwitcasIcon className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-color)] transition-colors">ツイキャスはこちら</span>
                                 </a>
                             )}
                             {uiConfig.xUrl && (
-                                <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm font-semibold text-white bg-gray-800 dark:bg-gray-200 dark:text-black rounded-full shadow-md hover:bg-black dark:hover:bg-white transition transform hover:scale-105">
-                                    Xはこちら
+                                <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 group">
+                                    <div className="w-10 h-10 rounded-full bg-gray-800 dark:bg-white group-hover:bg-black dark:group-hover:bg-gray-200 transition-colors flex items-center justify-center shadow-md">
+                                        <XSocialIcon className="w-5 h-5 text-white dark:text-black" />
+                                    </div>
+                                    <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-color)] transition-colors">Xはこちら</span>
                                 </a>
                             )}
                             {(uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) && (
-                                <button onClick={() => setIsSupportModalOpen(true)} className="px-4 py-2 text-sm font-semibold text-white bg-pink-500 dark:bg-pink-600 rounded-full shadow-md hover:bg-pink-600 dark:hover:bg-pink-700 transition transform hover:scale-105">
-                                    配信者を支援
+                                <button onClick={() => setIsSupportModalOpen(true)} className="inline-flex items-center gap-3 group">
+                                    <div className="w-10 h-10 rounded-full bg-pink-500 group-hover:bg-pink-600 transition-colors flex items-center justify-center shadow-md">
+                                        <HeartIcon className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-color)] transition-colors">配信者を支援</span>
                                 </button>
                             )}
                         </div>
