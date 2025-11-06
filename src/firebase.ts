@@ -1,10 +1,11 @@
-import firebase from 'firebase/app';
+// FIX: The original named import `import { initializeApp, getApps } from 'firebase/app';` was causing errors.
+// Switched to a namespace import which is more robust against module resolution issues in some build environments.
+import * as app from 'firebase/app';
 
 const initializeFirebase = async () => {
   // Check if Firebase has already been initialized to avoid re-initialization errors.
-  // FIX: Switched to Firebase v8 syntax to resolve import errors.
-  // The client-side environment appears to be using an older version of the Firebase SDK.
-  if (firebase.apps.length > 0) {
+  // This uses the v9+ modular syntax which is compatible with Firebase v10+.
+  if (app.getApps().length > 0) {
     return;
   }
   
@@ -23,8 +24,8 @@ const initializeFirebase = async () => {
       return; // Stop initialization if config is bad.
     }
 
-    // Initialize Firebase with the fetched configuration using the correct v8 function.
-    firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase with the fetched configuration.
+    app.initializeApp(firebaseConfig);
 
   } catch (error) {
     // Catch any errors during the fetch or initialization process and log them.
