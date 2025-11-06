@@ -24,19 +24,33 @@ const colorPresets = [
 ];
 
 const headingFontOptions = [
-    { name: 'Kiwi Maru (現在)', value: "'Kiwi Maru', serif" },
+    // Serif fonts
+    { name: 'Kiwi Maru (明朝)', value: "'Kiwi Maru', serif" },
     { name: 'しっぽり明朝', value: "'Shippori Mincho', serif" },
-    { name: 'Yuji Syuku', value: "'Yuji Syuku', serif" },
+    { name: 'Yuji Syuku (明朝)', value: "'Yuji Syuku', serif" },
     { name: 'さわらび明朝', value: "'Sawarabi Mincho', serif" },
-    { name: 'Merriweather', value: "'Merriweather', serif" },
+    { name: 'Merriweather (明朝)', value: "'Merriweather', serif" },
+    // Sans-serif (Gothic) fonts
+    { name: 'Noto Sans JP (ゴシック)', value: "'Noto Sans JP', sans-serif" },
+    { name: 'M PLUS Rounded 1c (ゴシック)', value: "'M PLUS Rounded 1c', sans-serif" },
+    { name: 'Zen Kaku Gothic New (ゴシック)', value: "'Zen Kaku Gothic New', sans-serif" },
+    { name: 'さわらびゴシック', value: "'Sawarabi Gothic', sans-serif" },
+    { name: 'Roboto (ゴシック)', value: "'Roboto', sans-serif" },
 ];
 
 const bodyFontOptions = [
-    { name: 'Noto Sans JP (現在)', value: "'Noto Sans JP', sans-serif" },
-    { name: 'M PLUS Rounded 1c', value: "'M PLUS Rounded 1c', sans-serif" },
-    { name: 'Zen Kaku Gothic New', value: "'Zen Kaku Gothic New', sans-serif" },
+    // Sans-serif (Gothic) fonts
+    { name: 'Noto Sans JP (ゴシック)', value: "'Noto Sans JP', sans-serif" },
+    { name: 'M PLUS Rounded 1c (ゴシック)', value: "'M PLUS Rounded 1c', sans-serif" },
+    { name: 'Zen Kaku Gothic New (ゴシック)', value: "'Zen Kaku Gothic New', sans-serif" },
     { name: 'さわらびゴシック', value: "'Sawarabi Gothic', sans-serif" },
-    { name: 'Roboto', value: "'Roboto', sans-serif" },
+    { name: 'Roboto (ゴシック)', value: "'Roboto', sans-serif" },
+    // Serif fonts
+    { name: 'Kiwi Maru (明朝)', value: "'Kiwi Maru', serif" },
+    { name: 'しっぽり明朝', value: "'Shippori Mincho', serif" },
+    { name: 'Yuji Syuku (明朝)', value: "'Yuji Syuku', serif" },
+    { name: 'さわらび明朝', value: "'Sawarabi Mincho', serif" },
+    { name: 'Merriweather (明朝)', value: "'Merriweather', serif" },
 ];
 
 
