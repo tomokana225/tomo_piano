@@ -69,6 +69,8 @@ export async function onRequest(context) {
         const now = new Date();
         const yyyy = now.getFullYear();
         const mm = (now.getMonth() + 1).toString().padStart(2, '0');
+        
+        const isAnonymousRequest = !requester || requester.trim() === '';
 
         const batch = writeBatch(db);
         
@@ -77,7 +79,8 @@ export async function onRequest(context) {
         const dataToSet = { 
             count: increment(1),
             artist: artist || '',
-            lastRequester: requester || 'anonymous',
+            lastRequester: isAnonymousRequest ? 'anonymous' : requester,
+            isAnonymous: isAnonymousRequest,
             lastRequestedAt: Date.now()
         };
         batch.set(requestRef, dataToSet, { merge: true });

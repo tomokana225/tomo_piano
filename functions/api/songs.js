@@ -123,13 +123,11 @@ export async function onRequest(context) {
                 }
                 case 'getBlogPosts': {
                     const postsRef = collection(db, 'blogPosts');
-                    // Query by date first to avoid needing a composite index.
-                    const q = query(postsRef, orderBy('createdAt', 'desc'));
+                    // This efficient query requires a composite index on (isPublished, createdAt).
+                    // Firestore will provide a link in the error console to create it.
+                    const q = query(postsRef, where('isPublished', '==', true), orderBy('createdAt', 'desc'));
                     const querySnapshot = await getDocs(q);
-                    // Filter for published posts in the function code.
-                    const posts = querySnapshot.docs
-                        .map(d => ({ id: d.id, ...d.data() }))
-                        .filter(post => post.isPublished);
+                    const posts = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                     return jsonResponse(posts);
                 }
                 case 'getAdminBlogPosts': {

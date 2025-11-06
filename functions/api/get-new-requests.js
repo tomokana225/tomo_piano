@@ -58,27 +58,24 @@ export async function onRequest(context) {
     try {
         const requestsRef = collection(db, 'songRequests');
         
-        // First, query by the most recent requests. This avoids needing a composite index.
-        // We fetch more items than needed (e.g., 200) to ensure we can find enough non-anonymous requests.
+        // This efficient query filters for non-anonymous requests and orders them by date.
+        // It requires a composite index on (isAnonymous, lastRequestedAt).
+        // Firestore will provide a link in the error console to create it if it doesn't exist.
         const q = query(
             requestsRef, 
+            where('isAnonymous', '==', false),
             orderBy('lastRequestedAt', 'desc'),
-            limit(200)
+            limit(100)
         );
         
         const querySnapshot = await getDocs(q);
-        const allRecentRequests = [];
+        const newRequests = [];
         querySnapshot.forEach((doc) => {
-            allRecentRequests.push({
+            newRequests.push({
                 id: doc.id, // This is the song title
                 ...doc.data()
             });
         });
-
-        // Second, filter out anonymous requests in the function's code.
-        const newRequests = allRecentRequests
-            .filter(req => req.lastRequester !== 'anonymous')
-            .slice(0, 100); // Apply the final limit after filtering.
         
         return new Response(JSON.stringify(newRequests), { 
             headers: { 
@@ -90,6 +87,16 @@ export async function onRequest(context) {
 
     } catch (error) {
         console.warn('Get new requests failed:', error);
+        // Provide a specific error if it's a missing index problem.
+        if (error.code === 'failed-precondition') {
+             return new Response(JSON.stringify({ 
+                 error: 'Query requires an index. Please check the Firebase console for a link to create it. This is a one-time setup.',
+                 details: error.message 
+             }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+            });
+        }
         return new Response(JSON.stringify({ error: 'Failed to fetch new requests.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
