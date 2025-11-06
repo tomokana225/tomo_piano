@@ -26,6 +26,10 @@ const DEFAULT_UI_CONFIG = {
     twitcastingIconUrl: '',
     xIconUrl: '',
     supportIconUrl: '',
+    headingFontFamily: "'Kiwi Maru', serif",
+    bodyFontFamily: "'Noto Sans JP', sans-serif",
+    headingFontScale: 1.0,
+    bodyFontScale: 1.0,
     navButtons: {
         search: { label: '曲を検索', enabled: true },
         printGakufu: { label: 'ぷりんと楽譜', enabled: true },

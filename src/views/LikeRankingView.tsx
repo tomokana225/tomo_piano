@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { RankingItem, RankingPeriod } from '../types';
 import { YouTubeIcon, DocumentTextIcon } from '../components/ui/Icons';
 

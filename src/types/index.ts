@@ -70,6 +70,10 @@ export interface UiConfig {
     twitcastingIconUrl?: string;
     xIconUrl?: string;
     supportIconUrl?: string;
+    headingFontFamily: string;
+    bodyFontFamily: string;
+    headingFontScale: number;
+    bodyFontScale: number;
     navButtons: {
         search: NavButtonConfig;
         printGakufu: NavButtonConfig;

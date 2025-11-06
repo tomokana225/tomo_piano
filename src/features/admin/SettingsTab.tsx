@@ -23,6 +23,22 @@ const colorPresets = [
     { name: 'ロイヤルパープル', primaryColor: '#8b5cf6', backgroundColor: '#f5f3ff', darkBackgroundColor: '#2e1065' },
 ];
 
+const headingFontOptions = [
+    { name: 'Kiwi Maru (現在)', value: "'Kiwi Maru', serif" },
+    { name: 'しっぽり明朝', value: "'Shippori Mincho', serif" },
+    { name: 'Yuji Syuku', value: "'Yuji Syuku', serif" },
+    { name: 'さわらび明朝', value: "'Sawarabi Mincho', serif" },
+    { name: 'Merriweather', value: "'Merriweather', serif" },
+];
+
+const bodyFontOptions = [
+    { name: 'Noto Sans JP (現在)', value: "'Noto Sans JP', sans-serif" },
+    { name: 'M PLUS Rounded 1c', value: "'M PLUS Rounded 1c', sans-serif" },
+    { name: 'Zen Kaku Gothic New', value: "'Zen Kaku Gothic New', sans-serif" },
+    { name: 'さわらびゴシック', value: "'Sawarabi Gothic', sans-serif" },
+    { name: 'Roboto', value: "'Roboto', sans-serif" },
+];
+
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConfig }) => {
     const [config, setConfig] = useState<UiConfig>(uiConfig);
@@ -34,6 +50,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
     }, [uiConfig]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setConfig(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
         setConfig(prev => ({ ...prev, [name]: value }));
     };
@@ -128,6 +149,30 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                 </div>
             </div>
             
+             <h3 className="text-lg font-semibold mb-4 mt-8">フォント設定</h3>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {/* Heading Font Section */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">見出しフォント</label>
+                        <select name="headingFontFamily" value={config.headingFontFamily} onChange={handleSelectChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
+                            {headingFontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.name}</option>)}
+                        </select>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 pt-2">見出しの大きさ: {Math.round((config.headingFontScale || 1) * 100)}%</label>
+                        <input type="range" name="headingFontScale" min="0.8" max="1.5" step="0.05" value={config.headingFontScale || 1} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+                    {/* Body Font Section */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">本文フォント</label>
+                        <select name="bodyFontFamily" value={config.bodyFontFamily} onChange={handleSelectChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
+                            {bodyFontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.name}</option>)}
+                        </select>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 pt-2">本文の大きさ: {Math.round((config.bodyFontScale || 1) * 100)}%</label>
+                        <input type="range" name="bodyFontScale" min="0.8" max="1.5" step="0.05" value={config.bodyFontScale || 1} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+                </div>
+            </div>
+
             <h3 className="text-lg font-semibold mb-4 mt-8">背景設定</h3>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-4">
                  <div className="flex items-center gap-6">

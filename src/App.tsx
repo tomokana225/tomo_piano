@@ -58,8 +58,13 @@ const App: React.FC = () => {
     };
     
     useEffect(() => {
-        document.documentElement.style.setProperty('--primary-color', uiConfig.primaryColor);
-    }, [uiConfig.primaryColor]);
+        const root = document.documentElement;
+        root.style.setProperty('--primary-color', uiConfig.primaryColor);
+        root.style.setProperty('--heading-font', uiConfig.headingFontFamily || "'Kiwi Maru', serif");
+        root.style.setProperty('--body-font', uiConfig.bodyFontFamily || "'Noto Sans JP', sans-serif");
+        root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
+        root.style.setProperty('--body-font-scale', String(uiConfig.bodyFontScale || 1));
+    }, [uiConfig]);
 
     const handleSuggestSelect = useCallback((text: string) => {
         setSearchTerm(text);
