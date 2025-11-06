@@ -3,16 +3,14 @@ import { useApi } from '../../hooks/useApi';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { Song } from '../../types';
 import { parseSongs, songsToString } from '../../utils/parser';
-import { XIcon, PlusIcon } from '../../components/ui/Icons';
+import { XIcon, PlusIcon, InformationCircleIcon, CheckCircleIcon, XCircleIcon } from '../../components/ui/Icons';
 
 
 export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promise<boolean>;}> = ({ onSaveSongs }) => {
     const { rawSongList, isLoading } = useApi();
     const [songString, setSongString] = useState('');
     const [songs, setSongs] = useState<Song[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isGeneratingKana, setIsGeneratingKana] = useState(false);
-    const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [processState, setProcessState] = useState<{ status: 'idle' | 'processing' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
 
     useEffect(() => {
         if (rawSongList) {
@@ -24,6 +22,15 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
         setSongs(parseSongs(songString));
     }, [songString]);
 
+    useEffect(() => {
+        if (processState.status === 'success' || processState.status === 'error') {
+            const timer = setTimeout(() => {
+                setProcessState({ status: 'idle', message: '' });
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [processState.status]);
+
     const updateSong = useCallback((index: number, updatedSong: Partial<Song>) => {
         const newSongs = [...songs];
         newSongs[index] = { ...newSongs[index], ...updatedSong };
@@ -31,7 +38,6 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
     }, [songs]);
 
     const addSong = useCallback(() => {
-        // Fix: Explicitly type the new song object to prevent type inference issues.
         const newSong: Song = { title: '', artist: '', genre: '', isNew: false, status: 'playable' };
         const newSongs = [...songs, newSong];
         setSongString(songsToString(newSongs));
@@ -42,10 +48,8 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
         setSongString(songsToString(newSongs));
     }, [songs]);
 
-
     const handleSave = async () => {
-        setIsGeneratingKana(true);
-        setSaveStatus('idle');
+        setProcessState({ status: 'processing', message: '準備中...' });
 
         try {
             const songsToProcess = parseSongs(songString);
@@ -60,6 +64,10 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             let processedSongs = [...songsToProcess];
 
             if (songsWithoutKana.length > 0) {
+                 setProcessState({
+                    status: 'processing',
+                    message: `${songsWithoutKana.length}曲のふりがなを生成中です...`
+                });
                  const response = await fetch('/api/generate-kana', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -68,7 +76,7 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to fetch kana from server.');
+                    throw new Error(errorData.error || 'ふりがなの生成に失敗しました。');
                 }
 
                 const kanaResults = await response.json();
@@ -93,26 +101,55 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             const newSongString = songsToString(processedSongs);
             setSongString(newSongString);
             
-            setIsGeneratingKana(false);
-            setIsSaving(true);
+            setProcessState({ status: 'processing', message: 'データベースに保存中です...' });
             const success = await onSaveSongs(newSongString);
-            setSaveStatus(success ? 'success' : 'error');
+
+            if (success) {
+                 setProcessState({ status: 'success', message: '保存が完了しました！' });
+            } else {
+                 throw new Error("データベースへの保存に失敗しました。");
+            }
 
         } catch (error) {
             console.error("Failed to generate kana or save:", error);
-            setSaveStatus('error');
-            setIsGeneratingKana(false);
-        } finally {
-            setIsSaving(false);
-            setTimeout(() => setSaveStatus('idle'), 3000);
+            const errorMessage = error instanceof Error ? error.message : '不明なエラーが発生しました。';
+            setProcessState({ status: 'error', message: `エラー: ${errorMessage}` });
         }
     };
     
-    const buttonText = isGeneratingKana ? 'ふりがな生成中...' : (isSaving ? '保存中...' : '保存する (ふりがな自動付与)');
-
     if (isLoading && !rawSongList) {
         return <div className="flex justify-center items-center h-full"><LoadingSpinner className="w-8 h-8"/></div>
     }
+
+    const renderProcessBanner = () => {
+        if (processState.status === 'idle') return null;
+
+        const baseClasses = 'p-3 rounded-md flex items-center gap-3 text-sm transition-opacity duration-300';
+        let specificClasses = '';
+        let IconComponent: React.FC<{ className?: string }> = LoadingSpinner;
+
+        switch (processState.status) {
+            case 'processing':
+                specificClasses = 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200';
+                IconComponent = InformationCircleIcon;
+                break;
+            case 'success':
+                specificClasses = 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
+                IconComponent = CheckCircleIcon;
+                break;
+            case 'error':
+                specificClasses = 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200';
+                IconComponent = XCircleIcon;
+                break;
+        }
+
+        return (
+            <div className={`${baseClasses} ${specificClasses}`} role="alert">
+                <IconComponent className={`w-5 h-5 flex-shrink-0 ${processState.status === 'processing' ? 'animate-spin' : ''}`} />
+                <p className="font-medium">{processState.message}</p>
+            </div>
+        );
+    };
 
     return (
         <div>
@@ -146,19 +183,17 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
                 曲を追加
             </button>
 
-
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-end gap-4">
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-right">保存時に、漢字や英語の曲名・アーティスト名に<br/>自動でふりがな（カタカナ）を追加します。</p>
-                <div className="flex items-center gap-4">
-                    {saveStatus === 'success' && <p className="text-green-500 dark:text-green-400">保存しました！</p>}
-                    {saveStatus === 'error' && <p className="text-red-500 dark:text-red-400">失敗しました。</p>}
+            <div className="mt-6 space-y-4">
+                {renderProcessBanner()}
+                <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-right">保存時に、漢字や英語の曲名・アーティスト名に<br/>自動でふりがな（カタカナ）を追加します。</p>
                     <button
                         onClick={handleSave}
-                        disabled={isSaving || isGeneratingKana}
+                        disabled={processState.status === 'processing'}
                         className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-2 min-w-[200px] justify-center"
                     >
-                        {isSaving || isGeneratingKana ? <LoadingSpinner className="w-5 h-5" /> : null}
-                        {buttonText}
+                        {processState.status === 'processing' ? <LoadingSpinner className="w-5 h-5" /> : null}
+                        {processState.status === 'processing' ? '処理中...' : '保存する (ふりがな自動付与)'}
                     </button>
                 </div>
             </div>
