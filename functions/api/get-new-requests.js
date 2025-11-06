@@ -1,8 +1,8 @@
 // This serverless function runs on Cloudflare.
-// It retrieves a list of songs requested via the form (not "likes").
+// It retrieves new song requests that were submitted via the form (i.e., not anonymous likes).
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -31,11 +31,6 @@ async function getFirebaseApp(env) {
     return initializeApp(firebaseConfig);
 }
 
-const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-});
-
 export async function onRequest(context) {
     const { request, env } = context;
 
@@ -44,7 +39,7 @@ export async function onRequest(context) {
     }
 
     if (request.method !== 'GET') {
-        return jsonResponse({ error: 'Method Not Allowed' }, 405);
+        return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
 
     let app;
@@ -52,22 +47,27 @@ export async function onRequest(context) {
         app = await getFirebaseApp(env);
     } catch (e) {
         console.warn("Firebase Init Failed:", e.message);
-        return jsonResponse({ error: "Server configuration error." }, 500);
+        return new Response(JSON.stringify({ error: "Server configuration error." }), { 
+            status: 500, 
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
     }
 
     const db = getFirestore(app);
 
     try {
         const requestsRef = collection(db, 'songRequests');
-        // Get requests where the requester is not 'anonymous'
+        // Fetch requests that are NOT anonymous likes, and order by most recent.
+        // This query requires a composite index in Firestore.
         const q = query(
             requestsRef, 
-            where('lastRequester', '!=', 'anonymous'), 
-            orderBy('lastRequestedAt', 'desc'), 
+            where('lastRequester', '!=', 'anonymous'),
+            orderBy('lastRequester'),
+            orderBy('lastRequestedAt', 'desc'),
             limit(100)
         );
-        const querySnapshot = await getDocs(q);
         
+        const querySnapshot = await getDocs(q);
         const newRequests = [];
         querySnapshot.forEach((doc) => {
             newRequests.push({
@@ -76,10 +76,19 @@ export async function onRequest(context) {
             });
         });
         
-        return jsonResponse(newRequests);
+        return new Response(JSON.stringify(newRequests), { 
+            headers: { 
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache',
+                ...CORS_HEADERS
+            } 
+        });
 
     } catch (error) {
         console.warn('Get new requests failed:', error);
-        return jsonResponse({ error: 'Failed to fetch new requests.' }, 500);
+        return new Response(JSON.stringify({ error: 'Failed to fetch new requests.' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+        });
     }
 }

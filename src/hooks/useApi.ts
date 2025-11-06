@@ -34,8 +34,8 @@ export const useApi = () => {
     const [songs, setSongs] = useState<Song[]>([]);
     const [songRankingList, setSongRankingList] = useState<RankingItem[]>([]);
     const [artistRankingList, setArtistRankingList] = useState<ArtistRankingItem[]>([]);
-    const [requestRankingList, setRequestRankingList] = useState<RequestRankingItem[]>([]); // This is for "likes"
-    const [newlyRequestedSongs, setNewlyRequestedSongs] = useState<RequestRankingItem[]>([]); // This is for new requests from the form
+    const [requestRankingList, setRequestRankingList] = useState<RequestRankingItem[]>([]);
+    const [newlyRequestedSongs, setNewlyRequestedSongs] = useState<RequestRankingItem[]>([]);
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [adminPosts, setAdminPosts] = useState<BlogPost[]>([]); // For admin panel
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
@@ -45,7 +45,7 @@ export const useApi = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchRankingsAndRequests = useCallback(async (period: RankingPeriod) => {
+    const fetchRankings = useCallback(async (period: RankingPeriod) => {
         try {
             const [rankingRes, requestRankingRes, newRequestsRes] = await Promise.all([
                 fetch(`/api/get-ranking?period=${period}`),
@@ -64,7 +64,7 @@ export const useApi = () => {
             setRequestRankingList(requestRankingData || []);
             setNewlyRequestedSongs(newRequestsData || []);
         } catch (err) {
-            console.error("Failed to refresh rankings and requests", err);
+            console.error("Failed to refresh rankings", err);
         }
     }, []);
     
@@ -104,7 +104,7 @@ export const useApi = () => {
             setUiConfig(uiConfigData || DEFAULT_UI_CONFIG);
             setSetlistSuggestions(setlistSuggestionsData || []);
             
-            await fetchRankingsAndRequests('all'); // Fetch initial (all-time) rankings
+            await fetchRankings('all'); // Fetch initial (all-time) rankings
             
         } catch (err: any) {
             setError(err.message);
@@ -112,7 +112,7 @@ export const useApi = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [fetchRankingsAndRequests]);
+    }, [fetchRankings]);
 
     useEffect(() => {
         fetchData();
@@ -121,9 +121,9 @@ export const useApi = () => {
     useEffect(() => {
         // This effect re-fetches rankings when the period changes, but not on initial load.
         if (!isLoading) {
-            fetchRankingsAndRequests(rankingPeriod);
+            fetchRankings(rankingPeriod);
         }
-    }, [rankingPeriod, isLoading, fetchRankingsAndRequests]);
+    }, [rankingPeriod, isLoading, fetchRankings]);
 
     const postData = useCallback(async (url: string, body: object) => {
         try {
@@ -192,8 +192,8 @@ export const useApi = () => {
     }, [postData, fetchData]);
 
     const refreshRankings = useCallback(async () => {
-        await fetchRankingsAndRequests(rankingPeriod);
-    }, [rankingPeriod, fetchRankingsAndRequests]);
+        await fetchRankings(rankingPeriod);
+    }, [rankingPeriod, fetchRankings]);
 
 
     return {

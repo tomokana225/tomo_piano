@@ -1,36 +1,28 @@
-// FIX: The original named import `import { initializeApp, getApps } from 'firebase/app';` was causing errors.
-// Switched to a namespace import which is more robust against module resolution issues in some build environments.
-import * as app from 'firebase/app';
+// FIX: Changed to a namespace import to resolve Firebase module errors, as named imports were failing.
+import * as firebase from 'firebase/app';
 
 const initializeFirebase = async () => {
-  // Check if Firebase has already been initialized to avoid re-initialization errors.
-  // This uses the v9+ modular syntax which is compatible with Firebase v10+.
-  if (app.getApps().length > 0) {
+  // FIX: Use `firebase.getApps()` with the namespace import.
+  if (firebase.getApps().length > 0) {
+    // Firebase is already initialized, do nothing.
     return;
   }
   
   try {
-    // Fetch the Firebase configuration from our secure serverless function.
-    // This is a good practice to avoid exposing config in client-side source code.
     const response = await fetch('/api/songs?action=getFirebaseConfig');
     if (!response.ok) {
-      throw new Error(`Failed to fetch Firebase config from server. Status: ${response.status}`);
+      throw new Error('Failed to fetch Firebase config');
     }
     const firebaseConfig = await response.json();
-
-    // A crucial check to ensure we have a valid configuration before proceeding.
-    if (!firebaseConfig || !firebaseConfig.apiKey) {
-      console.error("Firebase config is invalid or missing an API key. Firebase will not be initialized.");
-      return; // Stop initialization if config is bad.
+    if (!firebaseConfig.apiKey) {
+      console.error("Firebase config is missing API key. Firebase will not be initialized.");
+      return;
     }
-
-    // Initialize Firebase with the fetched configuration.
-    app.initializeApp(firebaseConfig);
-
+    // FIX: Use `firebase.initializeApp()` with the namespace import.
+    firebase.initializeApp(firebaseConfig);
   } catch (error) {
-    // Catch any errors during the fetch or initialization process and log them.
-    // This prevents the entire app from crashing if Firebase can't be reached.
-    console.error("Firebase initialization process failed:", error);
+    console.error("Firebase initialization error:", error);
+    return;
   }
 };
 

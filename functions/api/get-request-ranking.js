@@ -2,7 +2,7 @@
 // It retrieves the song request ranking data from Firestore.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',

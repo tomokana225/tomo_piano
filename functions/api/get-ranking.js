@@ -3,7 +3,7 @@
 
 import { initializeApp, getApps } from 'firebase/app';
 // Use the "lite" version of Firestore for serverless environments to keep it fast
-import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
