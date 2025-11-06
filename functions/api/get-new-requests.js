@@ -4,11 +4,24 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore/lite';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+const ALLOWED_ORIGIN = 'https://tomo-piano.pages.dev';
+
+const createCorsHeaders = (request) => {
+    const origin = request.headers.get('Origin');
+    const isAllowed = origin === ALLOWED_ORIGIN;
+    return {
+        'Access-Control-Allow-Origin': isAllowed ? origin : '',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Vary': 'Origin'
+    };
 };
+
+const jsonResponse = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...headers }
+});
+
 
 async function getFirebaseApp(env) {
     if (getApps().length) {
@@ -33,29 +46,21 @@ async function getFirebaseApp(env) {
 
 export async function onRequest(context) {
     const { request, env } = context;
+    const corsHeaders = createCorsHeaders(request);
 
     if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: CORS_HEADERS });
+        return new Response(null, { headers: corsHeaders });
     }
-
     if (request.method !== 'GET') {
-        return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
+        return jsonResponse({ error: 'Method Not Allowed' }, 405, corsHeaders);
+    }
+    if (!corsHeaders['Access-Control-Allow-Origin']) {
+        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
-    let app;
     try {
-        app = await getFirebaseApp(env);
-    } catch (e) {
-        console.warn("Firebase Init Failed:", e.message);
-        return new Response(JSON.stringify({ error: "Server configuration error." }), { 
-            status: 500, 
-            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-        });
-    }
-
-    const db = getFirestore(app);
-
-    try {
+        const app = await getFirebaseApp(env);
+        const db = getFirestore(app);
         const requestsRef = collection(db, 'songRequests');
         
         // This efficient query filters for non-anonymous requests and orders them by date.
@@ -77,29 +82,20 @@ export async function onRequest(context) {
             });
         });
         
-        return new Response(JSON.stringify(newRequests), { 
-            headers: { 
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache',
-                ...CORS_HEADERS
-            } 
+        return jsonResponse(newRequests, 200, {
+            ...corsHeaders,
+            'Cache-Control': 'no-cache'
         });
 
     } catch (error) {
         console.warn('Get new requests failed:', error);
         // Provide a specific error if it's a missing index problem.
         if (error.code === 'failed-precondition') {
-             return new Response(JSON.stringify({ 
+             return jsonResponse({ 
                  error: 'Query requires an index. Please check the Firebase console for a link to create it. This is a one-time setup.',
                  details: error.message 
-             }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
-            });
+             }, 500, corsHeaders);
         }
-        return new Response(JSON.stringify({ error: 'Failed to fetch new requests.' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
-        });
+        return jsonResponse({ error: 'Failed to fetch new requests.' }, 500, corsHeaders);
     }
 }

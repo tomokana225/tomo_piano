@@ -4,11 +4,23 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, doc, runTransaction } from 'firebase/firestore/lite';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+const ALLOWED_ORIGIN = 'https://tomo-piano.pages.dev';
+
+const createCorsHeaders = (request) => {
+    const origin = request.headers.get('Origin');
+    const isAllowed = origin === ALLOWED_ORIGIN;
+    return {
+        'Access-Control-Allow-Origin': isAllowed ? origin : '',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Vary': 'Origin'
+    };
 };
+
+const jsonResponse = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...headers }
+});
 
 async function getFirebaseApp(env) {
     if (getApps().length) {
@@ -33,35 +45,25 @@ async function getFirebaseApp(env) {
 
 export async function onRequest(context) {
     const { request, env } = context;
+    const corsHeaders = createCorsHeaders(request);
     
     if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: CORS_HEADERS });
+        return new Response(null, { headers: corsHeaders });
     }
-
     if (request.method !== 'POST') {
-        return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
+        return jsonResponse({ error: 'Method Not Allowed' }, 405, corsHeaders);
+    }
+    if (!corsHeaders['Access-Control-Allow-Origin']) {
+        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
-    const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
-        status,
-        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-    });
-    
-    let app;
     try {
-        app = await getFirebaseApp(env);
-    } catch (e) {
-        console.warn("Firebase Init Failed:", e.message);
-        return jsonResponse({ error: "Server configuration error." }, 500);
-    }
-
-    const db = getFirestore(app);
-
-    try {
+        const app = await getFirebaseApp(env);
+        const db = getFirestore(app);
         const { term, artist, requester } = await request.json();
 
         if (!term || typeof term !== 'string' || term.trim().length === 0) {
-            return jsonResponse({ error: "Invalid song title provided." }, 400);
+            return jsonResponse({ error: "Invalid song title provided." }, 400, corsHeaders);
         }
         
         const songTitle = term.trim();
@@ -101,10 +103,10 @@ export async function onRequest(context) {
             transaction.set(yearlyRef, { [safeKey]: { count: newYearlyCount, artist: artist || '' } }, { merge: true });
         });
 
-        return jsonResponse({ success: true });
+        return jsonResponse({ success: true }, 200, corsHeaders);
 
     } catch (error) {
         console.warn('Logging request failed:', error);
-        return jsonResponse({ error: 'Failed to log request.' }, 500);
+        return jsonResponse({ error: 'Failed to log request.' }, 500, corsHeaders);
     }
 }

@@ -5,11 +5,24 @@ import { initializeApp, getApps } from 'firebase/app';
 // Use the lite Firestore SDK and transactions for atomic updates
 import { getFirestore, doc, getDoc, runTransaction } from 'firebase/firestore/lite';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+const ALLOWED_ORIGIN = 'https://tomo-piano.pages.dev';
+
+const createCorsHeaders = (request) => {
+    const origin = request.headers.get('Origin');
+    const isAllowed = origin === ALLOWED_ORIGIN;
+    return {
+        'Access-Control-Allow-Origin': isAllowed ? origin : '',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Vary': 'Origin'
+    };
 };
+
+const jsonResponse = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...headers }
+});
+
 
 async function getFirebaseApp(env) {
     if (getApps().length) {
@@ -66,101 +79,90 @@ const normalizeForSearch = (str) => {
 
 export async function onRequest(context) {
     const { request, env } = context;
+    const corsHeaders = createCorsHeaders(request);
     
     if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: CORS_HEADERS });
+        return new Response(null, { headers: corsHeaders });
     }
-
     if (request.method !== 'POST') {
-        return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
+        return jsonResponse({ error: 'Method Not Allowed' }, 405, corsHeaders);
     }
-
-    const successHeaders = { 'Content-Type': 'application/json', ...CORS_HEADERS };
-
-    let app;
-    try {
-        app = await getFirebaseApp(env);
-    } catch (e) {
-        return new Response(JSON.stringify({ success: true, message: "Server config error" }), { status: 200, headers: successHeaders });
+    if (!corsHeaders['Access-Control-Allow-Origin']) {
+        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
-
-    const db = getFirestore(app);
-
-    try {
-        const { term } = await request.json();
-        const searchTerm = normalizeForSearch(term);
-
-        if (!searchTerm) {
-            return new Response(JSON.stringify({ success: true, message: "No term provided" }), { status: 200, headers: successHeaders });
-        }
-
-        const songDocRef = doc(db, 'songlist/default');
-        const docSnap = await getDoc(songDocRef);
-
-        if (!docSnap.exists()) {
-            return new Response(JSON.stringify({ success: true, message: "Song list not found" }), { status: 200, headers: successHeaders });
-        }
-        
-        const songs = parseSongs(docSnap.data().list);
-        let bestMatch = null;
-        let highestScore = -1;
-
-        const calculateScore = (song, term) => {
-            const songTitle = normalizeForSearch(song.title);
-            const songArtist = normalizeForSearch(song.artist);
-            let score = 0;
-            if (songTitle === term) score = 100;
-            else if (songArtist === term) score = 90;
-            else if (songTitle.startsWith(term)) score = 70;
-            else if (songArtist.startsWith(term)) score = 60;
-            else if (songTitle.includes(term)) score = 30;
-            else if (songArtist.includes(term)) score = 20;
-            return score;
-        };
-
-        for (const song of songs) {
-            const score = calculateScore(song, searchTerm);
-            if (score > highestScore) {
-                highestScore = score;
-                bestMatch = song;
-            }
-        }
-
-        if (!bestMatch) {
-            return new Response(JSON.stringify({ success: true, message: "No matching songs" }), { status: 200, headers: successHeaders });
-        }
-        
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = (now.getMonth() + 1).toString().padStart(2, '0');
-        const safeKey = bestMatch.title.replace(/\./g, '_'); // Firestore field paths cannot contain '.'
-
-        await runTransaction(db, async (transaction) => {
-            // 1. Update all-time ranking
-            const countRef = doc(db, 'songSearchCounts', bestMatch.title);
-            const countDoc = await transaction.get(countRef);
-            const newAllTimeCount = (countDoc.data()?.count || 0) + 1;
-            transaction.set(countRef, { count: newAllTimeCount, artist: bestMatch.artist }, { merge: true });
-
-            // 2. Update monthly ranking
-            const monthlyRef = doc(db, 'monthlySearchCounts', `${yyyy}-${mm}`);
-            const monthlyDoc = await transaction.get(monthlyRef);
-            const monthlyData = monthlyDoc.data() || {};
-            const newMonthlyCount = (monthlyData[safeKey]?.count || 0) + 1;
-            transaction.set(monthlyRef, { [safeKey]: { count: newMonthlyCount, artist: bestMatch.artist } }, { merge: true });
+    
+    // For logging, we don't need to block execution on the client-side.
+    // Respond immediately and log in the background.
+    const logPromise = async () => {
+        try {
+            const app = await getFirebaseApp(env);
+            const db = getFirestore(app);
+            const { term } = await request.clone().json();
+            const searchTerm = normalizeForSearch(term);
+    
+            if (!searchTerm) return;
+    
+            const songDocRef = doc(db, 'songlist/default');
+            const docSnap = await getDoc(songDocRef);
+    
+            if (!docSnap.exists()) return;
             
-            // 3. Update yearly ranking
-            const yearlyRef = doc(db, 'yearlySearchCounts', `${yyyy}`);
-            const yearlyDoc = await transaction.get(yearlyRef);
-            const yearlyData = yearlyDoc.data() || {};
-            const newYearlyCount = (yearlyData[safeKey]?.count || 0) + 1;
-            transaction.set(yearlyRef, { [safeKey]: { count: newYearlyCount, artist: bestMatch.artist } }, { merge: true });
-        });
+            const songs = parseSongs(docSnap.data().list);
+            let bestMatch = null;
+            let highestScore = -1;
+    
+            const calculateScore = (song, term) => {
+                const songTitle = normalizeForSearch(song.title);
+                const songArtist = normalizeForSearch(song.artist);
+                let score = 0;
+                if (songTitle === term) score = 100;
+                else if (songArtist === term) score = 90;
+                else if (songTitle.startsWith(term)) score = 70;
+                else if (songArtist.startsWith(term)) score = 60;
+                else if (songTitle.includes(term)) score = 30;
+                else if (songArtist.includes(term)) score = 20;
+                return score;
+            };
+    
+            for (const song of songs) {
+                const score = calculateScore(song, searchTerm);
+                if (score > highestScore) {
+                    highestScore = score;
+                    bestMatch = song;
+                }
+            }
+    
+            if (!bestMatch) return;
+            
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = (now.getMonth() + 1).toString().padStart(2, '0');
+            const safeKey = bestMatch.title.replace(/\./g, '_');
+    
+            await runTransaction(db, async (transaction) => {
+                const countRef = doc(db, 'songSearchCounts', bestMatch.title);
+                const countDoc = await transaction.get(countRef);
+                const newAllTimeCount = (countDoc.data()?.count || 0) + 1;
+                transaction.set(countRef, { count: newAllTimeCount, artist: bestMatch.artist }, { merge: true });
+    
+                const monthlyRef = doc(db, 'monthlySearchCounts', `${yyyy}-${mm}`);
+                const monthlyDoc = await transaction.get(monthlyRef);
+                const monthlyData = monthlyDoc.data() || {};
+                const newMonthlyCount = (monthlyData[safeKey]?.count || 0) + 1;
+                transaction.set(monthlyRef, { [safeKey]: { count: newMonthlyCount, artist: bestMatch.artist } }, { merge: true });
+                
+                const yearlyRef = doc(db, 'yearlySearchCounts', `${yyyy}`);
+                const yearlyDoc = await transaction.get(yearlyRef);
+                const yearlyData = yearlyDoc.data() || {};
+                const newYearlyCount = (yearlyData[safeKey]?.count || 0) + 1;
+                transaction.set(yearlyRef, { [safeKey]: { count: newYearlyCount, artist: bestMatch.artist } }, { merge: true });
+            });
+        } catch (error) {
+            console.warn('Background search logging failed:', error);
+        }
+    };
+    
+    context.waitUntil(logPromise());
 
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: successHeaders });
-
-    } catch (error) {
-        console.warn('Logging search failed:', error);
-        return new Response(JSON.stringify({ success: true, error: "Internal logging error" }), { status: 200, headers: successHeaders });
-    }
+    return jsonResponse({ success: true }, 200, corsHeaders);
 }

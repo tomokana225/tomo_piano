@@ -3,38 +3,48 @@
 
 import { GoogleGenAI } from '@google/genai';
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+const ALLOWED_ORIGIN = 'https://tomo-piano.pages.dev';
+
+const createCorsHeaders = (request) => {
+    const origin = request.headers.get('Origin');
+    const isAllowed = origin === ALLOWED_ORIGIN;
+    return {
+        'Access-Control-Allow-Origin': isAllowed ? origin : '',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Vary': 'Origin'
+    };
 };
 
-const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
+const jsonResponse = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    headers: { 'Content-Type': 'application/json', ...headers }
 });
 
 export async function onRequest(context) {
     const { request, env } = context;
+    const corsHeaders = createCorsHeaders(request);
 
     if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: CORS_HEADERS });
+        return new Response(null, { headers: corsHeaders });
     }
-
     if (request.method !== 'POST') {
-        return jsonResponse({ error: 'Method Not Allowed' }, 405);
+        return jsonResponse({ error: 'Method Not Allowed' }, 405, corsHeaders);
+    }
+    if (!corsHeaders['Access-Control-Allow-Origin']) {
+        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
     try {
         const { songs } = await request.json();
 
         if (!Array.isArray(songs) || songs.length === 0) {
-            return jsonResponse({ error: 'Invalid songs data provided.' }, 400);
+            return jsonResponse({ error: 'Invalid songs data provided.' }, 400, corsHeaders);
         }
 
         if (!env.GEMINI_API_KEY) {
             console.error("GEMINI_API_KEY is not set in Cloudflare environment variables.");
-            return jsonResponse({ error: 'Server configuration error: API key is missing.' }, 500);
+            return jsonResponse({ error: 'Server configuration error: API key is missing.' }, 500, corsHeaders);
         }
 
         const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
@@ -57,10 +67,10 @@ ${JSON.stringify(songs.map(s => ({ title: s.title, artist: s.artist })))}
         const rawJson = (response.text ?? '').trim().replace(/^```json\s*|```\s*$/g, '');
         const kanaResults = rawJson ? JSON.parse(rawJson) : [];
 
-        return jsonResponse({ kanaResults });
+        return jsonResponse({ kanaResults }, 200, corsHeaders);
 
     } catch (error) {
         console.error("Error in generate-kana function:", error);
-        return jsonResponse({ error: 'Failed to generate kana from AI service.' }, 500);
+        return jsonResponse({ error: 'Failed to generate kana from AI service.' }, 500, corsHeaders);
     }
 }
