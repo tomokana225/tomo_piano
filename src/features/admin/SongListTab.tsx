@@ -4,7 +4,6 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { Song } from '../../types';
 import { parseSongs, songsToString } from '../../utils/parser';
 import { XIcon, PlusIcon } from '../../components/ui/Icons';
-import { GoogleGenAI } from "@google/genai";
 
 
 export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promise<boolean>;}> = ({ onSaveSongs }) => {
@@ -61,29 +60,26 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             let processedSongs = [...songsToProcess];
 
             if (songsWithoutKana.length > 0) {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-                
-                const prompt = `以下の日本の曲名とアーティスト名のリストについて、一般的なカタカナの読み仮名を括弧付きで追記してください。
-- 英語名、数字、記号のみ、または既にカタカナ/ひらがなの場合は、読み仮名は不要です。その場合は元の文字列をそのまま返してください。
-- 読み仮名が必要な漢字や英語表記の場合のみ「元の名前(カタカナ)」の形式にしてください。
-- 結果はJSON配列で、各要素は { "originalTitle": "元の曲名", "updatedTitle": "更新後の曲名", "originalArtist": "元のアーティスト名", "updatedArtist": "更新後のアーティスト名" } の形式で返してください。
-
-リスト:
-${JSON.stringify(songsWithoutKana.map(s => ({ title: s.title, artist: s.artist })))}
-`;
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: prompt,
-                    config: { responseMimeType: "application/json" }
+                 // Call the backend function to generate kana
+                const response = await fetch('/api/generate-kana', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ songs: songsWithoutKana }),
                 });
 
-                const rawJson = (response.text ?? '').trim().replace(/^```json\s*|```\s*$/g, '');
-                const kanaResults = rawJson ? JSON.parse(rawJson) : [];
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch kana from the server.');
+                }
+                
+                const { kanaResults } = await response.json();
                 
                 const kanaMap = new Map<string, { title: string, artist: string }>();
-                kanaResults.forEach((res: any) => {
-                    kanaMap.set(`${res.originalTitle}|${res.originalArtist}`, { title: res.updatedTitle, artist: res.updatedArtist });
-                });
+                if (Array.isArray(kanaResults)) {
+                    kanaResults.forEach((res: any) => {
+                        kanaMap.set(`${res.originalTitle}|${res.originalArtist}`, { title: res.updatedTitle, artist: res.updatedArtist });
+                    });
+                }
 
                 processedSongs = songsToProcess.map(song => {
                     const key = `${song.title}|${song.artist}`;
