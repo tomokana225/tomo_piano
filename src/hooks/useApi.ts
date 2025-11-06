@@ -35,7 +35,6 @@ export const useApi = () => {
     const [songRankingList, setSongRankingList] = useState<RankingItem[]>([]);
     const [artistRankingList, setArtistRankingList] = useState<ArtistRankingItem[]>([]);
     const [requestRankingList, setRequestRankingList] = useState<RequestRankingItem[]>([]);
-    const [newlyRequestedSongs, setNewlyRequestedSongs] = useState<RequestRankingItem[]>([]);
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [adminPosts, setAdminPosts] = useState<BlogPost[]>([]); // For admin panel
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
@@ -47,22 +46,19 @@ export const useApi = () => {
 
     const fetchRankings = useCallback(async (period: RankingPeriod) => {
         try {
-            const [rankingRes, requestRankingRes, newRequestsRes] = await Promise.all([
+            const [rankingRes, requestRankingRes] = await Promise.all([
                 fetch(`/api/get-ranking?period=${period}`),
                 fetch(`/api/get-request-ranking?period=${period}`),
-                fetch('/api/get-new-requests'),
             ]);
-            if (!rankingRes.ok || !requestRankingRes.ok || !newRequestsRes.ok) {
-                console.error('Failed to fetch ranking or request data');
+            if (!rankingRes.ok || !requestRankingRes.ok) {
+                console.error('Failed to fetch ranking data');
                 return;
             }
             const rankingData = await rankingRes.json();
             const requestRankingData = await requestRankingRes.json();
-            const newRequestsData = await newRequestsRes.json();
             setSongRankingList(rankingData.songRanking || []);
             setArtistRankingList(rankingData.artistRanking || []);
             setRequestRankingList(requestRankingData || []);
-            setNewlyRequestedSongs(newRequestsData || []);
         } catch (err) {
             console.error("Failed to refresh rankings", err);
         }
@@ -202,7 +198,6 @@ export const useApi = () => {
         songRankingList,
         artistRankingList,
         requestRankingList,
-        newlyRequestedSongs,
         posts,
         adminPosts,
         uiConfig,

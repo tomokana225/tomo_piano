@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
-import { Mode, Song } from './types';
+import { Mode } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
@@ -21,7 +21,7 @@ import {
 
 const App: React.FC = () => {
     const { 
-        songs, songRankingList, artistRankingList, requestRankingList, newlyRequestedSongs, posts, adminPosts, uiConfig, setlistSuggestions,
+        songs, songRankingList, artistRankingList, requestRankingList, posts, adminPosts, uiConfig, setlistSuggestions,
         isLoading, error, rankingPeriod, setRankingPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
         logSearch, logRequest, saveSetlistSuggestion, refreshRankings
@@ -33,26 +33,6 @@ const App: React.FC = () => {
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
-    
-    const [isLiking, setIsLiking] = useState<string | null>(null);
-    const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
-    const [likeMessage, setLikeMessage] = useState('');
-
-    const showLikeMessage = (msg: string) => {
-        setLikeMessage(msg);
-        setTimeout(() => setLikeMessage(''), 3000);
-    };
-
-    const handleLike = async (song: Song) => {
-        if (likedSongs.has(song.title)) return; // Already liked this session
-
-        setIsLiking(song.title);
-        await logRequest(song.title, song.artist, ''); // Log anonymously with artist
-        setLikedSongs(prev => new Set(prev).add(song.title));
-        await refreshRankings();
-        setIsLiking(null);
-        showLikeMessage(`「${song.title}」にいいねしました！`);
-    };
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -104,29 +84,26 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} handleLike={handleLike} isLiking={isLiking} likedSongs={likedSongs} likeMessage={likeMessage} />;
+                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
             case 'list':
-                return <ListView songs={songs} handleLike={handleLike} isLiking={isLiking} likedSongs={likedSongs} likeMessage={likeMessage} />;
+                return <ListView songs={songs} />;
             case 'ranking':
                 return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} requestRanking={requestRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
-                return <RequestRankingView newlyRequestedSongs={newlyRequestedSongs} logRequest={logRequest} refreshRankings={refreshRankings} />;
+                return <RequestRankingView logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'news':
                 return <BlogView posts={posts} />;
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} handleLike={handleLike} isLiking={isLiking} likedSongs={likedSongs} likeMessage={likeMessage} />;
+                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
         }
     };
 
-    // FIX: Use a specific type for NavButtonKey to avoid potential indexing errors with symbols.
     const navButtons = useMemo(() => {
         if (!uiConfig.navButtons) return [];
         
-        type NavButtonKey = keyof typeof uiConfig.navButtons;
-
-        const buttonConfigs: Record<NavButtonKey, any> = {
+        const buttonConfigs: { [key: string]: any } = {
             search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
             printGakufu: { 
                 href: 'https://www.print-gakufu.com/search/result/score___subscription/', 
@@ -141,7 +118,7 @@ const App: React.FC = () => {
             setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
         };
 
-        const buttonOrder: NavButtonKey[] = [
+        const buttonOrder: (keyof typeof uiConfig.navButtons)[] = [
             'search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'
         ];
 

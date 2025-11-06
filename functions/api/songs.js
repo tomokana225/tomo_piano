@@ -3,10 +3,8 @@
 // This function has been extended to act as a router for multiple actions.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { 
-    getFirestore, doc, getDoc, setDoc, collection, getDocs, 
-    query, where, orderBy, deleteDoc, addDoc, serverTimestamp, updateDoc 
-} from 'firebase/firestore/lite';
+// Use the "lite" version of Firestore for serverless environments to avoid timeouts
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from 'firebase/firestore/lite';
 
 // Default song list to be used if Firestore is empty
 const PLAYABLE_SONGS_EXAMPLE_STR = "夜に駆ける,YOASOBI,J-Pop,new\nPretender,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\nLemon,米津玄師,J-Pop\n紅蓮華,LiSA,Anime\nドライフラワー,優里,J-Pop\n白日,King Gnu (キングヌー),J-Rock\nマリーゴールド,あいみょん,J-Pop\n猫,DISH//,J-Rock\nうっせぇわ,Ado,J-Pop\n廻廻奇譚,Eve,Anime\n炎,LiSA,Anime\nCry Baby,Official髭男dism (オフィシャルヒゲダンディズム),Anime\nアイドル,YOASOBI,Anime,new\nKICK BACK,米津玄師,Anime\n新時代,Ado,Anime\n旅路,藤井風,J-Pop\n何なんw,藤井風,J-Pop\ngrace,藤井風,J-Pop\nきらり,藤井風,J-Pop\nSubtitle,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\n怪獣の花唄,Vaundy,J-Rock\nミックスナッツ,Official髭男dism (オフィシャルヒゲダンディズム),Anime\n水平線,back number,J-Pop\nシンデレラボーイ,Saucy Dog,J-Rock\nなんでもないや,RADWIMPS,Anime\nひまわりの約束,秦基博,J-Pop\nHANABI,Mr.Children,J-Pop\n天体観測,BUMP OF CHICKEN,J-Rock\n残酷な天使のテーゼ,高橋洋子,Anime\n千本桜,黒うさP,Vocaloid,,練習中";
@@ -40,26 +38,16 @@ const DEFAULT_UI_CONFIG = {
     }
 };
 
-const ALLOWED_ORIGIN = 'https://tomo-piano.pages.dev';
-
-const createCorsHeaders = (request) => {
-    const origin = request.headers.get('Origin');
-    const isAllowed = origin === ALLOWED_ORIGIN;
-    return {
-        'Access-Control-Allow-Origin': isAllowed ? origin : '',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Vary': 'Origin'
-    };
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const jsonResponse = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...headers }
-});
-
 async function getFirebaseApp(env) {
-    if (getApps().length) return getApps()[0];
+    if (getApps().length) {
+        return getApps()[0];
+    }
     const firebaseConfig = {
         apiKey: env.FIREBASE_API_KEY,
         authDomain: env.FIREBASE_AUTH_DOMAIN,
@@ -75,137 +63,157 @@ async function getFirebaseApp(env) {
     return initializeApp(firebaseConfig);
 }
 
-// GET handlers
-const handleGetSongList = async (db, corsHeaders) => {
-    const docRef = doc(db, 'songlist/default');
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-        await setDoc(docRef, { list: PLAYABLE_SONGS_EXAMPLE_STR });
-        return jsonResponse({ list: PLAYABLE_SONGS_EXAMPLE_STR }, 200, corsHeaders);
-    }
-    return jsonResponse(docSnap.data(), 200, corsHeaders);
-};
-
-const handleGetFirebaseConfig = (env, corsHeaders) => {
-    const config = {
-        apiKey: env.FIREBASE_API_KEY,
-        authDomain: env.FIREBASE_AUTH_DOMAIN,
-        projectId: env.FIREBASE_PROJECT_ID,
-    };
-    return jsonResponse(config, 200, corsHeaders);
-};
-
-const handleGetBlogPosts = async (db, isAdmin, corsHeaders) => {
-    const postsRef = collection(db, 'blogPosts');
-    const constraints = [orderBy('createdAt', 'desc')];
-    if (!isAdmin) {
-        constraints.unshift(where('isPublished', '==', true));
-    }
-    const q = query(postsRef, ...constraints);
-    const querySnapshot = await getDocs(q);
-    const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return jsonResponse(posts, 200, corsHeaders);
-};
-
-const handleGetUiConfig = async (db, corsHeaders) => {
-    const docRef = doc(db, 'uiconfig/default');
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-        await setDoc(docRef, DEFAULT_UI_CONFIG);
-        return jsonResponse(DEFAULT_UI_CONFIG, 200, corsHeaders);
-    }
-    return jsonResponse({ ...DEFAULT_UI_CONFIG, ...docSnap.data() }, 200, corsHeaders);
-};
-
-const handleGetSetlistSuggestions = async (db, corsHeaders) => {
-    const suggestionsRef = collection(db, 'setlistSuggestions');
-    const q = query(suggestionsRef, orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
-    const suggestions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return jsonResponse(suggestions, 200, corsHeaders);
-};
-
-
-// POST handlers
-const handleSaveSongList = async (db, request, corsHeaders) => {
-    const { list } = await request.json();
-    await setDoc(doc(db, 'songlist/default'), { list });
-    return jsonResponse({ success: true }, 200, corsHeaders);
-};
-
-const handleSaveUiConfig = async (db, request, corsHeaders) => {
-    const config = await request.json();
-    await setDoc(doc(db, 'uiconfig/default'), config, { merge: true });
-    return jsonResponse({ success: true }, 200, corsHeaders);
-};
-
-const handleSaveBlogPost = async (db, request, corsHeaders) => {
-    const post = await request.json();
-    if (post.id) {
-        const docRef = doc(db, 'blogPosts', post.id);
-        const { id, ...dataToUpdate } = post;
-        await updateDoc(docRef, dataToUpdate);
-    } else {
-        await addDoc(collection(db, 'blogPosts'), { ...post, createdAt: post.createdAt || Date.now() });
-    }
-    return jsonResponse({ success: true }, 200, corsHeaders);
-};
-
-const handleDeleteBlogPost = async (db, request, corsHeaders) => {
-    const { id } = await request.json();
-    await deleteDoc(doc(db, 'blogPosts', id));
-    return jsonResponse({ success: true }, 200, corsHeaders);
-};
-
-const handleSaveSetlistSuggestion = async (db, request, corsHeaders) => {
-    const { songs, requester } = await request.json();
-    await addDoc(collection(db, 'setlistSuggestions'), { songs, requester, createdAt: Date.now() });
-    return jsonResponse({ success: true }, 200, corsHeaders);
-};
-
+const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+});
 
 export async function onRequest(context) {
     const { request, env } = context;
-    const corsHeaders = createCorsHeaders(request);
 
     if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: corsHeaders });
+        return new Response(null, { headers: CORS_HEADERS });
     }
-    if (!corsHeaders['Access-Control-Allow-Origin']) {
-        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
+
+    let app;
+    try {
+        app = await getFirebaseApp(env);
+    } catch(e) {
+        console.warn("Firebase Init Failed:", e.message);
+        return jsonResponse({ error: "Server configuration error." }, 500);
     }
+
+    const db = getFirestore(app);
+    const url = new URL(request.url);
+    const action = url.searchParams.get('action');
 
     try {
-        const app = await getFirebaseApp(env);
-        const db = getFirestore(app);
-        const url = new URL(request.url);
-        const action = url.searchParams.get('action');
-
+        // --- GET Requests ---
         if (request.method === 'GET') {
             switch (action) {
-                case 'getFirebaseConfig': return handleGetFirebaseConfig(env, corsHeaders);
-                case 'getBlogPosts': return handleGetBlogPosts(db, false, corsHeaders);
-                case 'getAdminBlogPosts': return handleGetBlogPosts(db, true, corsHeaders);
-                case 'getUiConfig': return handleGetUiConfig(db, corsHeaders);
-                case 'getSetlistSuggestions': return handleGetSetlistSuggestions(db, corsHeaders);
-                default: return handleGetSongList(db, corsHeaders);
+                case 'getFirebaseConfig': {
+                    const clientConfig = {
+                        apiKey: env.FIREBASE_API_KEY,
+                        authDomain: env.FIREBASE_AUTH_DOMAIN,
+                        projectId: env.FIREBASE_PROJECT_ID,
+                        storageBucket: env.FIREBASE_STORAGE_BUCKET,
+                        messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID,
+                        appId: env.FIREBASE_APP_ID,
+                        measurementId: env.FIREBASE_MEASUREMENT_ID,
+                    };
+                    return jsonResponse(clientConfig);
+                }
+                case 'getUiConfig': {
+                    const docRef = doc(db, 'settings/ui');
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const storedConfig = docSnap.data();
+                        // Deep merge navButtons to ensure new buttons added in code are not missing from the config
+                        const mergedData = {
+                            ...DEFAULT_UI_CONFIG,
+                            ...storedConfig,
+                            navButtons: {
+                                ...DEFAULT_UI_CONFIG.navButtons,
+                                ...(storedConfig.navButtons || {})
+                            }
+                        };
+                        return jsonResponse(mergedData);
+                    }
+                    return jsonResponse(DEFAULT_UI_CONFIG);
+                }
+                case 'getBlogPosts': {
+                    const postsRef = collection(db, 'blogPosts');
+                    const q = query(postsRef, where('isPublished', '==', true), orderBy('createdAt', 'desc'));
+                    const querySnapshot = await getDocs(q);
+                    const posts = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    return jsonResponse(posts);
+                }
+                case 'getAdminBlogPosts': {
+                    const postsRef = collection(db, 'blogPosts');
+                    const q = query(postsRef, orderBy('createdAt', 'desc'));
+                    const querySnapshot = await getDocs(q);
+                    const posts = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    return jsonResponse(posts);
+                }
+                 case 'getSetlistSuggestions': {
+                    const suggestionsRef = collection(db, 'setlistSuggestions');
+                    const q = query(suggestionsRef, orderBy('createdAt', 'desc'));
+                    const querySnapshot = await getDocs(q);
+                    const suggestions = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    return jsonResponse(suggestions);
+                }
+                default: { // Original song list GET logic
+                    const songDocRef = doc(db, 'songlist/default');
+                    const docSnap = await getDoc(songDocRef);
+                    if (docSnap.exists()) {
+                        return jsonResponse(docSnap.data());
+                    } else {
+                        await setDoc(songDocRef, { list: PLAYABLE_SONGS_EXAMPLE_STR });
+                        return jsonResponse({ list: PLAYABLE_SONGS_EXAMPLE_STR });
+                    }
+                }
             }
         }
 
+        // --- POST Requests ---
         if (request.method === 'POST') {
+            const body = await request.json();
             switch (action) {
-                case 'saveUiConfig': return handleSaveUiConfig(db, request, corsHeaders);
-                case 'saveBlogPost': return handleSaveBlogPost(db, request, corsHeaders);
-                case 'deleteBlogPost': return handleDeleteBlogPost(db, request, corsHeaders);
-                case 'saveSetlistSuggestion': return handleSaveSetlistSuggestion(db, request, corsHeaders);
-                default: return handleSaveSongList(db, request, corsHeaders);
+                case 'saveUiConfig': {
+                    const docRef = doc(db, 'settings/ui');
+                    await setDoc(docRef, body, { merge: true });
+                    return jsonResponse({ success: true });
+                }
+                case 'saveBlogPost': {
+                    const { id, ...postData } = body;
+                    const docRef = id ? doc(db, 'blogPosts', id) : doc(collection(db, 'blogPosts'));
+                    
+                    const dataToSave = {
+                        ...postData,
+                        createdAt: id ? postData.createdAt : Date.now(),
+                        updatedAt: Date.now(),
+                    };
+                    
+                    await setDoc(docRef, dataToSave, { merge: true });
+                    return jsonResponse({ success: true, id: docRef.id });
+                }
+                case 'deleteBlogPost': {
+                    const { id } = body;
+                    if (!id) return jsonResponse({ error: "ID is required" }, 400);
+
+                    const docRef = doc(db, 'blogPosts', id);
+                    await deleteDoc(docRef);
+                    return jsonResponse({ success: true });
+                }
+                case 'saveSetlistSuggestion': {
+                    const { songs, requester } = body;
+                    if (!Array.isArray(songs) || songs.length === 0 || songs.length > 5 || typeof requester !== 'string' || !requester.trim()) {
+                        return jsonResponse({ error: "Invalid data provided." }, 400);
+                    }
+                    const suggestionRef = doc(collection(db, 'setlistSuggestions'));
+                    await setDoc(suggestionRef, {
+                        requester: requester.trim(),
+                        songs: songs.map(s => String(s)), // Sanitize
+                        createdAt: Date.now(),
+                    });
+                    return jsonResponse({ success: true, id: suggestionRef.id });
+                }
+                default: { // Original song list POST logic
+                    const { list } = body;
+                    if (typeof list !== 'string') {
+                        return jsonResponse({ error: "Invalid data format." }, 400);
+                    }
+                    const songDocRef = doc(db, 'songlist/default');
+                    await setDoc(songDocRef, { list });
+                    return jsonResponse({ success: true });
+                }
             }
         }
-
-        return jsonResponse({ error: 'Method Not Allowed' }, 405, corsHeaders);
+        
+        return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
 
     } catch (error) {
-        console.error('API Error:', error);
-        return jsonResponse({ error: 'An internal server error occurred.', details: error.message }, 500, corsHeaders);
+        console.warn('Firebase operation failed:', error);
+        return jsonResponse({ error: 'Failed to communicate with the database.' }, 500);
     }
 }

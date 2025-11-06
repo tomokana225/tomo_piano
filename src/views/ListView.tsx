@@ -5,10 +5,6 @@ import { SongCard } from '../components/ui/SongCard';
 
 interface ListViewProps {
     songs: Song[];
-    handleLike: (song: Song) => Promise<void>;
-    isLiking: string | null;
-    likedSongs: Set<string>;
-    likeMessage: string;
 }
 
 type ViewState =
@@ -18,7 +14,7 @@ type ViewState =
     { mode: 'by_artist', artist: string } |
     { mode: 'by_genre', genre: string };
 
-export const ListView: React.FC<ListViewProps> = ({ songs, handleLike, isLiking, likedSongs, likeMessage }) => {
+export const ListView: React.FC<ListViewProps> = ({ songs }) => {
     const [viewState, setViewState] = useState<ViewState>({ mode: 'all' });
 
     // FIX: Explicitly type sort callback parameters 'a' and 'b' as strings to prevent them from being inferred as 'unknown'.
@@ -81,21 +77,21 @@ export const ListView: React.FC<ListViewProps> = ({ songs, handleLike, isLiking,
                 const songsByArtist = songs.filter(s => s.artist === viewState.artist).sort((a, b) => a.title.localeCompare(b.title, 'ja'));
                 return (
                     <div className="space-y-3">
-                         {songsByArtist.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
+                         {songsByArtist.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
                     </div>
                 );
              case 'by_genre':
                 const songsByGenre = songs.filter(s => s.genre === viewState.genre).sort((a, b) => a.title.localeCompare(b.title, 'ja'));
                 return (
                     <div className="space-y-3">
-                         {songsByGenre.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
+                         {songsByGenre.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
                     </div>
                 );
             case 'all':
             default:
                 return (
                      <div className="space-y-3">
-                        {sortedSongs.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
+                        {sortedSongs.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
                     </div>
                 );
         }
@@ -126,8 +122,6 @@ export const ListView: React.FC<ListViewProps> = ({ songs, handleLike, isLiking,
                 </div>
                  <p className="text-center text-gray-500 dark:text-gray-400 mt-4">{countLabel}</p>
              </div>
-             
-            {likeMessage && <p className="text-center text-green-500 dark:text-green-400 h-6 mb-4 flex items-center justify-center animate-fade-in">{likeMessage}</p>}
              
              {(viewState.mode === 'by_artist' || viewState.mode === 'by_genre') && (
                 <div className="mb-4">

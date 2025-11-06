@@ -13,18 +13,17 @@ interface SearchViewProps {
     searchTerm: string;
     setSearchTerm: (term: string) => void;
     setIsAdminModalOpen: (isOpen: boolean) => void;
-    handleLike: (song: Song) => Promise<void>;
-    isLiking: string | null;
-    likedSongs: Set<string>;
-    likeMessage: string;
 }
 
 const MAX_RELATED_SONGS = 5;
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logRequest, refreshRankings, searchTerm, setSearchTerm, setIsAdminModalOpen, handleLike, isLiking, likedSongs, likeMessage }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logRequest, refreshRankings, searchTerm, setSearchTerm, setIsAdminModalOpen }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
+    const [isLiking, setIsLiking] = useState<string | null>(null);
+    const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
+    const [likeMessage, setLikeMessage] = useState('');
     const searchContainerRef = useRef<HTMLDivElement>(null);
     const initialSearchTermRef = useRef(searchTerm);
 
@@ -133,6 +132,22 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
     
+    const showLikeMessage = (msg: string) => {
+        setLikeMessage(msg);
+        setTimeout(() => setLikeMessage(''), 3000);
+    };
+
+    const handleLike = async (song: Song) => {
+        if (likedSongs.has(song.title)) return; // Already liked this session
+
+        setIsLiking(song.title);
+        await logRequest(song.title, song.artist, ''); // Log anonymously with artist
+        setLikedSongs(prev => new Set(prev).add(song.title));
+        await refreshRankings();
+        setIsLiking(null);
+        showLikeMessage(`「${song.title}」にいいねしました！`);
+    };
+
     const handleRequestSuccess = () => {
         refreshRankings();
     };

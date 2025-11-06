@@ -43,14 +43,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!selectedPost) return;
         const { name, value } = e.target;
-    
-        if (name === 'createdAt' && e.target instanceof HTMLInputElement && e.target.type === 'date') {
-            // Use today's date at midnight if the input is cleared
-            const timestamp = value ? new Date(`${value}T00:00:00`).getTime() : new Date().setHours(0, 0, 0, 0);
-            setSelectedPost(prev => ({ ...prev, createdAt: timestamp }));
-        } else {
-            setSelectedPost(prev => ({ ...prev, [name]: value }));
-        }
+        setSelectedPost(prev => ({ ...prev, [name]: value }));
     };
 
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,15 +131,6 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">タイトル</label>
                                 <input type="text" name="title" value={selectedPost.title || ''} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">投稿日</label>
-                                <input
-                                    type="date"
-                                    name="createdAt"
-                                    value={selectedPost.createdAt ? new Date(selectedPost.createdAt).toLocaleDateString('sv-SE') : ''}
-                                    onChange={handleInputChange}
-                                    className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">内容 (Markdown対応)</label>

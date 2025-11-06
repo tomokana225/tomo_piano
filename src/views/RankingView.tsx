@@ -160,6 +160,18 @@ export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, ar
         );
     };
 
+    const SearchSubTabButton: React.FC<{ tab: 'song' | 'artist', label: string }> = ({ tab, label }) => {
+        const isActive = searchSubTab === tab;
+        return (
+            <button
+                onClick={() => setSearchSubTab(tab)}
+                className={`flex-1 py-2 text-sm font-semibold transition-colors focus:outline-none ${isActive ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-600/50'}`}
+            >
+                {label}
+            </button>
+        );
+    };
+
     const PeriodButton: React.FC<{ p: RankingPeriod, label: string }> = ({ p, label }) => {
         const isActive = period === p;
         return (
@@ -192,24 +204,14 @@ export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, ar
 
             <div className="bg-white dark:bg-gray-800 rounded-b-lg shadow-lg">
                 {mainTab === 'search' ? (
-                    <div className="p-4">
-                        <div className="flex justify-center mb-4">
-                            <div className="inline-flex items-center bg-gray-200 dark:bg-gray-700 rounded-full p-1">
-                                <button
-                                    onClick={() => setSearchSubTab('song')}
-                                    className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors ${searchSubTab === 'song' ? 'bg-white dark:bg-gray-900 shadow text-gray-800 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
-                                >
-                                    曲
-                                </button>
-                                <button
-                                    onClick={() => setSearchSubTab('artist')}
-                                    className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors ${searchSubTab === 'artist' ? 'bg-white dark:bg-gray-900 shadow text-gray-800 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
-                                >
-                                    アーティスト
-                                </button>
-                            </div>
+                    <div>
+                        <div className="flex bg-gray-100 dark:bg-gray-900/50 rounded-t-md overflow-hidden border-b border-gray-200 dark:border-gray-700">
+                             <SearchSubTabButton tab="song" label="曲" />
+                             <SearchSubTabButton tab="artist" label="アーティスト" />
                         </div>
-                        {searchSubTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} songs={songs} />}
+                        <div className="p-4">
+                            {searchSubTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} songs={songs} />}
+                        </div>
                     </div>
                 ) : (
                     <div className="p-4">

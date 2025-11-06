@@ -4,24 +4,11 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore/lite';
 
-const ALLOWED_ORIGIN = 'https://tomo-piano.pages.dev';
-
-const createCorsHeaders = (request) => {
-    const origin = request.headers.get('Origin');
-    const isAllowed = origin === ALLOWED_ORIGIN;
-    return {
-        'Access-Control-Allow-Origin': isAllowed ? origin : '',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Vary': 'Origin'
-    };
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
 };
-
-const jsonResponse = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...headers }
-});
-
 
 async function getFirebaseApp(env) {
     if (getApps().length) {
@@ -56,23 +43,31 @@ const processRankingData = (requestData) => {
 
 export async function onRequest(context) {
     const { request, env } = context;
-    const corsHeaders = createCorsHeaders(request);
 
     if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: corsHeaders });
-    }
-    if (request.method !== 'GET') {
-        return jsonResponse({ error: 'Method Not Allowed' }, 405, corsHeaders);
-    }
-    if (!corsHeaders['Access-Control-Allow-Origin']) {
-        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
+        return new Response(null, { headers: CORS_HEADERS });
     }
 
+    if (request.method !== 'GET') {
+        return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
+    }
+
+    let app;
     try {
-        const app = await getFirebaseApp(env);
-        const db = getFirestore(app);
-        const url = new URL(request.url);
-        const period = url.searchParams.get('period') || 'all';
+        app = await getFirebaseApp(env);
+    } catch (e) {
+        console.warn("Firebase Init Failed:", e.message);
+        return new Response(JSON.stringify({ error: "Server configuration error." }), { 
+            status: 500, 
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
+    }
+
+    const db = getFirestore(app);
+    const url = new URL(request.url);
+    const period = url.searchParams.get('period') || 'all';
+
+    try {
         let rankings = [];
 
         if (period === 'all') {
@@ -107,13 +102,19 @@ export async function onRequest(context) {
             }
         }
         
-        return jsonResponse(rankings, 200, {
-            ...corsHeaders,
-            'Cache-Control': 'public, max-age=300'
+        return new Response(JSON.stringify(rankings), { 
+            headers: { 
+                'Content-Type': 'application/json',
+                'Cache-Control': 'public, max-age=300',
+                ...CORS_HEADERS
+            } 
         });
 
     } catch (error) {
         console.warn('Get request ranking failed:', error);
-        return jsonResponse({ error: 'Failed to fetch request rankings.' }, 500, corsHeaders);
+        return new Response(JSON.stringify({ error: 'Failed to fetch request rankings.' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+        });
     }
 }
