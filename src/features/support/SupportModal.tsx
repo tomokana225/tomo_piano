@@ -32,7 +32,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, uiC
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
                 <div className="flex justify-center items-center gap-3 mb-4">
                     <HeartIcon className="w-8 h-8 text-pink-500" />
-                    <h2 className="text-2xl font-bold">配信者をサポートする</h2>
+                    <h2 className="text-2xl font-bold dark:text-white">配信者をサポートする</h2>
                 </div>
                 
                 {hasLinks ? (

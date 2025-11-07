@@ -1,3 +1,4 @@
+
 // --- TYPE DEFINITIONS ---
 export interface Song {
   title: string;
@@ -79,7 +80,6 @@ export interface UiConfig {
         printGakufu: NavButtonConfig;
         list: NavButtonConfig;
         ranking: NavButtonConfig;
-        likeRanking: NavButtonConfig;
         requests: NavButtonConfig;
         news: NavButtonConfig;
         suggest: NavButtonConfig;

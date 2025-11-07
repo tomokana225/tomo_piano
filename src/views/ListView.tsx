@@ -87,7 +87,7 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
                 return (
                     <div className="space-y-2">
                         {artists.map(artist => (
-                             <div key={artist} onClick={() => setViewState({ mode: 'by_artist', artist })} className="bg-white dark:bg-gray-800 p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                             <div key={artist} onClick={() => setViewState({ mode: 'by_artist', artist })} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm">
                                 <span className="font-semibold">{artist}</span>
                                 <ChevronRightIcon className="w-5 h-5 text-gray-400" />
                             </div>
@@ -98,7 +98,7 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
                 return (
                     <div className="space-y-2">
                         {genres.map(genre => (
-                             <div key={genre} onClick={() => setViewState({ mode: 'by_genre', genre })} className="bg-white dark:bg-gray-800 p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                             <div key={genre} onClick={() => setViewState({ mode: 'by_genre', genre })} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm">
                                 <span className="font-semibold">{genre}</span>
                                 <ChevronRightIcon className="w-5 h-5 text-gray-400" />
                             </div>

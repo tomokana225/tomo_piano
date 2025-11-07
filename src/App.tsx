@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -115,7 +116,7 @@ const App: React.FC = () => {
     const navButtons = useMemo(() => {
         if (!uiConfig.navButtons) return [];
         
-        const buttonConfigs: { [key: string]: any } = {
+        const buttonConfigs = {
             search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
             printGakufu: { 
                 href: 'https://www.print-gakufu.com/search/result/score___subscription/', 
@@ -130,7 +131,8 @@ const App: React.FC = () => {
             setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
         };
 
-        const buttonOrder: (keyof typeof uiConfig.navButtons)[] = [
+        // FIX: Changed type to `keyof typeof buttonConfigs` to ensure type-safe indexing.
+        const buttonOrder: (keyof typeof buttonConfigs)[] = [
             'search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'
         ];
 
@@ -284,6 +286,7 @@ const App: React.FC = () => {
                 posts={adminPosts}
                 uiConfig={uiConfig}
                 setlistSuggestions={setlistSuggestions}
+                recentRequests={recentRequests}
                 onSaveSongs={onSaveSongs}
                 onSavePost={onSavePost}
                 onDeletePost={onDeletePost}

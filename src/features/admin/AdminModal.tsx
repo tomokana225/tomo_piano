@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
-import { Song, BlogPost, UiConfig, SetlistSuggestion } from '../../types';
+import { Song, BlogPost, UiConfig, SetlistSuggestion, RequestRankingItem } from '../../types';
 import { XIcon } from '../../components/ui/Icons';
 import { SongListTab } from './SongListTab';
 import { BlogTab } from './BlogTab';
 import { SettingsTab } from './SettingsTab';
 import { SetlistSuggestionsTab } from './SetlistSuggestionsTab';
+import { RequestListTab } from './RequestListTab';
 
 interface AdminModalProps {
     isOpen: boolean;
@@ -13,13 +15,14 @@ interface AdminModalProps {
     posts: BlogPost[];
     uiConfig: UiConfig;
     setlistSuggestions: SetlistSuggestion[];
+    recentRequests: RequestRankingItem[];
     onSaveSongs: (newSongList: string) => Promise<boolean>;
     onSavePost: (post: Partial<BlogPost>) => Promise<boolean>;
     onDeletePost: (id: string, imageUrl?: string) => Promise<boolean>;
     onSaveUiConfig: (config: UiConfig) => Promise<boolean>;
 }
 
-type AdminTab = 'songs' | 'blog' | 'settings' | 'setlists';
+type AdminTab = 'songs' | 'blog' | 'settings' | 'setlists' | 'requests';
 
 export const AdminModal: React.FC<AdminModalProps> = (props) => {
     const { isOpen, onClose } = props;
@@ -48,6 +51,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                         <TabButton tab="songs" label="曲リスト管理" />
                         <TabButton tab="blog" label="お知らせ管理" />
                         <TabButton tab="setlists" label="セトリ提案" />
+                        <TabButton tab="requests" label="リクエスト一覧" />
                         <TabButton tab="settings" label="アプリ設定" />
                     </nav>
                 </div>
@@ -55,6 +59,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                     {activeTab === 'songs' && <SongListTab {...props} />}
                     {activeTab === 'blog' && <BlogTab {...props} />}
                     {activeTab === 'setlists' && <SetlistSuggestionsTab suggestions={props.setlistSuggestions} />}
+                    {activeTab === 'requests' && <RequestListTab requests={props.recentRequests} />}
                     {activeTab === 'settings' && <SettingsTab {...props} />}
                 </main>
             </div>

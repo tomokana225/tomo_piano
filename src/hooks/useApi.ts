@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig, SetlistSuggestion, RankingPeriod } from '../types';
 import { parseSongs } from '../utils/parser';
@@ -25,7 +26,6 @@ const DEFAULT_UI_CONFIG: UiConfig = {
         printGakufu: { label: 'ぷりんと楽譜', enabled: true },
         list: { label: 'List', enabled: true },
         ranking: { label: 'Ranking', enabled: true },
-        likeRanking: { label: 'いいね', enabled: true },
         requests: { label: 'Requests', enabled: true },
         news: { label: 'お知らせ', enabled: true },
         suggest: { label: 'Suggest', enabled: true },

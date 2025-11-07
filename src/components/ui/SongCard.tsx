@@ -22,20 +22,20 @@ export const SongCard: React.FC<SongCardProps> = ({ song, onLike, isLiking, isLi
     const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${song.artist} ${song.title} 歌詞`)}`;
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex justify-between items-center">
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-md flex justify-between items-center">
             <div className="min-w-0 flex-grow">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate">{song.title}</h3>
+                <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white truncate">{song.title}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{song.artist}</p>
                  <div className="flex items-center gap-2 mt-2">
                     {song.isNew && <span className="text-xs font-semibold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full">NEW</span>}
                     {song.status === 'practicing' && <span className="text-xs font-semibold bg-blue-500 text-white px-2 py-1 rounded-full">練習中</span>}
                 </div>
             </div>
-            <div className="flex items-center gap-4 flex-shrink-0 ml-4">
-                <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
-                <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 ml-2 sm:ml-4">
+                <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 hover:text-red-500" />} />
+                <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5" />} />
                  {onLike && (
-                    <button onClick={() => onLike(song)} disabled={isLiking || isLiked} className="p-2 rounded-full hover:bg-pink-500/10 dark:hover:bg-pink-500/20 disabled:cursor-not-allowed" title={isLiked ? "いいね済み" : "いいね！"}>
+                    <button onClick={() => onLike(song)} disabled={isLiking || isLiked} className="p-1 sm:p-2 rounded-full hover:bg-pink-500/10 dark:hover:bg-pink-500/20 disabled:cursor-not-allowed" title={isLiked ? "いいね済み" : "いいね！"}>
                         {isLiking ? (
                             <LoadingSpinner className="w-5 h-5 text-pink-400" />
                         ) : isLiked ? (

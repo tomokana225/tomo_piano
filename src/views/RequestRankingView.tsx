@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 import { HeartIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -98,13 +100,12 @@ const RecentRequestsList: React.FC<{ requests: RequestRankingItem[] }> = ({ requ
             {requests && requests.length > 0 ? (
                 <div className="space-y-3">
                     {requests.map((req) => (
-                        <div key={`${req.id}-${req.lastRequestedAt}`} className="bg-white dark:bg-gray-800/50 p-3 rounded-lg flex justify-between items-center text-sm">
-                            <div>
-                                <p className="font-semibold text-gray-800 dark:text-gray-200">{req.id}</p>
-                                {req.artist && <p className="text-xs text-gray-500 dark:text-gray-400">{req.artist}</p>}
+                        <div key={`${req.id}-${req.lastRequestedAt}`} className="bg-white dark:bg-gray-800/50 p-2 sm:p-3 rounded-lg flex justify-between items-center text-sm">
+                            <div className="min-w-0">
+                                <p className="font-semibold text-gray-800 dark:text-gray-200 truncate">{req.id}</p>
+                                {req.artist && <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{req.artist}</p>}
                             </div>
                             <div className="text-right text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
-                                <p>{req.lastRequester}</p>
                                 <p className="text-xs">{formatDate(req.lastRequestedAt)}</p>
                             </div>
                         </div>
