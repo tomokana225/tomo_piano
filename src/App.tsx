@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -234,16 +235,6 @@ const App: React.FC = () => {
                     </nav>
                 </div>
             </div>
-
-            <button
-                onClick={() => setIsMenuOpen(true)}
-                className="fixed top-4 left-4 z-40 flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-white transition-transform transform hover:scale-105 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background-light dark:focus:ring-offset-background-dark"
-                style={{ backgroundColor: 'var(--primary-color)', '--tw-ring-color': 'var(--primary-color)' } as React.CSSProperties}
-                aria-label="メニューを開く"
-            >
-                <MenuIcon className="w-6 h-6" />
-                <span>メニュー</span>
-            </button>
             
             <div 
                 className={`min-h-screen w-full transition-colors duration-300 ${error ? 'pt-12' : ''}`}
@@ -259,21 +250,26 @@ const App: React.FC = () => {
                 <div className="relative z-10 min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 md:p-8">
                     
                     <div className="w-full max-w-5xl bg-card-background-light dark:bg-card-background-dark rounded-2xl shadow-2xl border border-border-light dark:border-border-dark flex flex-col">
-                        <header className="w-full flex justify-between items-center p-6 border-b border-border-light dark:border-border-dark">
-                            <div className="text-left">
-                                <h1 className="text-2xl md:text-3xl font-bold">{uiConfig.mainTitle}</h1>
-                                <p className="text-sm md:text-base mt-1 text-text-secondary-light dark:text-text-secondary-dark">{uiConfig.subtitle}</p>
+                        <header className="w-full flex justify-between items-center p-4 sm:p-6 border-b border-border-light dark:border-border-dark">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <button
+                                    onClick={() => setIsMenuOpen(true)}
+                                    className="p-2.5 rounded-full text-white transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-background-light dark:focus:ring-offset-card-background-dark"
+                                    style={{ backgroundColor: 'var(--primary-color)', '--tw-ring-color': 'var(--primary-color)' } as React.CSSProperties}
+                                    aria-label="メニューを開く"
+                                >
+                                    <MenuIcon className="w-6 h-6" />
+                                </button>
+                                <div className="text-left">
+                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{uiConfig.mainTitle}</h1>
+                                    <p className="text-xs sm:text-sm md:text-base mt-1 text-text-secondary-light dark:text-text-secondary-dark">{uiConfig.subtitle}</p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
+                            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                                <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-2 sm:px-3 py-1.5 rounded-full" title="現在の訪問者数">
                                     <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
                                     <span className="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">{activeUserCount}</span>
                                 </div>
-                                {uiConfig.xUrl && (
-                                    <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10">
-                                        {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5"/>}
-                                    </a>
-                                )}
                                 <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
                                     {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
                                 </button>
@@ -289,6 +285,12 @@ const App: React.FC = () => {
                                 <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 w-full sm:w-auto px-6 py-3 rounded-lg font-semibold text-white transition-transform transform hover:scale-105 shadow-lg" style={{backgroundColor: 'var(--primary-color)'}}>
                                     {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-6 h-6" /> : <TwitcasIcon className="w-6 h-6"/>}
                                     {uiConfig.specialButtons.twitcas.label}
+                                </a>
+                            )}
+                            {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
+                                <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 w-full sm:w-auto px-6 py-3 bg-gray-800 hover:bg-black rounded-lg font-semibold text-white transition-transform transform hover:scale-105 shadow-lg">
+                                    {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5"/>}
+                                    {uiConfig.specialButtons.x.label}
                                 </a>
                             )}
                             {uiConfig.specialButtons?.support?.enabled && (

@@ -295,6 +295,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                         </div>
                     </div>
                 )}
+                {config.specialButtons?.x && (
+                    <div key="x" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
+                        <input type="checkbox" checked={config.specialButtons.x.enabled} onChange={(e) => handleSpecialNavChange('x', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
+                        <div className="flex-grow">
+                             <input type="text" value={config.specialButtons.x.label} onChange={(e) => handleSpecialNavChange('x', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                        </div>
+                    </div>
+                )}
                  {config.specialButtons?.support && (
                     <div key="support" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
                         <input type="checkbox" checked={config.specialButtons.support.enabled} onChange={(e) => handleSpecialNavChange('support', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />

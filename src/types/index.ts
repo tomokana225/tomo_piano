@@ -79,6 +79,7 @@ export interface UiConfig {
     specialButtons: {
         twitcas: NavButtonConfig;
         support: NavButtonConfig;
+        x: NavButtonConfig;
     };
     navButtons: {
         search: NavButtonConfig;

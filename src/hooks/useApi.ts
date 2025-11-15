@@ -1,6 +1,3 @@
-
-
-
 import { useState, useEffect, useCallback } from 'react';
 import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig, SetlistSuggestion, RankingPeriod } from '../types';
 import { parseSongs } from '../utils/parser';
@@ -27,8 +24,10 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     bodyFontFamily: "'Noto Sans JP', sans-serif",
     headingFontScale: 1.0,
     bodyFontScale: 1.0,
+    // FIX: Add the missing 'x' property to the `specialButtons` object to align with the `UiConfig` type.
     specialButtons: {
         twitcas: { label: 'ツイキャス配信はこちら', enabled: true },
+        x: { label: 'X (Twitter) はこちら', enabled: true },
         support: { label: '配信者支援', enabled: true },
     },
     navButtons: {
@@ -270,34 +269,46 @@ export const useApi = () => {
         return result.success;
     }, [postData]);
 
-    const onSaveUiConfig = useCallback(async (config: UiConfig) => {
-        const result = await postData('/api/songs?action=saveUiConfig', config);
+    const onSaveUiConfig = useCallback(async (newConfig: UiConfig) => {
+        const result = await postData('/api/songs?action=saveUiConfig', newConfig);
         if (result.success) {
-            setUiConfig(config);
+            setUiConfig(newConfig);
         }
         return result.success;
     }, [postData]);
-    
+
     const onSavePost = useCallback(async (post: Partial<BlogPost>) => {
         const result = await postData('/api/songs?action=saveBlogPost', post);
         if (result.success) {
-            fetchData();
+            try {
+                const [adminRes, publicRes] = await Promise.all([
+                    fetch('/api/songs?action=getAdminBlogPosts'),
+                    fetch('/api/songs?action=getBlogPosts')
+                ]);
+                const adminData = await adminRes.json();
+                const publicData = await publicRes.json();
+                setAdminPosts(adminData || []);
+                setPosts(publicData || []);
+            } catch (e) {
+                console.error("Failed to refresh posts", e);
+            }
         }
         return result.success;
-    }, [postData, fetchData]);
+    }, [postData]);
 
     const onDeletePost = useCallback(async (id: string) => {
         const result = await postData('/api/songs?action=deleteBlogPost', { id });
         if (result.success) {
-            fetchData();
+            setAdminPosts(prev => prev.filter(p => p.id !== id));
+            setPosts(prev => prev.filter(p => p.id !== id));
         }
         return result.success;
-    }, [postData, fetchData]);
-    
+    }, [postData]);
+
     const logSearch = useCallback((term: string) => {
         postData('/api/log-search', { term });
     }, [postData]);
-    
+
     const logRequest = useCallback(async (term: string, artist: string, requester: string) => {
         await postData('/api/log-request', { term, artist, requester });
     }, [postData]);
@@ -305,49 +316,39 @@ export const useApi = () => {
     const logLike = useCallback(async (term: string, artist: string) => {
         await postData('/api/log-like', { term, artist });
     }, [postData]);
-    
+
     const saveSetlistSuggestion = useCallback(async (songs: string[], requester: string) => {
         const result = await postData('/api/songs?action=saveSetlistSuggestion', { songs, requester });
-        if (result.success) {
-            fetchData();
-        }
         return result.success;
-    }, [postData, fetchData]);
-
+    }, [postData]);
+    
     const refreshRankings = useCallback(async () => {
-        await Promise.all([
-            fetchRankings(rankingPeriod),
-            fetchLikeRankings(rankingPeriod)
-        ]);
-        try {
-            const res = await fetch('/api/songs?action=getRecentRequests');
-            if (res.ok) {
-                const data = await res.json();
-                setRecentRequests(data || []);
-            }
-        } catch (err) {
-            console.error("Failed to refetch recent requests", err);
+         try {
+            await Promise.all([
+                fetchRankings(rankingPeriod),
+                fetchLikeRankings(rankingPeriod),
+                fetch('/api/songs?action=getRecentRequests').then(res => res.json()).then(data => setRecentRequests(data || []))
+            ]);
+        } catch (e) {
+            console.error("Failed to refresh all ranking data", e);
         }
     }, [rankingPeriod, fetchRankings, fetchLikeRankings]);
-
 
     return {
         rawSongList,
         songs,
         songRankingList,
         artistRankingList,
-        requestRankingList,
         songLikeRankingList,
-        recentRequests,
         posts,
         adminPosts,
         uiConfig,
         setlistSuggestions,
+        recentRequests,
         isLoading,
         error,
         activeUserCount,
-        rankingPeriod,
-        setRankingPeriod,
+        rankingPeriod, setRankingPeriod,
         onSaveSongs,
         onSaveUiConfig,
         onSavePost,
@@ -357,6 +358,5 @@ export const useApi = () => {
         logLike,
         saveSetlistSuggestion,
         refreshRankings,
-        refetchPosts: fetchData,
     };
 };
