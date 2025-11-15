@@ -48,7 +48,6 @@ export const useApi = () => {
     const [songs, setSongs] = useState<Song[]>([]);
     const [songRankingList, setSongRankingList] = useState<RankingItem[]>([]);
     const [artistRankingList, setArtistRankingList] = useState<ArtistRankingItem[]>([]);
-    const [requestRankingList, setRequestRankingList] = useState<RequestRankingItem[]>([]);
     const [songLikeRankingList, setSongLikeRankingList] = useState<RankingItem[]>([]);
     const [recentRequests, setRecentRequests] = useState<RequestRankingItem[]>([]);
     const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -63,19 +62,14 @@ export const useApi = () => {
 
     const fetchRankings = useCallback(async (period: RankingPeriod) => {
         try {
-            const [rankingRes, requestRankingRes] = await Promise.all([
-                fetch(`/api/get-ranking?period=${period}`),
-                fetch(`/api/get-request-ranking?period=${period}`),
-            ]);
-            if (!rankingRes.ok || !requestRankingRes.ok) {
+            const rankingRes = await fetch(`/api/get-ranking?period=${period}`);
+            if (!rankingRes.ok) {
                 console.error('Failed to fetch ranking data');
                 return;
             }
             const rankingData = await rankingRes.json();
-            const requestRankingData = await requestRankingRes.json();
             setSongRankingList(rankingData.songRanking || []);
             setArtistRankingList(rankingData.artistRanking || []);
-            setRequestRankingList(requestRankingData || []);
         } catch (err) {
             console.error("Failed to refresh rankings", err);
         }
@@ -245,94 +239,114 @@ export const useApi = () => {
 
     const postData = useCallback(async (url: string, body: object) => {
         try {
-            const response = await fetch(url, {
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
-            if (!response.ok) {
-                throw new Error(`Request failed: ${response.statusText}`);
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error(`POST to ${url} failed:`, errorData.error);
+                return false;
             }
-            return await response.json();
+            return true;
         } catch (err) {
-            console.error('POST request failed:', err);
-            return { success: false, error: err };
+            console.error(`Error during POST to ${url}:`, err);
+            return false;
         }
     }, []);
 
     const onSaveSongs = useCallback(async (newSongList: string) => {
-        const result = await postData('/api/songs', { list: newSongList });
-        if (result.success) {
+        const success = await postData('/api/songs', { list: newSongList });
+        if (success) {
             setRawSongList(newSongList);
             setSongs(parseSongs(newSongList));
         }
-        return result.success;
+        return success;
     }, [postData]);
 
-    const onSaveUiConfig = useCallback(async (newConfig: UiConfig) => {
-        const result = await postData('/api/songs?action=saveUiConfig', newConfig);
-        if (result.success) {
-            setUiConfig(newConfig);
+    const onSaveUiConfig = useCallback(async (config: UiConfig) => {
+        const success = await postData('/api/songs?action=saveUiConfig', config);
+        if (success) {
+            setUiConfig(config);
         }
-        return result.success;
+        return success;
     }, [postData]);
 
     const onSavePost = useCallback(async (post: Partial<BlogPost>) => {
-        const result = await postData('/api/songs?action=saveBlogPost', post);
-        if (result.success) {
-            try {
-                const [adminRes, publicRes] = await Promise.all([
-                    fetch('/api/songs?action=getAdminBlogPosts'),
-                    fetch('/api/songs?action=getBlogPosts')
-                ]);
-                const adminData = await adminRes.json();
-                const publicData = await publicRes.json();
-                setAdminPosts(adminData || []);
-                setPosts(publicData || []);
-            } catch (e) {
-                console.error("Failed to refresh posts", e);
-            }
+        const success = await postData('/api/songs?action=saveBlogPost', post);
+        if (success) {
+            // Refetch admin posts to get the latest list with new/updated post
+            fetch('/api/songs?action=getAdminBlogPosts')
+                .then(res => res.json())
+                .then(data => setAdminPosts(data || []));
+            // Also refetch public posts
+            fetch('/api/songs?action=getBlogPosts')
+                .then(res => res.json())
+                .then(data => setPosts(data || []));
         }
-        return result.success;
+        return success;
     }, [postData]);
-
+    
     const onDeletePost = useCallback(async (id: string) => {
-        const result = await postData('/api/songs?action=deleteBlogPost', { id });
-        if (result.success) {
-            setAdminPosts(prev => prev.filter(p => p.id !== id));
-            setPosts(prev => prev.filter(p => p.id !== id));
+        const success = await postData('/api/songs?action=deleteBlogPost', { id });
+        if (success) {
+            // Refetch admin and public posts after deletion
+            fetch('/api/songs?action=getAdminBlogPosts')
+                .then(res => res.json())
+                .then(data => setAdminPosts(data || []));
+            fetch('/api/songs?action=getBlogPosts')
+                .then(res => res.json())
+                .then(data => setPosts(data || []));
         }
-        return result.success;
-    }, [postData]);
-
-    const logSearch = useCallback((term: string) => {
-        postData('/api/log-search', { term });
-    }, [postData]);
-
-    const logRequest = useCallback(async (term: string, artist: string, requester: string) => {
-        await postData('/api/log-request', { term, artist, requester });
-    }, [postData]);
-
-    const logLike = useCallback(async (term: string, artist: string) => {
-        await postData('/api/log-like', { term, artist });
+        return success;
     }, [postData]);
 
     const saveSetlistSuggestion = useCallback(async (songs: string[], requester: string) => {
-        const result = await postData('/api/songs?action=saveSetlistSuggestion', { songs, requester });
-        return result.success;
+        return await postData('/api/songs?action=saveSetlistSuggestion', { songs, requester });
     }, [postData]);
+
+    // Use a fire-and-forget approach for logging
+    const logSearch = useCallback((term: string) => {
+        fetch('/api/log-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ term }),
+            keepalive: true // Important for requests that might not block UI
+        }).catch(console.error);
+    }, []);
+
+    const logRequest = useCallback(async (term: string, artist: string, requester: string) => {
+        await fetch('/api/log-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ term, artist, requester }),
+        });
+    }, []);
     
+    const logLike = useCallback(async (term: string, artist: string) => {
+        await fetch('/api/log-like', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ term, artist }),
+        });
+    }, []);
+
     const refreshRankings = useCallback(async () => {
-         try {
-            await Promise.all([
-                fetchRankings(rankingPeriod),
-                fetchLikeRankings(rankingPeriod),
-                fetch('/api/songs?action=getRecentRequests').then(res => res.json()).then(data => setRecentRequests(data || []))
-            ]);
-        } catch (e) {
-            console.error("Failed to refresh all ranking data", e);
-        }
+        // This function will re-fetch all ranking data
+        await Promise.all([
+            fetchRankings(rankingPeriod),
+            fetchLikeRankings(rankingPeriod)
+        ]);
+        
+        // Also refresh recent requests as they might have changed
+        fetch('/api/songs?action=getRecentRequests')
+            .then(res => res.ok ? res.json() : [])
+            .then(data => setRecentRequests(data))
+            .catch(console.error);
+
     }, [rankingPeriod, fetchRankings, fetchLikeRankings]);
+
 
     return {
         rawSongList,
@@ -348,7 +362,8 @@ export const useApi = () => {
         isLoading,
         error,
         activeUserCount,
-        rankingPeriod, setRankingPeriod,
+        rankingPeriod,
+        setRankingPeriod,
         onSaveSongs,
         onSaveUiConfig,
         onSavePost,
