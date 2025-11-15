@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Song, SearchResult } from '../types';
+import { Song, SearchResult, Mode, UiConfig } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon, MusicNoteIcon, NewspaperIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -14,11 +14,13 @@ interface SearchViewProps {
     searchTerm: string;
     setSearchTerm: (term: string) => void;
     onAdminLogin: () => void;
+    setMode: (mode: Mode) => void;
+    uiConfig: UiConfig;
 }
 
 const MAX_RELATED_SONGS = 5;
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, setMode, uiConfig }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
@@ -275,6 +277,29 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                     </ul>
                 )}
             </form>
+
+            {(uiConfig.navButtons.list.enabled || uiConfig.navButtons.news.enabled) && (
+                <div className="mt-4 flex justify-center items-center gap-3">
+                    {uiConfig.navButtons.list.enabled && (
+                        <button
+                            onClick={() => setMode('list')}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                        >
+                            <MusicNoteIcon className="w-5 h-5" />
+                            <span>{uiConfig.navButtons.list.label}</span>
+                        </button>
+                    )}
+                    {uiConfig.navButtons.news.enabled && (
+                        <button
+                            onClick={() => setMode('news')}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                        >
+                            <NewspaperIcon className="w-5 h-5" />
+                            <span>{uiConfig.navButtons.news.label}</span>
+                        </button>
+                    )}
+                </div>
+            )}
 
             <div className="mt-6">
                 {renderResult()}

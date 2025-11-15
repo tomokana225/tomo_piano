@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -108,7 +109,7 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} setMode={setMode} uiConfig={uiConfig} />;
             case 'list':
                 return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
             case 'ranking':
@@ -120,7 +121,7 @@ const App: React.FC = () => {
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} setMode={setMode} uiConfig={uiConfig} />;
         }
     };
 
@@ -254,15 +255,17 @@ const App: React.FC = () => {
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <button
                                     onClick={() => setIsMenuOpen(true)}
-                                    className="p-2.5 rounded-full text-white transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-background-light dark:focus:ring-offset-card-background-dark"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full text-white font-semibold transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-background-light dark:focus:ring-offset-card-background-dark"
                                     style={{ backgroundColor: 'var(--primary-color)', '--tw-ring-color': 'var(--primary-color)' } as React.CSSProperties}
                                     aria-label="メニューを開く"
                                 >
-                                    <MenuIcon className="w-6 h-6" />
+                                    <MenuIcon className="w-5 h-5" />
+                                    <span>メニュー</span>
                                 </button>
                                 <div className="text-left">
                                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{uiConfig.mainTitle}</h1>
                                     <p className="text-xs sm:text-sm md:text-base mt-1 text-text-secondary-light dark:text-text-secondary-dark">{uiConfig.subtitle}</p>
+
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
