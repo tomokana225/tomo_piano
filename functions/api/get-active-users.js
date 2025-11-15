@@ -2,8 +2,8 @@
 // It retrieves the count of active users from Firestore.
 
 import { initializeApp, getApps } from 'firebase/app';
-// Use the full Firestore SDK for getCountFromServer
-import { getFirestore, collection, query, where, getCountFromServer } from 'firebase/firestore';
+// Use the "lite" version of Firestore, which is more reliable in serverless environments.
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -63,8 +63,9 @@ export async function onRequest(context) {
         const usersRef = collection(db, 'activeUsers');
         const q = query(usersRef, where('lastSeen', '>', fiveMinutesAgo));
         
-        const snapshot = await getCountFromServer(q);
-        const count = snapshot.data().count;
+        // Use getDocs and the size property, as it's more reliable in CF Workers than getCountFromServer
+        const snapshot = await getDocs(q);
+        const count = snapshot.size;
 
         return jsonResponse({ count }, 200);
 
