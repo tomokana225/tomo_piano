@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -18,7 +19,8 @@ import {
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, XIcon,
     DocumentTextIcon, CloudUploadIcon, HeartIcon, XSocialIcon, TwitcasIcon,
-    UserGroupIcon
+    UserGroupIcon,
+    ChevronLeftIcon
 } from './components/ui/Icons';
 
 
@@ -280,6 +282,17 @@ const App: React.FC = () => {
                         </header>
                         
                         <main className="p-6 flex-grow">
+                            {mode !== 'search' && (
+                                <button
+                                    onClick={() => setMode('search')}
+                                    className="flex items-center gap-2 mb-6 text-sm font-semibold transition-opacity hover:opacity-75"
+                                    style={{ color: 'var(--primary-color)' }}
+                                    aria-label="検索画面に戻る"
+                                >
+                                    <ChevronLeftIcon className="w-5 h-5" />
+                                    <span>検索画面に戻る</span>
+                                </button>
+                            )}
                             {renderView()}
                         </main>
 
