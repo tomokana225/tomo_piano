@@ -183,8 +183,8 @@ const App: React.FC = () => {
                 
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-md px-2 sm:px-4 py-3">
-                        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between">
+                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-md px-4 sm:px-6 py-4">
+                        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-3">
                             {/* Left Section: Menu Button */}
                             <div className="flex-1 flex justify-start order-2 sm:order-1">
                                 <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
@@ -244,7 +244,7 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
-                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 flex flex-wrap justify-center items-center gap-4">
+                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 pb-8 sm:p-3 flex flex-wrap justify-center items-center gap-4">
                         {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && uiConfig.twitcastingUrl.trim() !== '' && (
                             <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap bg-[#179BF1] hover:bg-[#1588d6]">
                                 {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}

@@ -336,11 +336,11 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
             </form>
 
             {(uiConfig.navButtons.list.enabled || uiConfig.navButtons.news.enabled || uiConfig.navButtons.requests.enabled || uiConfig.navButtons.suggest.enabled) && (
-                <div className="mt-4 flex flex-wrap justify-center items-center gap-x-3 gap-y-2">
+                <div className="mt-4 flex flex-wrap justify-center items-center gap-2">
                     {uiConfig.navButtons.list.enabled && (
                         <button
                             onClick={() => setMode('list')}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition w-[48%] sm:w-auto"
                         >
                             <MusicNoteIcon className="w-5 h-5" />
                             <span>{uiConfig.navButtons.list.label}</span>
@@ -349,7 +349,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                     {uiConfig.navButtons.news.enabled && (
                         <button
                             onClick={() => setMode('news')}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition w-[48%] sm:w-auto"
                         >
                             <NewspaperIcon className="w-5 h-5" />
                             <span>{uiConfig.navButtons.news.label}</span>
@@ -358,7 +358,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                     {uiConfig.navButtons.requests.enabled && (
                         <button
                             onClick={() => setMode('requests')}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition w-[48%] sm:w-auto"
                         >
                             <CloudUploadIcon className="w-5 h-5" />
                             <span>{uiConfig.navButtons.requests.label}</span>
@@ -367,7 +367,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                      {uiConfig.navButtons.suggest.enabled && (
                         <button
                             onClick={() => setIsSuggestModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition w-[48%] sm:w-auto"
                         >
                             <LightBulbIcon className="w-5 h-5" />
                             <span>{uiConfig.navButtons.suggest.label}</span>
