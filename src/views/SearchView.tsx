@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Song, SearchResult, Mode, UiConfig } from '../types';
+import { Song, SearchResult, Mode, UiConfig, RankingItem } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon, MusicNoteIcon, NewspaperIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon, MusicNoteIcon, NewspaperIcon, CloudUploadIcon, LightBulbIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -16,11 +16,13 @@ interface SearchViewProps {
     onAdminLogin: () => void;
     setMode: (mode: Mode) => void;
     uiConfig: UiConfig;
+    setIsSuggestModalOpen: (isOpen: boolean) => void;
+    songRankingList: RankingItem[];
 }
 
 const MAX_RELATED_SONGS = 5;
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, setMode, uiConfig }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, setMode, uiConfig, setIsSuggestModalOpen, songRankingList }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
@@ -30,6 +32,16 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
     const searchContainerRef = useRef<HTMLDivElement>(null);
     const initialSearchTermRef = useRef(searchTerm);
 
+    const newSongs = useMemo(() => {
+        return songs.filter(song => song.isNew).sort((a, b) => a.title.localeCompare(b.title, 'ja'));
+    }, [songs]);
+
+    const popularSongs = useMemo(() => {
+        return songRankingList
+            .slice(0, 5) // Top 5
+            .map(rankItem => songs.find(s => s.title === rankItem.id && s.artist === rankItem.artist))
+            .filter((s): s is Song => !!s);
+    }, [songRankingList, songs]);
 
     const normalizedSongs = useMemo(() => {
         return songs.map(song => ({
@@ -177,9 +189,54 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
 
     const renderResult = () => {
         if (!searchResult) {
+            const hasNewSongs = newSongs.length > 0;
+            const hasPopularSongs = popularSongs.length > 0;
+
+            if (!hasNewSongs && !hasPopularSongs) {
+                return (
+                    <div className="text-center text-text-secondary-light dark:text-text-secondary-dark mt-8">
+                        <p>曲名やアーティスト名で検索してください。</p>
+                    </div>
+                );
+            }
+            
             return (
-                <div className="text-center text-text-secondary-light dark:text-text-secondary-dark mt-8">
-                    <p>曲名やアーティスト名で検索してください。</p>
+                <div className="space-y-12 animate-fade-in">
+                    {/* Popular Songs */}
+                    {hasPopularSongs && (
+                        <div>
+                            <h2 className="text-2xl font-bold mb-4 px-1">人気の曲</h2>
+                            <div className="space-y-3">
+                                {popularSongs.map(song => (
+                                    <SongCard 
+                                        key={`${song.title}-${song.artist}`} 
+                                        song={song} 
+                                        onLike={handleLike} 
+                                        isLiking={isLiking === song.title} 
+                                        isLiked={likedSongs.has(song.title)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Recently Added Songs */}
+                    {hasNewSongs && (
+                        <div>
+                            <h2 className="text-2xl font-bold mb-4 px-1">最近追加された曲</h2>
+                            <div className="space-y-3">
+                                {newSongs.map(song => (
+                                    <SongCard 
+                                        key={`${song.title}-${song.artist}`}
+                                        song={song} 
+                                        onLike={handleLike} 
+                                        isLiking={isLiking === song.title} 
+                                        isLiked={likedSongs.has(song.title)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -278,8 +335,8 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 )}
             </form>
 
-            {(uiConfig.navButtons.list.enabled || uiConfig.navButtons.news.enabled) && (
-                <div className="mt-4 flex justify-center items-center gap-3">
+            {(uiConfig.navButtons.list.enabled || uiConfig.navButtons.news.enabled || uiConfig.navButtons.requests.enabled || uiConfig.navButtons.suggest.enabled) && (
+                <div className="mt-4 flex flex-wrap justify-center items-center gap-x-3 gap-y-2">
                     {uiConfig.navButtons.list.enabled && (
                         <button
                             onClick={() => setMode('list')}
@@ -296,6 +353,24 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                         >
                             <NewspaperIcon className="w-5 h-5" />
                             <span>{uiConfig.navButtons.news.label}</span>
+                        </button>
+                    )}
+                    {uiConfig.navButtons.requests.enabled && (
+                        <button
+                            onClick={() => setMode('requests')}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                        >
+                            <CloudUploadIcon className="w-5 h-5" />
+                            <span>{uiConfig.navButtons.requests.label}</span>
+                        </button>
+                    )}
+                     {uiConfig.navButtons.suggest.enabled && (
+                        <button
+                            onClick={() => setIsSuggestModalOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10 transition"
+                        >
+                            <LightBulbIcon className="w-5 h-5" />
+                            <span>{uiConfig.navButtons.suggest.label}</span>
                         </button>
                     )}
                 </div>

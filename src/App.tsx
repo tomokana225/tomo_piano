@@ -16,7 +16,7 @@ import {
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon, XSocialIcon, TwitcasIcon,
-    UserGroupIcon, ChevronLeftIcon, XIcon
+    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon
 } from './components/ui/Icons';
 
 
@@ -99,7 +99,7 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} setMode={setMode} uiConfig={uiConfig} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} setMode={setMode} uiConfig={uiConfig} setIsSuggestModalOpen={setIsSuggestModalOpen} songRankingList={songRankingList} />;
             case 'list':
                 return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
             case 'ranking':
@@ -111,7 +111,7 @@ const App: React.FC = () => {
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} setMode={setMode} uiConfig={uiConfig} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} setMode={setMode} uiConfig={uiConfig} setIsSuggestModalOpen={setIsSuggestModalOpen} songRankingList={songRankingList} />;
         }
     };
 
@@ -183,24 +183,32 @@ const App: React.FC = () => {
                 
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <header className="flex-shrink-0 h-16 bg-card-background-light dark:bg-card-background-dark border-b border-border-light dark:border-border-dark flex items-center justify-between px-4">
-                        <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2">
-                            <MenuIcon className="w-6 h-6" />
-                            <span className="font-semibold">メニュー</span>
-                        </button>
-
-                        <div className="absolute left-1/2 -translate-x-1/2 text-center">
-                             <h1 className="text-xl sm:text-2xl font-bold whitespace-nowrap">{uiConfig.mainTitle}</h1>
-                        </div>
-
-                        <div className="flex items-center gap-2 ml-auto">
-                           <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-2 sm:px-3 py-1.5 rounded-full" title="現在の訪問者数">
-                                <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                                <span className="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">{activeUserCount}</span>
+                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-b border-border-light dark:border-border-dark px-2 sm:px-4 py-2">
+                        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between">
+                            {/* Left Section: Menu Button */}
+                            <div className="flex-1 flex justify-start order-2 sm:order-1">
+                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                                    <MenuIcon className="w-6 h-6" />
+                                    <span className="font-semibold">メニュー</span>
+                                </button>
                             </div>
-                            <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
-                                {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
-                            </button>
+
+                            {/* Center Section: Title */}
+                            <div className="w-full sm:w-auto flex-shrink-0 px-2 text-center order-1 sm:order-2">
+                                 <h1 className="text-lg sm:text-2xl font-bold whitespace-nowrap truncate" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
+                                 <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark hidden sm:block">配信で演奏できる曲を調べることができます。</p>
+                            </div>
+
+                            {/* Right Section: Icons */}
+                            <div className="flex-1 flex justify-end items-center gap-1 sm:gap-2 order-3 sm:order-3">
+                               <div className="flex items-center gap-1 sm:gap-2 bg-black/5 dark:bg-white/5 px-2 py-1.5 rounded-full" title="現在の訪問者数">
+                                    <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                                    <span className="text-sm font-semibold hidden sm:inline">{activeUserCount}</span>
+                                </div>
+                                <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+                                    {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
+                                </button>
+                            </div>
                         </div>
                     </header>
                     <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
@@ -212,6 +220,11 @@ const App: React.FC = () => {
                                 <strong>開発者向け情報:</strong> {error}
                             </div>
                         )}
+                        
+                        <div className="mb-6 bg-blue-100 dark:bg-blue-900/50 border border-blue-500/50 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-start gap-3 text-sm shadow-md">
+                            <InformationCircleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <span>URLをコピペするか、ツイキャスアプリの右上にある共有ボタンから、ブラウザでサイトを読み込むと大きな画面で閲覧できます。</span>
+                        </div>
                         
                         {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
                             <div className="fixed inset-0 bg-cover bg-center bg-fixed z-[-1]" style={{ ...backgroundStyle, opacity: uiConfig.backgroundOpacity }} />
@@ -231,21 +244,21 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
-                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 flex justify-center items-center gap-4">
+                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 flex flex-wrap justify-center items-center gap-4">
                         {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
-                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm" style={{backgroundColor: 'var(--primary-color)'}}>
+                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap" style={{backgroundColor: 'var(--primary-color)'}}>
                                 {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}
                                 <span>{uiConfig.specialButtons.twitcas.label}</span>
                             </a>
                         )}
                         {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
-                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm" style={{backgroundColor: 'var(--primary-color)'}}>
+                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap" style={{backgroundColor: 'var(--primary-color)'}}>
                                 {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5" />}
                                 <span>{uiConfig.specialButtons.x.label}</span>
                             </a>
                         )}
                          {uiConfig.specialButtons?.support?.enabled && (
-                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm" style={{backgroundColor: 'var(--primary-color)'}}>
+                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap" style={{backgroundColor: 'var(--primary-color)'}}>
                                 {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
                                 <span>{uiConfig.specialButtons.support.label}</span>
                             </button>
