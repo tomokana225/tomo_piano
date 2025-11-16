@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, Mode, UiConfig, RankingItem } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon, MusicNoteIcon, NewspaperIcon, CloudUploadIcon, LightBulbIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -14,15 +14,13 @@ interface SearchViewProps {
     searchTerm: string;
     setSearchTerm: (term: string) => void;
     onAdminLogin: () => void;
-    setMode: (mode: Mode) => void;
     uiConfig: UiConfig;
-    setIsSuggestModalOpen: (isOpen: boolean) => void;
     songRankingList: RankingItem[];
 }
 
 const MAX_RELATED_SONGS = 5;
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, setMode, uiConfig, setIsSuggestModalOpen, songRankingList }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, uiConfig, songRankingList }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
