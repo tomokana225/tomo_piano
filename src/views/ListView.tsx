@@ -16,6 +16,51 @@ type ViewState =
     { mode: 'by_artist', artist: string } |
     { mode: 'by_genre', genre: string };
 
+const getCategory = (song: Song): string => {
+    // Prioritize kana for categorization
+    const str = (song.titleKana || song.title).trim();
+    if (!str) return 'その他';
+    const char = str[0];
+    const code = char.charCodeAt(0);
+
+    // Hiragana
+    if (code >= 0x3041 && code <= 0x304A) return 'あ行'; // あ-お
+    if (code >= 0x304B && code <= 0x3054) return 'か行'; // か-ご
+    if (code >= 0x3055 && code <= 0x305E) return 'さ行'; // さ-ぞ
+    if (code >= 0x305F && code <= 0x3069) return 'た行'; // た-ど
+    if (code >= 0x306A && code <= 0x306E) return 'な行'; // な-の
+    if (code >= 0x306F && code <= 0x307D) return 'は行'; // は-ぽ
+    if (code >= 0x307E && code <= 0x3082) return 'ま行'; // ま-も
+    if (code >= 0x3083 && code <= 0x3088) return 'や行'; // や-よ
+    if (code >= 0x3089 && code <= 0x308D) return 'ら行'; // ら-ろ
+    if (code >= 0x308F && code <= 0x3093) return 'わ行'; // わ-ん
+
+    // Katakana
+    if (code >= 0x30A1 && code <= 0x30AA) return 'あ行';
+    if (code >= 0x30AB && code <= 0x30B4) return 'か行';
+    if (code >= 0x30B5 && code <= 0x30BE) return 'さ行';
+    if (code >= 0x30BF && code <= 0x30C9) return 'た行';
+    if (code >= 0x30CA && code <= 0x30CE) return 'な行';
+    if (code >= 0x30CF && code <= 0x30DD) return 'は行';
+    if (code >= 0x30DE && code <= 0x30E2) return 'ま行';
+    if (code >= 0x30E3 && code <= 0x30E8) return 'や行';
+    if (code >= 0x30E9 && code <= 0x30ED) return 'ら行';
+    if (code >= 0x30EF && code <= 0x30F3) return 'わ行';
+
+    // Alphabet (Full-width and Half-width)
+    if ((code >= 0x0041 && code <= 0x005A) || (code >= 0x0061 && code <= 0x007A) || (code >= 0xFF21 && code <= 0xFF3A) || (code >= 0xFF41 && code <= 0xFF5A)) {
+        return 'A-Z';
+    }
+
+    // Numbers (Full-width and Half-width)
+    if ((code >= 0x0030 && code <= 0x0039) || (code >= 0xFF10 && code <= 0xFF19)) {
+        return '0-9';
+    }
+
+    return 'その他';
+};
+
+
 export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRankings }) => {
     const [viewState, setViewState] = useState<ViewState>({ mode: 'all' });
     const [isLiking, setIsLiking] = useState<string | null>(null);
@@ -24,7 +69,33 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
 
     const artists = useMemo(() => [...new Set(songs.map(s => s.artist))].sort((a: string, b: string) => a.localeCompare(b, 'ja')), [songs]);
     const genres = useMemo(() => [...new Set(songs.map(s => s.genre).filter(Boolean))].sort((a: string, b: string) => a.localeCompare(b, 'ja')), [songs]);
-    const sortedSongs = useMemo(() => [...songs].sort((a, b) => a.title.localeCompare(b.title, 'ja')), [songs]);
+    
+    const groupedSongs = useMemo(() => {
+        const sorted = [...songs].sort((a, b) => {
+            const aStr = a.titleKana || a.title;
+            const bStr = b.titleKana || b.title;
+            return aStr.localeCompare(bStr, 'ja');
+        });
+
+        const groups: { [key: string]: Song[] } = {};
+        sorted.forEach(song => {
+            const category = getCategory(song);
+            if (!groups[category]) {
+                groups[category] = [];
+            }
+            groups[category].push(song);
+        });
+        
+        const categoryOrder = [
+            'あ行', 'か行', 'さ行', 'た行', 'な行', 'は行', 'ま行', 'や行', 'ら行', 'わ行',
+            'A-Z', '0-9', 'その他'
+        ];
+        
+        return categoryOrder
+            .map(cat => ({ category: cat, songs: groups[cat] || [] }))
+            .filter(group => group.songs.length > 0);
+
+    }, [songs]);
 
     const countLabel = useMemo(() => {
         switch (viewState.mode) {
@@ -120,8 +191,17 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
             case 'all':
             default:
                 return (
-                     <div className="space-y-3">
-                        {songCards(sortedSongs)}
+                    <div>
+                        {groupedSongs.map(({ category, songs: songsInCategory }) => (
+                            <div key={category}>
+                                <h3 className="sticky top-[-1px] bg-background-light dark:bg-background-dark py-2 text-lg font-bold text-text-primary-light dark:text-text-primary-dark z-10 border-b-2" style={{borderColor: 'var(--primary-color)'}}>
+                                    {category}
+                                </h3>
+                                <div className="space-y-3 pt-3">
+                                    {songCards(songsInCategory)}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 );
         }
