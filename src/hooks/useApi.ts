@@ -26,9 +26,9 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     bodyFontScale: 1.0,
     // FIX: Add the missing 'x' property to the `specialButtons` object to align with the `UiConfig` type.
     specialButtons: {
-        twitcas: { label: 'ツイキャス配信はこちら', enabled: true },
+        twitcas: { label: 'ツイキャスはこちら', enabled: true },
         x: { label: 'X (Twitter) はこちら', enabled: true },
-        support: { label: '配信者支援', enabled: true },
+        support: { label: '配信者をサポート', enabled: true },
     },
     navButtons: {
         search: { label: '曲を検索', enabled: true },

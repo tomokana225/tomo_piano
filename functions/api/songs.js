@@ -31,9 +31,9 @@ const DEFAULT_UI_CONFIG = {
     headingFontScale: 1.0,
     bodyFontScale: 1.0,
     specialButtons: {
-        twitcas: { label: 'ツイキャス配信はこちら', enabled: true },
+        twitcas: { label: 'ツイキャスはこちら', enabled: true },
         x: { label: 'X (Twitter) はこちら', enabled: true },
-        support: { label: '配信者支援', enabled: true },
+        support: { label: '配信者をサポート', enabled: true },
     },
     navButtons: {
         search: { label: '曲を検索', enabled: true },

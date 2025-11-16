@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -16,7 +18,8 @@ import {
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon, XSocialIcon, TwitcasIcon,
-    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon
+    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon,
+    ChevronDownIcon, ChevronUpIcon
 } from './components/ui/Icons';
 
 
@@ -38,6 +41,7 @@ const App: React.FC = () => {
     const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isInfoBannerVisible, setIsInfoBannerVisible] = useState(true);
+    const [isFooterCollapsed, setIsFooterCollapsed] = useState(false);
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -83,8 +87,8 @@ const App: React.FC = () => {
             root.style.setProperty('--background-light', uiConfig.backgroundColor);
             root.style.setProperty('--background-dark', uiConfig.darkBackgroundColor);
         } else {
-            root.style.setProperty('--background-light', '#f1f5f9');
-            root.style.setProperty('--background-dark', '#020617');
+            root.style.setProperty('--background-light', 'transparent');
+            root.style.setProperty('--background-dark', 'transparent');
         }
     }, [uiConfig]);
 
@@ -152,6 +156,14 @@ const App: React.FC = () => {
             ? { backgroundImage: `url(${uiConfig.backgroundImageUrl})` }
             : {};
     
+    const backgroundFallbackColor = useMemo(() => {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (uiConfig.backgroundType === 'color') {
+            return isDark ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
+        }
+        return isDark ? '#020617' : '#f1f5f9';
+    }, [uiConfig.backgroundType, uiConfig.backgroundColor, uiConfig.darkBackgroundColor, isDarkMode]);
+    
     if (isLoading && !rawSongList) {
         return (
             <div className="min-h-screen w-full flex flex-col justify-center items-center bg-background-light dark:bg-background-dark">
@@ -198,7 +210,7 @@ const App: React.FC = () => {
                 </aside>
                 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 flex flex-col">
                     <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg px-4 sm:px-6 py-4 border-b-2" style={{ borderColor: 'var(--primary-color)' }}>
                         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-3">
                             {/* Left Section: Menu Button */}
@@ -247,7 +259,7 @@ const App: React.FC = () => {
                         {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
                             <div className="fixed inset-0 bg-cover bg-center bg-fixed z-[-1]" style={{ ...backgroundStyle, opacity: uiConfig.backgroundOpacity }} />
                         )}
-                        <div className="fixed inset-0 z-[-2] bg-background-light dark:bg-background-dark" style={{ opacity: uiConfig.backgroundType === 'image' ? 1 - uiConfig.backgroundOpacity : 1 }}/>
+                        <div className="fixed inset-0 z-[-2]" style={{ backgroundColor: backgroundFallbackColor }}/>
 
                         {mode !== 'search' && (
                             <button
@@ -262,25 +274,42 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
-                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 pb-8 sm:p-3 flex flex-wrap justify-center items-center gap-4">
-                        {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && uiConfig.twitcastingUrl.trim() !== '' && (
-                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-[#179BF1] to-[#4ab3f3] hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
-                                {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}
-                                <span>{uiConfig.specialButtons.twitcas.label}</span>
-                            </a>
-                        )}
-                        {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && uiConfig.xUrl.trim() !== '' && (
-                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-gray-800 to-black dark:from-gray-200 dark:to-white text-white dark:text-black hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
-                                {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5" />}
-                                <span>{uiConfig.specialButtons.x.label}</span>
-                            </a>
-                        )}
-                         {uiConfig.specialButtons?.support?.enabled && (
-                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
-                                {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
-                                <span>{uiConfig.specialButtons.support.label}</span>
-                            </button>
-                        )}
+                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark relative">
+                        <button
+                            onClick={() => setIsFooterCollapsed(prev => !prev)}
+                            className={`absolute ${isFooterCollapsed ? '-top-5 right-3' : 'top-2 right-2'} bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-full p-1.5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-300 ease-in-out shadow-lg z-10`}
+                            aria-label={isFooterCollapsed ? 'フッターを開く' : 'フッターを閉じる'}
+                        >
+                            {isFooterCollapsed ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                        </button>
+                        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isFooterCollapsed ? 'max-h-0' : 'max-h-48'}`}>
+                            <div className="p-4 pt-6 pb-4 flex flex-col sm:flex-row sm:justify-center items-center gap-y-3 sm:gap-x-4">
+                                {/* Top Row: Support Button */}
+                                {uiConfig.specialButtons?.support?.enabled && (
+                                    <div className="flex justify-center">
+                                        <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
+                                            {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
+                                            <span>{uiConfig.specialButtons.support.label}</span>
+                                        </button>
+                                    </div>
+                                )}
+                                {/* Bottom Row: Other Buttons */}
+                                <div className="flex justify-center items-center gap-4">
+                                    {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && uiConfig.twitcastingUrl.trim() !== '' && (
+                                        <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-[#179BF1] to-[#4ab3f3] hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
+                                            {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}
+                                            <span>{uiConfig.specialButtons.twitcas.label}</span>
+                                        </a>
+                                    )}
+                                    {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && uiConfig.xUrl.trim() !== '' && (
+                                         <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-gray-800 to-black dark:from-gray-200 dark:to-white text-white dark:text-black hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
+                                            {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5" />}
+                                            <span>{uiConfig.specialButtons.x.label}</span>
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </footer>
                 </div>
             </div>
