@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Song, SearchResult, Mode, UiConfig, RankingItem } from '../types';
+import { Song, SearchResult, UiConfig, RankingItem } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
 import { SearchIcon, XIcon, PlusIcon, DocumentTextIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';

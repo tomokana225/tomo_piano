@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
