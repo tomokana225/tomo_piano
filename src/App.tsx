@@ -41,7 +41,6 @@ const App: React.FC = () => {
     const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isInfoBannerVisible, setIsInfoBannerVisible] = useState(true);
-    const [isFooterCollapsed, setIsFooterCollapsed] = useState(false);
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -280,44 +279,34 @@ const App: React.FC = () => {
                             </button>
                         )}
                         {renderView()}
-                    </main>
-                    <footer className="relative flex-shrink-0 bg-card-background-light/80 dark:bg-card-background-dark/80 backdrop-blur-sm border-t-2 transition-all duration-500 ease-in-out" style={{ borderColor: 'var(--primary-color)' }}>
-                        <button
-                            onClick={() => setIsFooterCollapsed(prev => !prev)}
-                            className={`absolute right-2 w-8 h-8 bg-card-background-light dark:bg-card-background-dark rounded-full border-2 flex items-center justify-center transition-all duration-300 hover:scale-110 z-10 ${isFooterCollapsed ? '-top-4' : 'top-2'}`}
-                            style={{ borderColor: 'var(--primary-color)' }}
-                            aria-label={isFooterCollapsed ? 'フッターを開く' : 'フッターを閉じる'}
-                        >
-                            {isFooterCollapsed ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
-                        </button>
-                        <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isFooterCollapsed ? 'max-h-0' : 'max-h-56'}`}>
-                            <div className="p-4">
-                                <div className="flex flex-col items-center gap-3">
-                                    <button
-                                        onClick={() => setIsSupportModalOpen(true)}
-                                        className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md"
-                                    >
-                                        <HeartIcon className="w-5 h-5" />
-                                        <span>{uiConfig.specialButtons?.support?.label || '配信者をサポート'}</span>
-                                    </button>
-                                    <div className="flex items-center justify-center gap-3">
-                                        {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
-                                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-md">
-                                                <TwitcasIcon className="w-5 h-5" />
-                                                <span>{uiConfig.specialButtons.twitcas.label}</span>
-                                            </a>
-                                        )}
-                                        {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
-                                            <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-md">
-                                                <XSocialIcon className="w-5 h-5" />
-                                                <span>{uiConfig.specialButtons.x.label}</span>
-                                            </a>
-                                        )}
-                                    </div>
+                        
+                        {/* Buttons formerly in footer */}
+                        <div className="mt-12 pt-8 border-t-2" style={{ borderColor: 'var(--primary-color)' }}>
+                            <div className="flex flex-col items-center gap-4">
+                                <button
+                                    onClick={() => setIsSupportModalOpen(true)}
+                                    className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md"
+                                >
+                                    <HeartIcon className="w-5 h-5" />
+                                    <span>{uiConfig.specialButtons?.support?.label || '配信者をサポート'}</span>
+                                </button>
+                                <div className="flex items-center justify-center gap-4">
+                                    {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
+                                        <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-md">
+                                            <TwitcasIcon className="w-5 h-5" />
+                                            <span>{uiConfig.specialButtons.twitcas.label}</span>
+                                        </a>
+                                    )}
+                                    {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
+                                        <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-md">
+                                            <XSocialIcon className="w-5 h-5" />
+                                            <span>{uiConfig.specialButtons.x.label}</span>
+                                        </a>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    </footer>
+                    </main>
                 </div>
             </div>
 
