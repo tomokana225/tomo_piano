@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, UiConfig, RankingItem, Mode } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
@@ -146,7 +143,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
 
         if (term === 'admin') {
             const password = prompt("管理者パスワードを入力してください:");
-            if (password === 'tomokanachan') {
+            if (password === 'admin.225') {
                 onAdminLogin();
             } else if (password) {
                 alert("パスワードが違います。");
@@ -185,7 +182,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         if (e.ctrlKey && e.key === 'a') {
             e.preventDefault();
             const password = prompt("管理者パスワードを入力してください:");
-            if (password === 'tomokanachan') { // Super secure password
+            if (password === 'admin.225') { // Super secure password
                 onAdminLogin();
             } else if (password) {
                 alert("パスワードが違います。");
