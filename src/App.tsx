@@ -1,6 +1,5 @@
 
 
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -18,9 +17,120 @@ import { SupportModal } from './features/support/SupportModal';
 import { 
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
-    DocumentTextIcon, CloudUploadIcon,
-    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon
+    DocumentTextIcon, CloudUploadIcon, HeartIcon,
+    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon,
+    CheckCircleIcon
 } from './components/ui/Icons';
+
+
+// --- Tutorial Modal Component ---
+const tutorialSteps = [
+    {
+        icon: LightBulbIcon,
+        title: "ようこそ！",
+        text: "このアプリは、ピアノ配信でリクエストできる曲を簡単に検索・管理するためのツールです。基本的な使い方を簡単にご紹介します。"
+    },
+    {
+        icon: SearchIcon,
+        title: "曲を検索する",
+        text: "メイン画面の検索バーに曲名やアーティスト名を入力して、レパートリーにあるかすぐに確認できます。入力中に候補も表示されます。"
+    },
+    {
+        icon: CloudUploadIcon,
+        title: "曲をリクエストする",
+        text: "検索して見つからなかった曲は、その場で簡単にリクエストできます。あなたのリクエストが次の演奏曲になるかもしれません！"
+    },
+    {
+        icon: HeartIcon,
+        title: "「いいね！」で応援",
+        text: "曲の詳細カードにあるハートマークを押すと「いいね」ができます。たくさん「いいね」された曲は、配信者が練習する際の参考になります。"
+    },
+    {
+        icon: MenuIcon,
+        title: "いろんな機能を探そう",
+        text: "「メニュー」ボタンから、全曲リスト、人気ランキング、お知らせなど、さまざまな機能にアクセスできます。おまかせ選曲ルーレットも試してみてくださいね！"
+    },
+    {
+        icon: CheckCircleIcon,
+        title: "準備完了！",
+        text: "これで基本的な使い方はバッチリです。さっそくアプリを使ってみましょう！"
+    }
+];
+
+interface TutorialModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
+    const [step, setStep] = useState(0);
+
+    useEffect(() => {
+        // Reset to first step when modal is reopened
+        if (isOpen) {
+            setStep(0);
+        }
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    const handleNext = () => {
+        if (step < tutorialSteps.length - 1) {
+            setStep(s => s + 1);
+        } else {
+            onClose(); // Finish on the last step
+        }
+    };
+    
+    const handlePrev = () => {
+        if (step > 0) {
+            setStep(s => s - 1);
+        }
+    };
+
+    const currentStep = tutorialSteps[step];
+    const Icon = currentStep.icon;
+
+    return (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="bg-card-background-light dark:bg-card-background-dark rounded-2xl shadow-2xl w-full max-w-md text-center p-6 sm:p-8 relative flex flex-col justify-between min-h-[380px]">
+                <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark">
+                    <XIcon className="w-6 h-6" />
+                </button>
+
+                <div>
+                    <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'var(--primary-color)', opacity: 0.2 }}>
+                        <Icon className="w-8 h-8" style={{ color: 'var(--primary-color)' }} />
+                    </div>
+                    <h2 className="text-2xl font-bold mb-3">{currentStep.title}</h2>
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">{currentStep.text}</p>
+                </div>
+
+                <div className="mt-6">
+                    <div className="flex justify-center gap-2 mb-6">
+                        {tutorialSteps.map((_, index) => (
+                            <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full transition-colors ${step === index ? 'bg-[var(--primary-color)]' : 'bg-border-light dark:bg-border-dark'}`}
+                            />
+                        ))}
+                    </div>
+                    <div className="flex items-center gap-4">
+                        {step > 0 && (
+                            <button onClick={handlePrev} className="w-full font-semibold py-3 px-6 rounded-lg transition-colors bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20">
+                                戻る
+                            </button>
+                        )}
+                        <button onClick={handleNext} className="w-full text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow" style={{ backgroundColor: 'var(--primary-color)' }}>
+                            {step === tutorialSteps.length - 1 ? '完了' : '次へ'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+// --- End of Tutorial Modal Component ---
 
 
 const App: React.FC = () => {
@@ -41,6 +151,11 @@ const App: React.FC = () => {
     const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isInfoBannerVisible, setIsInfoBannerVisible] = useState(true);
+    const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+
+    const handleCloseTutorial = () => {
+        setIsTutorialOpen(false);
+    };
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -144,13 +259,14 @@ const App: React.FC = () => {
             ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
             requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests },
             setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
+            tutorial: { mode: 'tutorial', icon: InformationCircleIcon, config: uiConfig.navButtons.tutorial },
             printGakufu: { 
                 href: uiConfig.printGakufuUrl || '#', 
                 icon: DocumentTextIcon, 
                 config: uiConfig.navButtons.printGakufu 
             },
         };
-        const buttonOrder: (keyof typeof buttonConfigs)[] = ['search', 'list', 'suggest', 'news', 'ranking', 'requests', 'setlist', 'printGakufu'];
+        const buttonOrder: (keyof typeof buttonConfigs)[] = ['search', 'list', 'suggest', 'news', 'ranking', 'requests', 'setlist', 'tutorial', 'printGakufu'];
         return buttonOrder.map(key => buttonConfigs[key]).filter(btn => btn && btn.config?.enabled);
     }, [uiConfig.navButtons, uiConfig.printGakufuUrl]);
 
@@ -193,6 +309,9 @@ const App: React.FC = () => {
                         if (button.mode === 'suggest') {
                             return <NavButton key={button.mode} onClick={() => { setIsSuggestModalOpen(true); setIsMenuOpen(false); }} isActive={false} IconComponent={button.icon} label={button.config.label} />;
                         }
+                        if (button.mode === 'tutorial') {
+                            return <NavButton key={button.mode} onClick={() => { setIsTutorialOpen(true); setIsMenuOpen(false); }} isActive={false} IconComponent={button.icon} label={button.config.label} />;
+                        }
                         return <NavButton key={button.mode} onClick={() => { setMode(button.mode as Mode); setIsMenuOpen(false); }} isActive={mode === button.mode} IconComponent={button.icon} label={button.config.label} />;
                     }
                     return null;
@@ -231,14 +350,14 @@ const App: React.FC = () => {
 
                             {/* Right Section: Icons */}
                             <div className="flex-1 flex justify-end items-center gap-2 relative order-3 sm:order-3">
-                                {/* Visitor count & dark mode toggle - desktop only */}
+                                {/* Visitor count & dark mode toggle */}
                                 <div className="hidden sm:flex items-center gap-2">
-                                    <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
-                                        <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                                        <span className="text-sm font-semibold">{activeUserCount}</span>
+                                    <div className="flex items-center gap-1 sm:gap-2 bg-black/5 dark:bg-white/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full" title="現在の訪問者数">
+                                        <UserGroupIcon className="w-4 h-4 sm:w-5 sm:h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                                        <span className="text-xs sm:text-sm font-semibold">{activeUserCount}</span>
                                     </div>
-                                    <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
-                                        {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
+                                    <button onClick={toggleDarkMode} className="p-1.5 sm:p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+                                        {isDarkMode ? <SunIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <MoonIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                                     </button>
                                 </div>
                             </div>
@@ -279,6 +398,16 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
+                     {/* Mobile Bottom Bar */}
+                    <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-t-lg border-t border-border-light dark:border-border-dark p-2 flex justify-around items-center">
+                        <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-full" title="現在の訪問者数">
+                            <UserGroupIcon className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
+                            <span className="text-xs font-semibold">{activeUserCount}</span>
+                        </div>
+                        <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+                            {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+                        </button>
+                    </footer>
                 </div>
             </div>
 
@@ -310,6 +439,8 @@ const App: React.FC = () => {
                 onClose={() => setIsSupportModalOpen(false)}
                 uiConfig={uiConfig}
             />
+            
+            <TutorialModal isOpen={isTutorialOpen} onClose={handleCloseTutorial} />
         </>
     );
 };

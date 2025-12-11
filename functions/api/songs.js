@@ -45,6 +45,7 @@ const DEFAULT_UI_CONFIG = {
         suggest: { label: 'おまかせ選曲', enabled: true },
         setlist: { label: 'セトリ提案', enabled: true },
         printGakufu: { label: 'ぷりんと楽譜', enabled: true },
+        tutorial: { label: '使い方ガイド', enabled: true },
     }
 };
 

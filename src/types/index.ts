@@ -91,6 +91,7 @@ export interface UiConfig {
         suggest: NavButtonConfig;
         setlist: NavButtonConfig;
         printGakufu: NavButtonConfig;
+        tutorial: NavButtonConfig;
     }
 }
 
