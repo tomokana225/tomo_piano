@@ -5,7 +5,7 @@ import { parseSongs } from '../utils/parser';
 // Default UI Config to prevent crashes before data loads
 const DEFAULT_UI_CONFIG: UiConfig = {
     mainTitle: 'ともかなのリクエスト曲一検索',
-    subtitle: 'ともかなの弾ける曲を検索できます',
+    subtitle: 'ピアノの配信でリクエストをする際に、その曲が配信者の弾ける曲かどうかを調べるアプリ',
     primaryColor: '#ec4899',
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',
