@@ -35,6 +35,8 @@ body {
   font-size: calc(1rem * var(--body-font-scale));
   @apply bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-300;
   @apply bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950;
+  /* Ensure full height for gradient */
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -64,6 +66,11 @@ h4 { font-size: calc(1.25rem * var(--heading-font-scale)); } /* text-xl base */
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Faster fade in for lists */
+.animate-fade-in-fast {
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .custom-scrollbar::-webkit-scrollbar { 
