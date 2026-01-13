@@ -54,6 +54,7 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
         try {
             const songsToProcess = parseSongs(songString);
             
+            // ふりがな付与が必要な曲を抽出
             const songsWithoutKana = songsToProcess.filter(song => {
                 const hasKanaInTitle = /\(.+?\)|（.+?）/.test(song.title);
                 const hasKanaInArtist = /\(.+?\)|（.+?）/.test(song.artist);
@@ -62,40 +63,47 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             });
 
             let processedSongs = [...songsToProcess];
+            let kanaSkipped = false;
 
+            // AIによるふりがな生成（失敗しても保存は継続する）
             if (songsWithoutKana.length > 0) {
                  setProcessState({
                     status: 'processing',
                     message: `${songsWithoutKana.length}曲のふりがなを生成中です...`
                 });
-                 const response = await fetch('/api/generate-kana', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ songs: songsWithoutKana.map(s => ({ title: s.title, artist: s.artist })) }),
-                });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'ふりがなの生成に失敗しました。');
-                }
-
-                const kanaResults = await response.json();
-                
-                const kanaMap = new Map<string, { title: string, artist: string }>();
-                if (Array.isArray(kanaResults)) {
-                    kanaResults.forEach((res: any) => {
-                        kanaMap.set(`${res.originalTitle}|${res.originalArtist}`, { title: res.updatedTitle, artist: res.updatedArtist });
+                try {
+                    const response = await fetch('/api/generate-kana', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ songs: songsWithoutKana.map(s => ({ title: s.title, artist: s.artist })) }),
                     });
-                }
 
-                processedSongs = songsToProcess.map(song => {
-                    const key = `${song.title}|${song.artist}`;
-                    if (kanaMap.has(key)) {
-                        const updated = kanaMap.get(key)!;
-                        return { ...song, title: updated.title, artist: updated.artist };
+                    if (response.ok) {
+                        const kanaResults = await response.json();
+                        const kanaMap = new Map<string, { title: string, artist: string }>();
+                        if (Array.isArray(kanaResults)) {
+                            kanaResults.forEach((res: any) => {
+                                kanaMap.set(`${res.originalTitle}|${res.originalArtist}`, { title: res.updatedTitle, artist: res.updatedArtist });
+                            });
+                        }
+
+                        processedSongs = songsToProcess.map(song => {
+                            const key = `${song.title}|${song.artist}`;
+                            if (kanaMap.has(key)) {
+                                const updated = kanaMap.get(key)!;
+                                return { ...song, title: updated.title, artist: updated.artist };
+                            }
+                            return song;
+                        });
+                    } else {
+                        console.warn("ふりがな生成APIがエラーを返しました。ふりがな付与をスキップします。");
+                        kanaSkipped = true;
                     }
-                    return song;
-                });
+                } catch (apiError) {
+                    console.error("ふりがな生成中にエラーが発生しました。保存のみ継続します:", apiError);
+                    kanaSkipped = true;
+                }
             }
 
             const newSongString = songsToString(processedSongs);
@@ -105,13 +113,16 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             const success = await onSaveSongs(newSongString);
 
             if (success) {
-                 setProcessState({ status: 'success', message: '保存が完了しました！' });
+                 setProcessState({ 
+                    status: 'success', 
+                    message: kanaSkipped ? '保存が完了しました（ふりがな生成はスキップされました）' : '保存が完了しました！' 
+                });
             } else {
                  throw new Error("データベースへの保存に失敗しました。");
             }
 
         } catch (error) {
-            console.error("Failed to generate kana or save:", error);
+            console.error("Failed to save song list:", error);
             const errorMessage = error instanceof Error ? error.message : '不明なエラーが発生しました。';
             setProcessState({ status: 'error', message: `エラー: ${errorMessage}` });
         }
@@ -186,14 +197,14 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             <div className="mt-6 space-y-4">
                 {renderProcessBanner()}
                 <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-right">保存時に、漢字や英語の曲名・アーティスト名に<br/>自動でふりがな（カタカナ）を追加します。</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-right">保存時にAIがふりがなを自動生成します。<br/>（サーバー設定によりスキップされる場合があります）</p>
                     <button
                         onClick={handleSave}
                         disabled={processState.status === 'processing'}
                         className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-2 min-w-[200px] justify-center"
                     >
                         {processState.status === 'processing' ? <LoadingSpinner className="w-5 h-5" /> : null}
-                        {processState.status === 'processing' ? '処理中...' : '保存する (ふりがな自動付与)'}
+                        {processState.status === 'processing' ? '処理中...' : '保存する'}
                     </button>
                 </div>
             </div>
