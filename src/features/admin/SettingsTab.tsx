@@ -178,6 +178,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのXアイコンが表示されます。</p>
                 </div>
                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">YouTube チャンネルURL</label>
+                    <input type="text" name="youtubeUrl" value={config.youtubeUrl || ''} onChange={handleInputChange} placeholder="https://www.youtube.com/@..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">YouTube アイコンURL</label>
+                    <input type="text" name="youtubeIconUrl" value={config.youtubeIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURL。空の場合、YouTubeのデフォルトアイコンが表示されます。</p>
+                </div>
+                <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ぷりんと楽譜 URL</label>
                     <input type="text" name="printGakufuUrl" value={config.printGakufuUrl || ''} onChange={handleInputChange} placeholder="https://www.print-gakufu.com/" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
@@ -289,7 +298,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                 </div>
                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サポートボタン アイコンURL</label>
-                    <input type="text" name="supportIconUrl" value={config.supportIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <input type="text" name="supportIconUrl" value={config.supportIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border(--primary-color)] sm:text-sm p-2" />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのハートアイコンが表示されます。</p>
                 </div>
             </div>
@@ -309,6 +318,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                         <input type="checkbox" checked={config.specialButtons.x.enabled} onChange={(e) => handleSpecialNavChange('x', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
                         <div className="flex-grow">
                              <input type="text" value={config.specialButtons.x.label} onChange={(e) => handleSpecialNavChange('x', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                        </div>
+                    </div>
+                )}
+                {config.specialButtons?.youtube && (
+                    <div key="youtube" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
+                        <input type="checkbox" checked={config.specialButtons.youtube.enabled} onChange={(e) => handleSpecialNavChange('youtube', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
+                        <div className="flex-grow">
+                             <input type="text" value={config.specialButtons.youtube.label} onChange={(e) => handleSpecialNavChange('youtube', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                         </div>
                     </div>
                 )}

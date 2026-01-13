@@ -62,6 +62,7 @@ export interface UiConfig {
     adminPassword?: string; // 管理者パスワードを追加
     twitcastingUrl?: string;
     xUrl?: string;
+    youtubeUrl?: string; // YouTube URLを追加
     printGakufuUrl?: string;
     ofuseUrl?: string;
     doneruUrl?: string;
@@ -73,6 +74,7 @@ export interface UiConfig {
     backgroundOpacity: number;
     twitcastingIconUrl?: string;
     xIconUrl?: string;
+    youtubeIconUrl?: string; // YouTubeアイコンURLを追加
     supportIconUrl?: string;
     headingFontFamily: string;
     bodyFontFamily: string;
@@ -82,6 +84,7 @@ export interface UiConfig {
         twitcas: NavButtonConfig;
         support: NavButtonConfig;
         x: NavButtonConfig;
+        youtube: NavButtonConfig; // YouTubeボタン設定を追加
     };
     navButtons: {
         search: NavButtonConfig;

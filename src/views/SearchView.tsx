@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, UiConfig, RankingItem, Mode } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, LightBulbIcon, CloudUploadIcon, ChevronRightIcon, HeartIcon, TwitcasIcon, XSocialIcon, DocumentTextIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, LightBulbIcon, CloudUploadIcon, ChevronRightIcon, HeartIcon, TwitcasIcon, XSocialIcon, DocumentTextIcon, YouTubeIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -218,6 +218,12 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 config: uiConfig.specialButtons.x,
                 colorClasses: 'bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 dark:text-black',
             },
+            youtube: { // YouTubeボタンの定義
+                href: uiConfig.youtubeUrl,
+                icon: uiConfig.youtubeIconUrl ? () => <img src={uiConfig.youtubeIconUrl} alt="YouTube" className="w-6 h-6"/> : YouTubeIcon,
+                config: uiConfig.specialButtons.youtube,
+                colorClasses: 'bg-[#ff0000] hover:bg-[#cc0000]',
+            },
             support: {
                 onClick: openSupportModal,
                 icon: uiConfig.supportIconUrl ? () => <img src={uiConfig.supportIconUrl} alt="Support" className="w-6 h-6"/> : HeartIcon,
@@ -225,7 +231,8 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 colorClasses: 'bg-pink-500 hover:bg-pink-600',
             }
         };
-        const buttonOrder: (keyof typeof buttonConfigs)[] = ['twitcas', 'x', 'support'];
+        // ボタンの表示順序
+        const buttonOrder: (keyof typeof buttonConfigs)[] = ['twitcas', 'x', 'youtube', 'support'];
         return buttonOrder.map(key => buttonConfigs[key]).filter(btn => btn && btn.config?.enabled);
     }, [uiConfig, openSupportModal]);
 
@@ -311,7 +318,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                         {uiConfig.navButtons?.requests?.enabled && <NavCard icon={CloudUploadIcon} title={uiConfig.navButtons.requests.label} onClick={() => setMode('requests')} />}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         {specialButtons.map((btn, index) => (
                             <a
                                 key={index}

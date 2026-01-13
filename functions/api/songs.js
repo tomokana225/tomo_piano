@@ -16,6 +16,7 @@ const DEFAULT_UI_CONFIG = {
     adminPassword: 'admin225', // デフォルトパスワード
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',
+    youtubeUrl: 'https://www.youtube.com/', // デフォルト
     printGakufuUrl: 'https://www.print-gakufu.com/',
     ofuseUrl: '',
     doneruUrl: '',
@@ -27,6 +28,7 @@ const DEFAULT_UI_CONFIG = {
     backgroundOpacity: 0.1,
     twitcastingIconUrl: '',
     xIconUrl: '',
+    youtubeIconUrl: '', // アイコン
     supportIconUrl: '',
     headingFontFamily: "'Kiwi Maru', serif",
     bodyFontFamily: "'Noto Sans JP', sans-serif",
@@ -35,6 +37,7 @@ const DEFAULT_UI_CONFIG = {
     specialButtons: {
         twitcas: { label: 'ツイキャスはこちら', enabled: true },
         x: { label: 'X (Twitter) はこちら', enabled: true },
+        youtube: { label: 'YouTubeはこちら', enabled: true }, // 設定
         support: { label: '配信者をサポート', enabled: true },
     },
     navButtons: {
@@ -145,20 +148,12 @@ export async function onRequest(context) {
                     }
                 };
 
-                // Fallback logic: If URL fields are empty in Firestore, use the default.
-                // This prevents buttons from disappearing if the URL is not set in the admin panel.
-                if (!finalConfig.twitcastingUrl) {
-                    finalConfig.twitcastingUrl = DEFAULT_UI_CONFIG.twitcastingUrl;
-                }
-                if (!finalConfig.xUrl) {
-                    finalConfig.xUrl = DEFAULT_UI_CONFIG.xUrl;
-                }
-                if (!finalConfig.printGakufuUrl) {
-                    finalConfig.printGakufuUrl = DEFAULT_UI_CONFIG.printGakufuUrl;
-                }
-                if (!finalConfig.adminPassword) {
-                    finalConfig.adminPassword = DEFAULT_UI_CONFIG.adminPassword;
-                }
+                // Fallback logic
+                if (!finalConfig.twitcastingUrl) finalConfig.twitcastingUrl = DEFAULT_UI_CONFIG.twitcastingUrl;
+                if (!finalConfig.xUrl) finalConfig.xUrl = DEFAULT_UI_CONFIG.xUrl;
+                if (!finalConfig.youtubeUrl) finalConfig.youtubeUrl = DEFAULT_UI_CONFIG.youtubeUrl;
+                if (!finalConfig.printGakufuUrl) finalConfig.printGakufuUrl = DEFAULT_UI_CONFIG.printGakufuUrl;
+                if (!finalConfig.adminPassword) finalConfig.adminPassword = DEFAULT_UI_CONFIG.adminPassword;
                 
                 return jsonResponse(finalConfig);
             }

@@ -9,6 +9,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     primaryColor: '#ec4899',
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',
+    youtubeUrl: 'https://www.youtube.com/', // デフォルト値
     printGakufuUrl: 'https://www.print-gakufu.com/',
     ofuseUrl: '',
     doneruUrl: '',
@@ -20,6 +21,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     backgroundOpacity: 0.1,
     twitcastingIconUrl: '',
     xIconUrl: '',
+    youtubeIconUrl: '',
     supportIconUrl: '',
     headingFontFamily: "'Kiwi Maru', serif",
     bodyFontFamily: "'Noto Sans JP', sans-serif",
@@ -28,6 +30,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     specialButtons: {
         twitcas: { label: 'ツイキャスはこちら', enabled: true },
         x: { label: 'X (Twitter) はこちら', enabled: true },
+        youtube: { label: 'YouTubeはこちら', enabled: true }, // YouTubeデフォルト
         support: { label: '配信者をサポート', enabled: true },
     },
     navButtons: {
