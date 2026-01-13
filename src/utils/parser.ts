@@ -13,19 +13,20 @@ const extractKana = (text: string): { main: string; kana?: string } => {
 
 export const parseSongs = (str: string): Song[] => {
     if (!str) return [];
-    // FIX: Add a return type annotation `Song | null` to the map callback. This correctly types the
-    // resulting array and resolves an error in the subsequent `.filter()` type predicate where the
-    // inferred anonymous object type was not assignable to the `Song` type.
+    
     return str.replace(/\r\n/g, '\n').split('\n').map((line): Song | null => {
-        if (!line.trim()) return null;
-        const parts = line.split(',');
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return null;
+        
+        // タブが含まれている場合はタブで分割、そうでなければコンマで分割
+        const separator = trimmedLine.includes('\t') ? '\t' : ',';
+        const parts = trimmedLine.split(separator);
+        
         if (parts.length < 2 || !parts[0] || !parts[1]) return null;
         
         const titleParts = extractKana(parts[0]);
         const artistParts = extractKana(parts[1]);
 
-        // FIX: Explicitly type `status` to match the `Song` interface. This helps TypeScript
-        // correctly infer the type from the ternary expression, resolving an assignability error.
         const status: 'playable' | 'practicing' = parts[4]?.trim()?.toLowerCase() === '練習中' ? 'practicing' : 'playable';
 
         return {
@@ -56,11 +57,9 @@ export const songsToString = (songs: Song[]): string => {
             fifthPart = '練習中';
         }
 
-        // To maintain comma structure, push even if empty
         parts.push(fourthPart);
         parts.push(fifthPart);
         
-        // Trim trailing empty parts for cleaner output
         while (parts.length > 2 && !parts[parts.length - 1]) {
             parts.pop();
         }

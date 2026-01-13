@@ -153,15 +153,15 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
 
     return (
         <div>
-            <h3 className="text-lg font-semibold mb-2">曲リストを編集 (Excel等から貼付)</h3>
+            <h3 className="text-lg font-semibold mb-2">曲リストを編集</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                <code>曲名,アーティスト名,ジャンル,new,練習中</code> の形式で入力してください。下のリストと連動します。
+                エクセルから直接貼り付け、または <code>曲名,アーティスト名,ジャンル,new,練習中</code> の形式（コンマ区切り）で入力してください。
             </p>
             <textarea
                 value={songString}
                 onChange={(e) => setSongString(e.target.value)}
                 className="w-full h-64 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md p-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar"
-                placeholder="夜に駆ける,YOASOBI,J-Pop,new..."
+                placeholder="夜に駆ける	YOASOBI	J-Pop	new (エクセルから貼り付け可)"
             />
             
             <h3 className="text-lg font-semibold mt-6 mb-2">クリックで編集</h3>
