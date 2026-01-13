@@ -59,6 +59,7 @@ export interface UiConfig {
     mainTitle: string;
     subtitle: string;
     primaryColor: string;
+    adminPassword?: string; // 管理者パスワードを追加
     twitcastingUrl?: string;
     xUrl?: string;
     printGakufuUrl?: string;

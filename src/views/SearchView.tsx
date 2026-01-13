@@ -143,7 +143,8 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
 
         if (term === 'admin') {
             const password = prompt("管理者パスワードを入力してください:");
-            if (password === 'admin.225') {
+            // データベースから取得したパスワードと比較
+            if (password === (uiConfig.adminPassword || 'admin225')) {
                 onAdminLogin();
             } else if (password) {
                 alert("パスワードが違います。");
@@ -182,13 +183,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         if (e.ctrlKey && e.key === 'a') {
             e.preventDefault();
             const password = prompt("管理者パスワードを入力してください:");
-            if (password === 'admin.225') { // Super secure password
+            // データベースから取得したパスワードと比較
+            if (password === (uiConfig.adminPassword || 'admin225')) {
                 onAdminLogin();
             } else if (password) {
                 alert("パスワードが違います。");
             }
         }
-    }, [onAdminLogin]);
+    }, [onAdminLogin, uiConfig.adminPassword]);
     
     // Close suggestions if clicked outside
     useEffect(() => {

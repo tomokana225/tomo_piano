@@ -13,6 +13,7 @@ const DEFAULT_UI_CONFIG = {
     mainTitle: 'ともかなのリクエスト曲ー検索',
     subtitle: 'ピアノの配信でリクエストをする際に、その曲が配信者の弾ける曲かどうかを調べるアプリ',
     primaryColor: '#ec4899',
+    adminPassword: 'admin225', // デフォルトパスワード
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',
     printGakufuUrl: 'https://www.print-gakufu.com/',
@@ -154,6 +155,9 @@ export async function onRequest(context) {
                 }
                 if (!finalConfig.printGakufuUrl) {
                     finalConfig.printGakufuUrl = DEFAULT_UI_CONFIG.printGakufuUrl;
+                }
+                if (!finalConfig.adminPassword) {
+                    finalConfig.adminPassword = DEFAULT_UI_CONFIG.adminPassword;
                 }
                 
                 return jsonResponse(finalConfig);

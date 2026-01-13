@@ -155,6 +155,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                     <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">管理者パスワード</label>
+                    <input type="text" name="adminPassword" value={config.adminPassword || ''} onChange={handleInputChange} placeholder="パスワードを入力" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">検索窓に「admin」と入力した際、または Ctrl+A を押した際に求められるパスワードです。</p>
+                </div>
+                <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ツイキャスURL</label>
                     <input type="text" name="twitcastingUrl" value={config.twitcastingUrl || ''} onChange={handleInputChange} placeholder="https://twitcasting.tv/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
