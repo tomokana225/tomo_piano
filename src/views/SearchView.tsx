@@ -31,14 +31,14 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, title, onClick }) => (
   <button
     onClick={onClick}
-    className="group w-full flex flex-col items-center justify-center gap-2 p-3 sm:p-5 rounded-3xl bg-card-background-light dark:bg-card-background-dark border-2 border-border-light dark:border-border-dark shadow-md hover:shadow-2xl hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/50 min-h-[120px] sm:min-h-0"
+    className="group w-full flex flex-col items-center justify-center gap-1 sm:gap-2 p-3 sm:p-5 rounded-3xl bg-card-background-light dark:bg-card-background-dark border-2 border-border-light dark:border-border-dark shadow-md hover:shadow-2xl hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/50 min-h-[110px] sm:min-h-[160px]"
     aria-label={title}
   >
     <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-300 bg-[var(--primary-color)]/10 group-hover:bg-[var(--primary-color)]/20 flex-shrink-0">
         <Icon className="w-5 h-5 sm:w-8 sm:h-8 transition-transform duration-300 group-hover:scale-110" style={{ color: 'var(--primary-color)' }} />
     </div>
-    <div className="flex flex-col items-center flex-grow min-w-0 w-full">
-        <h3 className="font-bold text-[11px] leading-[1.2] sm:text-base text-text-primary-light dark:text-text-primary-dark break-all sm:break-words overflow-hidden line-clamp-2 text-center w-full">
+    <div className="w-full flex items-center justify-center flex-grow overflow-hidden px-1">
+        <h3 className="font-bold text-[10px] sm:text-sm md:text-base leading-tight text-text-primary-light dark:text-text-primary-dark break-all sm:break-words overflow-hidden line-clamp-2 text-center">
             {title}
         </h3>
     </div>
@@ -344,14 +344,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 </div>
             ) : (
                 <>
-                    <div className="mb-10 grid grid-cols-2 gap-4">
+                    <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-6">
                         {uiConfig.navButtons?.list?.enabled && <NavCard icon={MusicNoteIcon} title={uiConfig.navButtons.list.label} onClick={() => setMode('list')} />}
                         {uiConfig.navButtons?.news?.enabled && <NavCard icon={NewspaperIcon} title={uiConfig.navButtons.news.label} onClick={() => setMode('news')} />}
                         {uiConfig.navButtons?.suggest?.enabled && <NavCard icon={LightBulbIcon} title={uiConfig.navButtons.suggest.label} onClick={openSuggestModal} />}
                         {uiConfig.navButtons?.requests?.enabled && <NavCard icon={CloudUploadIcon} title={uiConfig.navButtons.requests.label} onClick={() => setMode('requests')} />}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8 bg-black/5 dark:bg-white/5 p-3 rounded-2xl">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-8 bg-black/5 dark:bg-white/5 p-3 rounded-2xl">
                         {specialButtons.map((btn, index) => (
                             <a
                                 key={index}
@@ -359,10 +359,10 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                                 onClick={'onClick' in btn ? btn.onClick : undefined}
                                 target={'href' in btn ? '_blank' : undefined}
                                 rel={'href' in btn ? 'noopener noreferrer' : undefined}
-                                className={`flex items-center justify-center gap-2 w-full text-center px-2 py-3 sm:px-6 sm:py-4 text-white rounded-xl font-bold text-xs sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md ${btn.colorClasses}`}
+                                className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 w-full text-center p-3 sm:p-5 text-white rounded-2xl font-bold text-[10px] sm:text-base transition-all duration-300 transform hover:scale-[1.03] active:scale-95 shadow-md min-h-[60px] sm:min-h-[80px] ${btn.colorClasses}`}
                             >
                                 <btn.icon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0"/>
-                                <span className="break-words leading-tight">{btn.config.label}</span>
+                                <span className="break-all sm:break-words leading-tight text-center">{btn.config.label}</span>
                             </a>
                         ))}
                     </div>

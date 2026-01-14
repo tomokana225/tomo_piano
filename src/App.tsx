@@ -258,15 +258,6 @@ const App: React.FC = () => {
     }, [uiConfig.adminPassword, isAdminAuthenticated]);
 
     const renderView = () => {
-        if (isLoading && songs.length === 0) {
-            return (
-                <div className="flex flex-col justify-center items-center h-full">
-                    <LoadingSpinner className="w-12 h-12" />
-                    <p className="mt-4 text-text-secondary-light dark:text-text-secondary-dark">読み込み中...</p>
-                </div>
-            );
-        }
-
         switch (mode) {
             case 'search':
                 return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} openSupportModal={() => setIsSupportModalOpen(true)} />;
@@ -356,6 +347,16 @@ const App: React.FC = () => {
             </div>
         </div>
     );
+
+    // ロード中（かつまだ曲データなどが入っていない状態）は全画面ローディング
+    if (isLoading && songs.length === 0) {
+        return (
+            <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 z-[9999]">
+                <LoadingSpinner className="w-16 h-16 text-pink-500" />
+                <p className="mt-6 font-bold text-slate-500 dark:text-slate-400 text-lg animate-pulse">データを読み込み中...</p>
+            </div>
+        );
+    }
 
     return (
         <>
