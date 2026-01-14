@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BlogPost } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { PlusIcon, ChevronLeftIcon, ChevronRightIcon } from '../../components/ui/Icons';
@@ -93,8 +93,8 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
             {!isEditing ? (
                 /* リスト表示 */
                 <div className="animate-fade-in space-y-6">
-                    <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm">
-                        <h3 className="text-lg font-bold">投稿済みのお知らせ ({posts.length})</h3>
+                    <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-border-light dark:border-border-dark">
+                        <h3 className="text-lg font-bold">お知らせ管理 ({posts.length})</h3>
                         <button onClick={handleNewPost} className="flex items-center gap-2 text-xs font-bold py-2.5 px-4 bg-cyan-600 text-white rounded-full hover:bg-cyan-700 transition shadow-md">
                             <PlusIcon className="w-4 h-4" />
                             新規作成
@@ -142,13 +142,13 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                         
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">タイトル</label>
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">タイトル</label>
                                 <input type="text" name="title" value={selectedPost.title || ''} onChange={handleInputChange} className="w-full bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" placeholder="例: 今後の配信予定について" />
                             </div>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">公開日時</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">公開日時</label>
                                     <input
                                         type="datetime-local"
                                         name="createdAt"
@@ -158,7 +158,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                                     />
                                 </div>
                                 <div className="flex items-center sm:pt-6">
-                                    <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 dark:bg-gray-900 rounded-xl w-full">
+                                    <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 dark:bg-gray-900 rounded-xl w-full border border-transparent hover:border-cyan-500/50 transition-all">
                                         <input type="checkbox" name="isPublished" checked={selectedPost.isPublished || false} onChange={handleCheckboxChange} className="w-5 h-5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500" />
                                         <span className="text-sm font-bold">記事を公開する</span>
                                     </label>
@@ -166,20 +166,22 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">内容 (Markdown)</label>
-                                <textarea name="content" value={selectedPost.content || ''} onChange={handleInputChange} rows={12} className="w-full bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar" placeholder="**太字** や [リンク](https://...) が使えます" />
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">内容 (Markdown)</label>
+                                <textarea name="content" value={selectedPost.content || ''} onChange={handleInputChange} rows={10} className="w-full bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar" placeholder="**太字** や [リンク](https://...) が使えます" />
                             </div>
                             
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">画像URL</label>
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">画像URL (任意)</label>
                                 <input type="text" name="imageUrl" value={selectedPost.imageUrl || ''} onChange={handleInputChange} placeholder="https://..." className="w-full bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]" />
                                 {selectedPost.imageUrl && (
-                                    <img src={selectedPost.imageUrl} alt="preview" className="mt-4 max-h-48 w-full object-cover rounded-xl border border-border-light dark:border-border-dark" />
+                                    <div className="mt-4 rounded-xl overflow-hidden border border-border-light dark:border-border-dark">
+                                        <img src={selectedPost.imageUrl} alt="preview" className="w-full h-auto max-h-48 object-cover" />
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-border-light dark:border-border-dark">
                             <div className="w-full sm:w-auto">
                                 {selectedPost.id && (
                                     <button onClick={handleDelete} disabled={isDeleting} className="w-full sm:w-auto px-6 py-3 text-red-500 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors flex items-center justify-center gap-2">

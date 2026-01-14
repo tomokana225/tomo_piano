@@ -43,13 +43,13 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
     const TabButton: React.FC<{ tab: AdminTab; label: string }> = ({ tab, label }) => (
         <button
             onClick={() => setActiveTab(tab)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-xl transition-all whitespace-nowrap flex-shrink-0 ${
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-3 sm:px-4 sm:py-3 text-[10px] sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap flex-shrink-0 min-w-[70px] sm:min-w-0 ${
                 activeTab === tab 
                 ? 'bg-[var(--primary-color)] text-white shadow-lg scale-105' 
                 : 'bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10'
             }`}
         >
-            <TabIcon tab={tab} className="w-5 h-5" />
+            <TabIcon tab={tab} className="w-5 h-5 sm:w-5 sm:h-5" />
             <span>{label}</span>
         </button>
     );
@@ -67,8 +67,8 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                     </button>
                 </header>
 
-                <div className="p-3 sm:p-4 bg-background-light dark:bg-card-background-dark/50 overflow-x-auto custom-scrollbar flex-shrink-0 border-b border-border-light dark:border-border-dark">
-                    <nav className="flex items-center gap-3">
+                <div className="p-3 sm:p-4 bg-background-light dark:bg-card-background-dark/50 overflow-x-auto custom-scrollbar flex-shrink-0 border-b border-border-light dark:border-border-dark no-scrollbar">
+                    <nav className="flex items-center gap-2 sm:gap-3">
                         <TabButton tab="songs" label="曲リスト" />
                         <TabButton tab="blog" label="お知らせ" />
                         <TabButton tab="setlists" label="セトリ提案" />
@@ -79,11 +79,11 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
 
                 <main className="flex-grow p-4 sm:p-8 overflow-y-auto custom-scrollbar bg-background-light dark:bg-background-dark">
                     <div className="max-w-4xl mx-auto">
-                        {activeTab === 'songs' && <SongListTab {...props} />}
-                        {activeTab === 'blog' && <BlogTab {...props} />}
+                        {activeTab === 'songs' && <SongListTab onSaveSongs={props.onSaveSongs} />}
+                        {activeTab === 'blog' && <BlogTab posts={props.posts} onSavePost={props.onSavePost} onDeletePost={props.onDeletePost} />}
                         {activeTab === 'setlists' && <SetlistSuggestionsTab suggestions={props.setlistSuggestions} />}
                         {activeTab === 'requests' && <RequestListTab requests={props.recentRequests} />}
-                        {activeTab === 'settings' && <SettingsTab {...props} />}
+                        {activeTab === 'settings' && <SettingsTab uiConfig={props.uiConfig} onSaveUiConfig={props.onSaveUiConfig} />}
                     </div>
                 </main>
             </div>
