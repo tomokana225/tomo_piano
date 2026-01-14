@@ -43,24 +43,45 @@ const extractKana = (text) => {
     return { main: text.trim() };
 };
 
+const isNewKeyword = (s) => ['new', 'NEW', 'New', '新曲', '★', 'new!'].includes(s);
+const isPracticingKeyword = (s) => ['練習中', '練習', 'practicing', 'Practicing', '勉強中'].includes(s);
+const isSeasonKeyword = (s) => ['春', '夏', '秋', '冬'].includes(s);
+
 const parseSongs = (str) => {
     if (!str) return [];
     return str.replace(/\r\n/g, '\n').split('\n').map(line => {
-        if (!line.trim()) return null;
-        const parts = line.split(',');
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return null;
+        
+        const separator = trimmedLine.includes('\t') ? '\t' : ',';
+        const parts = trimmedLine.split(separator).map(p => p.trim());
+        
+        // アーティスト, 曲名 の順
         if (parts.length < 2 || !parts[0] || !parts[1]) return null;
         
-        const titleParts = extractKana(parts[0]);
-        const artistParts = extractKana(parts[1]);
+        const artistParts = extractKana(parts[0]);
+        const titleParts = extractKana(parts[1]);
+
+        let isNew = false;
+        let status = 'playable';
+        let season = '';
+
+        parts.slice(3).forEach(part => {
+            if (!part) return;
+            if (isNewKeyword(part)) isNew = true;
+            if (isPracticingKeyword(part)) status = 'practicing';
+            if (isSeasonKeyword(part)) season = part;
+        });
 
         return {
             title: titleParts.main,
             artist: artistParts.main,
             titleKana: titleParts.kana,
             artistKana: artistParts.kana,
-            genre: parts[2]?.trim() || '',
-            isNew: parts[3]?.trim()?.toLowerCase() === 'new',
-            status: parts[4]?.trim()?.toLowerCase() === '練習中' ? 'practicing' : 'playable',
+            genre: parts[2] || '',
+            isNew: isNew,
+            status: status === 'practicing' ? 'practicing' : 'playable',
+            season: season || undefined
         };
     }).filter(Boolean);
 };

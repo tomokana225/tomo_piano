@@ -41,7 +41,8 @@ body {
   font-size: calc(1rem * var(--body-font-scale));
   @apply bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-300;
   @apply bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950;
-  min-height: 100vh;
+  min-height: 100dvh; /* Use dynamic viewport height */
+  overflow: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -84,3 +85,11 @@ input, select, textarea, .rounded-lg {
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 10px; }
 .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: var(--text-secondary-dark); }
+
+/* モバイルのセーフエリア対応 */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}

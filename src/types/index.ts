@@ -7,6 +7,7 @@ export interface Song {
   genre: string;
   isNew: boolean;
   status: 'playable' | 'practicing';
+  season?: string; // 追加: 季節（春, 夏, 秋, 冬）
 }
 
 export interface SearchResult {

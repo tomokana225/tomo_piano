@@ -7,7 +7,8 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc, limit } from 'firebase/firestore/lite';
 
 // Default song list to be used if Firestore is empty
-const PLAYABLE_SONGS_EXAMPLE_STR = "夜に駆ける,YOASOBI,J-Pop,new\nPretender,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\nLemon,米津玄師,J-Pop\n紅蓮華,LiSA,Anime\nドライフラワー,優里,J-Pop\n白日,King Gnu (キングヌー),J-Rock\nマリーゴールド,あいみょん,J-Pop\n猫,DISH//,J-Rock\nうっせぇわ,Ado,J-Pop\n廻廻奇譚,Eve,Anime\n炎,LiSA,Anime\nCry Baby,Official髭男dism (オフィシャルヒゲダンディズム),Anime\nアイドル,YOASOBI,Anime,new\nKICK BACK,米津玄師,Anime\n新時代,Ado,Anime\n旅路,藤井風,J-Pop\n何なんw,藤井風,J-Pop\ngrace,藤井風,J-Pop\nきらり,藤井風,J-Pop\nSubtitle,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\n怪獣の花唄,Vaundy,J-Rock\nミックスナッツ,Official髭男dism (オフィシャルヒゲダンディズム),Anime\n水平線,back number (バックナンバー),J-Pop\nシンデレラボーイ,Saucy Dog,J-Rock\nなんでもないや,RADWIMPS,Anime\nひまわりの約束,秦基博,J-Pop\nHANABI,Mr.Children,J-Pop\n天体観測,BUMP OF CHICKEN (バンプオブチキン),J-Rock\n残酷な天使のテーゼ,高橋洋子,Anime\n千本桜,黒うさP,Vocaloid,,練習中";
+// 順序: アーティスト, 曲名, ジャンル, 練習中, New, 季節
+const PLAYABLE_SONGS_EXAMPLE_STR = "YOASOBI,夜に駆ける,J-Pop,,new\nOfficial髭男dism,Pretender,J-Pop\n米津玄師,Lemon,J-Pop\nLiSA,紅蓮華,Anime\n優里,ドライフラワー,J-Pop\nKing Gnu,白日,J-Rock\nあいみょん,マリーゴールド,J-Pop\nDISH//,猫,J-Rock\nAdo,うっせぇわ,J-Pop\nEve,廻廻奇譚,Anime\nLiSA,炎,Anime\nOfficial髭男dism,Cry Baby,Anime\nYOASOBI,アイドル,Anime,,new\n米津玄師,KICK BACK,Anime\nAdo,新時代,Anime\n藤井風,旅路,J-Pop\n藤井風,何なんw,J-Pop\n藤井風,grace,J-Pop\n藤井風,きらり,J-Pop\nOfficial髭男dism,Subtitle,J-Pop\nVaundy,怪獣の花唄,J-Rock\nOfficial髭男dism,ミックスナッツ,Anime\nback number,水平線,J-Pop\nSaucy Dog,シンデレラボーイ,J-Rock\nRADWIMPS,なんでもないや,Anime\n秦基博,ひまわりの約束,J-Pop\nMr.Children,HANABI,J-Pop\nBUMP OF CHICKEN,天体観測,J-Rock\n高橋洋子,残酷な天使のテーゼ,Anime\n黒うさP,千本桜,Vocaloid,練習中,,";
 
 const DEFAULT_UI_CONFIG = {
     mainTitle: 'ともかなのリクエスト曲ー検索',

@@ -20,14 +20,32 @@ export const SongCard: React.FC<SongCardProps> = ({ song, onLike, isLiking, isLi
     const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`)}`;
     const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${song.artist} ${song.title} 歌詞`)}`;
 
+    const getSeasonEmoji = (season?: string) => {
+        switch (season) {
+            case '春': return '🌸';
+            case '夏': return '☀️';
+            case '秋': return '🍂';
+            case '冬': return '❄️';
+            default: return null;
+        }
+    };
+
     return (
         <div className="bg-input-bg-light dark:bg-input-bg-dark p-3 sm:p-4 rounded-lg flex justify-between items-center border border-border-light dark:border-border-dark fancy-card shadow-sm">
             <div className="min-w-0 flex-grow">
-                <h3 className="font-bold text-base sm:text-lg truncate text-text-primary-light dark:text-text-primary-dark">{song.title}</h3>
+                <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="font-bold text-base sm:text-lg truncate text-text-primary-light dark:text-text-primary-dark">{song.title}</h3>
+                    {song.season && (
+                        <span className="text-sm" title={`${song.season}の曲`}>
+                            {getSeasonEmoji(song.season)}
+                        </span>
+                    )}
+                </div>
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark truncate">{song.artist}</p>
                  <div className="flex items-center gap-2 mt-2">
-                    {song.isNew && <span className="text-xs font-semibold bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full">NEW</span>}
-                    {song.status === 'practicing' && <span className="text-xs font-semibold bg-blue-500 text-white px-2 py-0.5 rounded-full">練習中</span>}
+                    {song.isNew && <span className="text-[10px] font-bold bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full">NEW</span>}
+                    {song.status === 'practicing' && <span className="text-[10px] font-bold bg-blue-500 text-white px-2 py-0.5 rounded-full">練習中</span>}
+                    {song.genre && <span className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark font-medium px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5">{song.genre}</span>}
                 </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 ml-2 sm:ml-4">

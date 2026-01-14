@@ -14,6 +14,7 @@ const extractKana = (text: string): { main: string; kana?: string } => {
 // キーワード判定用のヘルパー
 const isNewKeyword = (s: string) => ['new', 'NEW', 'New', '新曲', '★', 'new!'].includes(s);
 const isPracticingKeyword = (s: string) => ['練習中', '練習', 'practicing', 'Practicing', '勉強中'].includes(s);
+const isSeasonKeyword = (s: string) => ['春', '夏', '秋', '冬'].includes(s);
 
 export const parseSongs = (str: string): Song[] => {
     if (!str) return [];
@@ -26,29 +27,38 @@ export const parseSongs = (str: string): Song[] => {
         const separator = trimmedLine.includes('\t') ? '\t' : ',';
         const parts = trimmedLine.split(separator).map(p => p.trim());
         
-        // 最低限「曲名」と「アーティスト名」が必要
+        // 指定順序: アーティスト(0), 曲名(1), ジャンル(2), 練習中(3), New(4), 季節(5)
+        // 最低限「アーティスト名」と「曲名」が必要
         if (parts.length < 2 || !parts[0] || !parts[1]) return null;
         
-        const titleParts = extractKana(parts[0]);
-        const artistParts = extractKana(parts[1]);
+        const artistParts = extractKana(parts[0]);
+        const titleParts = extractKana(parts[1]);
 
-        let genre = '';
-        let isNew = false;
+        let genre = parts[2] || '';
         let status: 'playable' | 'practicing' = 'playable';
+        let isNew = false;
+        let season = '';
 
-        // 3列目以降を柔軟に解析（キーワードベースで判別）
-        const extraParts = parts.slice(2);
-        extraParts.forEach(part => {
+        // 3列目(インデックス3)以降を解析
+        // 練習中フラグ
+        if (parts[3] && isPracticingKeyword(parts[3])) {
+            status = 'practicing';
+        }
+        // Newフラグ
+        if (parts[4] && isNewKeyword(parts[4])) {
+            isNew = true;
+        }
+        // 季節
+        if (parts[5] && isSeasonKeyword(parts[5])) {
+            season = parts[5];
+        }
+
+        // キーワードベースでの補完（列がずれている場合のため）
+        parts.slice(3).forEach(part => {
             if (!part) return;
-
-            if (isNewKeyword(part)) {
-                isNew = true;
-            } else if (isPracticingKeyword(part)) {
-                status = 'practicing';
-            } else if (!genre) {
-                // キーワード以外で、かつ最初に現れた文字列をジャンルとする
-                genre = part;
-            }
+            if (isNewKeyword(part)) isNew = true;
+            if (isPracticingKeyword(part)) status = 'practicing';
+            if (isSeasonKeyword(part)) season = part;
         });
 
         return {
@@ -59,23 +69,27 @@ export const parseSongs = (str: string): Song[] => {
             genre: genre,
             isNew: isNew,
             status: status,
+            season: season || undefined
         };
     }).filter((song): song is Song => song !== null);
 };
 
 export const songsToString = (songs: Song[]): string => {
     return songs.map(song => {
-        const titleWithKana = song.titleKana ? `${song.title} (${song.titleKana})` : song.title;
         const artistWithKana = song.artistKana ? `${song.artist} (${song.artistKana})` : song.artist;
-        const parts = [titleWithKana, artistWithKana, song.genre || ''];
+        const titleWithKana = song.titleKana ? `${song.title} (${song.titleKana})` : song.title;
         
-        let fourthPart = song.isNew ? 'new' : '';
-        let fifthPart = song.status === 'practicing' ? '練習中' : '';
-
-        parts.push(fourthPart);
-        parts.push(fifthPart);
+        // 順序: アーティスト, 曲名, ジャンル, 練習中, New, 季節
+        const parts = [
+            artistWithKana,
+            titleWithKana,
+            song.genre || '',
+            song.status === 'practicing' ? '練習中' : '',
+            song.isNew ? 'new' : '',
+            song.season || ''
+        ];
         
-        // 配列の後ろにある空の要素を削除して、スッキリしたCSV/TSVにする
+        // 末尾の空要素を削除
         while (parts.length > 2 && !parts[parts.length - 1]) {
             parts.pop();
         }

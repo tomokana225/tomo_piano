@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -159,14 +158,14 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
         <div className="space-y-6">
             <section className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm">
                 <h3 className="text-lg font-bold mb-3">一括編集 (エクセル・CSV)</h3>
-                <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-4">
-                    エクセルのデータを直接貼り付け可能です。<br/>形式: <code>曲名,アーティスト名,ジャンル,new,練習中</code>
+                <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-4 leading-relaxed">
+                    エクセルのデータを直接貼り付け可能です。<br/>形式: <code>アーティスト,曲名,ジャンル,練習中,new,季節(春/夏/秋/冬)</code>
                 </p>
                 <textarea
                     value={songString}
                     onChange={(e) => setSongString(e.target.value)}
                     className="w-full h-48 sm:h-64 bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar"
-                    placeholder="夜に駆ける	YOASOBI	J-Pop	new"
+                    placeholder="YOASOBI	夜に駆ける	J-Pop	playable	new	夏"
                 />
             </section>
             
@@ -183,15 +182,29 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
                     {songs.map((song, index) => (
                         <div key={index} className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-border-light dark:border-border-dark shadow-sm relative group">
                             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start sm:items-center">
-                                <div className="sm:col-span-5 space-y-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block sm:hidden">曲名</label>
-                                    <input type="text" value={song.title} onChange={(e) => updateSong(index, { title: e.target.value })} placeholder="曲名" className="w-full bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg text-sm font-bold focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
-                                </div>
-                                <div className="sm:col-span-4 space-y-1">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block sm:hidden">アーティスト</label>
+                                <div className="sm:col-span-3 space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">アーティスト</label>
                                     <input type="text" value={song.artist} onChange={(e) => updateSong(index, { artist: e.target.value })} placeholder="アーティスト" className="w-full bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
                                 </div>
-                                <div className="sm:col-span-2 flex gap-2">
+                                <div className="sm:col-span-4 space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">曲名</label>
+                                    <input type="text" value={song.title} onChange={(e) => updateSong(index, { title: e.target.value })} placeholder="曲名" className="w-full bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg text-sm font-bold focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
+                                </div>
+                                <div className="sm:col-span-2 space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">季節</label>
+                                    <select 
+                                        value={song.season || ''} 
+                                        onChange={(e) => updateSong(index, { season: e.target.value || undefined })}
+                                        className="w-full bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"
+                                    >
+                                        <option value="">設定なし</option>
+                                        <option value="春">春 🌸</option>
+                                        <option value="夏">夏 ☀️</option>
+                                        <option value="秋">秋 🍂</option>
+                                        <option value="冬">冬 ❄️</option>
+                                    </select>
+                                </div>
+                                <div className="sm:col-span-2 flex gap-2 sm:pt-4">
                                     <button onClick={() => updateSong(index, { isNew: !song.isNew })} className={`flex-1 sm:flex-none text-[10px] font-bold px-3 py-2 rounded-lg transition-colors ${song.isNew ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>NEW</button>
                                     <button onClick={() => updateSong(index, { status: song.status === 'practicing' ? 'playable' : 'practicing' })} className={`flex-1 sm:flex-none text-[10px] font-bold px-3 py-2 rounded-lg transition-colors ${song.status === 'practicing' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>練習中</button>
                                 </div>
@@ -210,7 +223,7 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
                 {renderProcessBanner()}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark text-center sm:text-left">
-                        保存時にAIが「ふりがな」を自動付与します。<br className="hidden sm:block"/>曲名(ふりがな) の形式で保存されます。
+                        保存時にAIが「ふりがな」を自動付与します。<br className="hidden sm:block"/>アーティスト(ふりがな) / 曲名(ふりがな) の形式で保存されます。
                     </p>
                     <button
                         onClick={handleSave}

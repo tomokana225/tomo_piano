@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -360,41 +359,50 @@ const App: React.FC = () => {
 
     return (
         <>
-            <div className="flex h-screen bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
+            <div className="flex h-[100dvh] bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark overflow-hidden">
                 <div className={`fixed inset-0 bg-black/95 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
 
                 <aside className={`fixed z-40 h-full bg-card-background-light dark:bg-card-background-dark border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <SidebarContent />
                 </aside>
                 
-                <div className="flex-1 flex flex-col overflow-x-hidden">
-                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg px-4 sm:px-6 py-2 sm:py-4 border-b-2" style={{ borderColor: 'var(--primary-color)' }}>
-                        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-3">
-                            <div className="flex-1 flex justify-start order-2 sm:order-1">
-                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                                    <MenuIcon className="w-6 h-6" />
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg h-14 sm:h-20 border-b-2 z-20" style={{ borderColor: 'var(--primary-color)' }}>
+                        <div className="h-full flex items-center justify-between px-4 sm:px-6">
+                            {/* Left: Menu Toggle */}
+                            <div className="flex-1 flex justify-start">
+                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                                    <MenuIcon className="w-6 h-6 sm:w-7 sm:h-7" />
                                     <span className="font-semibold hidden sm:inline">メニュー</span>
                                 </button>
                             </div>
 
-                            <div className="w-full sm:w-auto flex-shrink-0 px-2 text-center order-1 sm:order-2">
-                                 <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-normal sm:whitespace-nowrap" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
+                            {/* Center: Title */}
+                            <div className="flex-[4] sm:flex-[3] text-center px-2 flex items-center justify-center h-full">
+                                 <h1 className="text-sm sm:text-2xl lg:text-3xl font-bold truncate leading-tight w-full" title={uiConfig.mainTitle}>
+                                     {uiConfig.mainTitle}
+                                 </h1>
                             </div>
 
-                            <div className="flex-1 flex justify-end items-center gap-2 relative order-3 sm:order-3">
+                            {/* Right: Visitor & Theme */}
+                            <div className="flex-1 flex justify-end items-center gap-2">
                                 <div className="hidden sm:flex items-center gap-2">
-                                    <div className="flex items-center gap-1 sm:gap-2 bg-black/5 dark:bg-white/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full" title="現在の訪問者数">
-                                        <UserGroupIcon className="w-4 h-4 sm:w-5 sm:h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                                        <span className="text-xs sm:text-sm font-semibold">{activeUserCount}</span>
+                                    <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
+                                        <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                                        <span className="text-sm font-semibold">{activeUserCount}</span>
                                     </div>
-                                    <button onClick={toggleDarkMode} className="p-1.5 sm:p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
-                                        {isDarkMode ? <SunIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <MoonIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
+                                    <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+                                        {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
                                     </button>
                                 </div>
+                                {/* Mobile-only simple dark toggle */}
+                                <button onClick={toggleDarkMode} className="sm:hidden p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+                                    {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
+                                </button>
                             </div>
                         </div>
                     </header>
-                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar relative">
                          {error && (
                             <div className="mb-4 bg-yellow-100 dark:bg-yellow-900/80 border border-yellow-500 text-yellow-800 dark:text-yellow-200 p-2 text-center text-sm z-20 shadow-md rounded-lg">
                                 <strong>開発用情報:</strong> {error}
@@ -426,13 +434,22 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
-                    <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-t-lg border-t border-border-light dark:border-border-dark p-2 flex justify-around items-center">
-                        <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-full" title="現在の訪問者数">
-                            <UserGroupIcon className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
-                            <span className="text-xs font-semibold">{activeUserCount}</span>
+                    <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-[0_-4px_10px_rgba(0,0,0,0.1)] border-t border-border-light dark:border-border-dark p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-20">
+                        <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
+                            <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                            <span className="text-sm font-semibold">{activeUserCount}</span>
                         </div>
-                        <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
-                            {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+                        
+                        <button onClick={() => setMode('search')} className={`p-3 rounded-full transition-colors ${mode === 'search' ? 'bg-[var(--primary-color)] text-white shadow-md' : 'text-text-secondary-light dark:text-text-secondary-dark'}`} aria-label="検索">
+                            <SearchIcon className="w-6 h-6" />
+                        </button>
+                        
+                        <button onClick={() => setMode('list')} className={`p-3 rounded-full transition-colors ${mode === 'list' ? 'bg-[var(--primary-color)] text-white shadow-md' : 'text-text-secondary-light dark:text-text-secondary-dark'}`} aria-label="曲リスト">
+                            <MusicNoteIcon className="w-6 h-6" />
+                        </button>
+
+                        <button onClick={toggleDarkMode} className="p-3 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="ダークモード切替">
+                            {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
                         </button>
                     </footer>
                 </div>
