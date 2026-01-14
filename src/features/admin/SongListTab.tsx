@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -53,8 +54,6 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
 
         try {
             const songsToProcess = parseSongs(songString);
-            
-            // ふりがな付与が必要な曲を抽出
             const songsWithoutKana = songsToProcess.filter(song => {
                 const hasKanaInTitle = /\(.+?\)|（.+?）/.test(song.title);
                 const hasKanaInArtist = /\(.+?\)|（.+?）/.test(song.artist);
@@ -65,7 +64,6 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             let processedSongs = [...songsToProcess];
             let kanaSkipped = false;
 
-            // AIによるふりがな生成（失敗しても保存は継続する）
             if (songsWithoutKana.length > 0) {
                  setProcessState({
                     status: 'processing',
@@ -97,11 +95,9 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
                             return song;
                         });
                     } else {
-                        console.warn("ふりがな生成APIがエラーを返しました。ふりがな付与をスキップします。");
                         kanaSkipped = true;
                     }
                 } catch (apiError) {
-                    console.error("ふりがな生成中にエラーが発生しました。保存のみ継続します:", apiError);
                     kanaSkipped = true;
                 }
             }
@@ -122,7 +118,6 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
             }
 
         } catch (error) {
-            console.error("Failed to save song list:", error);
             const errorMessage = error instanceof Error ? error.message : '不明なエラーが発生しました。';
             setProcessState({ status: 'error', message: `エラー: ${errorMessage}` });
         }
@@ -134,10 +129,8 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
 
     const renderProcessBanner = () => {
         if (processState.status === 'idle') return null;
-
-        const baseClasses = 'p-3 rounded-md flex items-center gap-3 text-sm transition-opacity duration-300';
-        let specificClasses = '';
         let IconComponent: React.FC<{ className?: string }> = LoadingSpinner;
+        let specificClasses = '';
 
         switch (processState.status) {
             case 'processing':
@@ -155,56 +148,77 @@ export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promis
         }
 
         return (
-            <div className={`${baseClasses} ${specificClasses}`} role="alert">
+            <div className={`p-4 rounded-xl flex items-center gap-3 text-sm shadow-sm ${specificClasses}`} role="alert">
                 <IconComponent className={`w-5 h-5 flex-shrink-0 ${processState.status === 'processing' ? 'animate-spin' : ''}`} />
-                <p className="font-medium">{processState.message}</p>
+                <p className="font-bold">{processState.message}</p>
             </div>
         );
     };
 
     return (
-        <div>
-            <h3 className="text-lg font-semibold mb-2">曲リストを編集</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                エクセルから直接貼り付け、または <code>曲名,アーティスト名,ジャンル,new,練習中</code> の形式（コンマ区切り）で入力してください。
-            </p>
-            <textarea
-                value={songString}
-                onChange={(e) => setSongString(e.target.value)}
-                className="w-full h-64 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md p-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar"
-                placeholder="夜に駆ける	YOASOBI	J-Pop	new (エクセルから貼り付け可)"
-            />
+        <div className="space-y-6">
+            <section className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm">
+                <h3 className="text-lg font-bold mb-3">一括編集 (エクセル・CSV)</h3>
+                <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-4">
+                    エクセルのデータを直接貼り付け可能です。<br/>形式: <code>曲名,アーティスト名,ジャンル,new,練習中</code>
+                </p>
+                <textarea
+                    value={songString}
+                    onChange={(e) => setSongString(e.target.value)}
+                    className="w-full h-48 sm:h-64 bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar"
+                    placeholder="夜に駆ける	YOASOBI	J-Pop	new"
+                />
+            </section>
             
-            <h3 className="text-lg font-semibold mt-6 mb-2">クリックで編集</h3>
-            <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
-                {songs.map((song, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-center bg-white dark:bg-gray-800 p-2 rounded-md">
-                        <input type="text" value={song.title} onChange={(e) => updateSong(index, { title: e.target.value })} placeholder="曲名" className="col-span-4 bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
-                        <input type="text" value={song.artist} onChange={(e) => updateSong(index, { artist: e.target.value })} placeholder="アーティスト" className="col-span-4 bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
-                        <div className="col-span-3 flex gap-2">
-                            <button onClick={() => updateSong(index, { isNew: !song.isNew })} className={`text-xs px-2 py-1 rounded-full ${song.isNew ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white'}`}>NEW</button>
-                            <button onClick={() => updateSong(index, { status: song.status === 'practicing' ? 'playable' : 'practicing' })} className={`text-xs px-2 py-1 rounded-full ${song.status === 'practicing' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white'}`}>練習中</button>
+            <section>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">個別編集</h3>
+                    <button onClick={addSong} className="flex items-center gap-2 text-xs font-bold py-2 px-4 bg-cyan-600 text-white rounded-full hover:bg-cyan-700 transition shadow-md">
+                        <PlusIcon className="w-4 h-4" />
+                        曲を追加
+                    </button>
+                </div>
+                
+                <div className="space-y-3">
+                    {songs.map((song, index) => (
+                        <div key={index} className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-border-light dark:border-border-dark shadow-sm relative group">
+                            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start sm:items-center">
+                                <div className="sm:col-span-5 space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block sm:hidden">曲名</label>
+                                    <input type="text" value={song.title} onChange={(e) => updateSong(index, { title: e.target.value })} placeholder="曲名" className="w-full bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg text-sm font-bold focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
+                                </div>
+                                <div className="sm:col-span-4 space-y-1">
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block sm:hidden">アーティスト</label>
+                                    <input type="text" value={song.artist} onChange={(e) => updateSong(index, { artist: e.target.value })} placeholder="アーティスト" className="w-full bg-gray-50 dark:bg-gray-700 p-2.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
+                                </div>
+                                <div className="sm:col-span-2 flex gap-2">
+                                    <button onClick={() => updateSong(index, { isNew: !song.isNew })} className={`flex-1 sm:flex-none text-[10px] font-bold px-3 py-2 rounded-lg transition-colors ${song.isNew ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>NEW</button>
+                                    <button onClick={() => updateSong(index, { status: song.status === 'practicing' ? 'playable' : 'practicing' })} className={`flex-1 sm:flex-none text-[10px] font-bold px-3 py-2 rounded-lg transition-colors ${song.status === 'practicing' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>練習中</button>
+                                </div>
+                                <div className="sm:col-span-1 flex justify-end">
+                                    <button onClick={() => deleteSong(index)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors" title="削除">
+                                        <XIcon className="w-6 h-6 sm:w-5 sm:h-5"/>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button onClick={() => deleteSong(index)} className="col-span-1 text-red-500 hover:text-red-400"><XIcon className="w-5 h-5"/></button>
-                    </div>
-                ))}
-            </div>
-             <button onClick={addSong} className="mt-3 flex items-center gap-2 text-sm text-cyan-500 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 font-semibold py-2 px-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md">
-                <PlusIcon className="w-4 h-4" />
-                曲を追加
-            </button>
+                    ))}
+                </div>
+            </section>
 
-            <div className="mt-6 space-y-4">
+            <div className="sticky bottom-0 bg-background-light dark:bg-background-dark py-4 border-t border-border-light dark:border-border-dark flex flex-col gap-4 z-10 mt-8">
                 {renderProcessBanner()}
-                <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-right">保存時にAIがふりがなを自動生成します。<br/>（サーバー設定によりスキップされる場合があります）</p>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark text-center sm:text-left">
+                        保存時にAIが「ふりがな」を自動付与します。<br className="hidden sm:block"/>曲名(ふりがな) の形式で保存されます。
+                    </p>
                     <button
                         onClick={handleSave}
                         disabled={processState.status === 'processing'}
-                        className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-2 min-w-[200px] justify-center"
+                        className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-12 rounded-full shadow-lg disabled:opacity-50 transition-all transform active:scale-95 flex items-center justify-center gap-2"
                     >
                         {processState.status === 'processing' ? <LoadingSpinner className="w-5 h-5" /> : null}
-                        {processState.status === 'processing' ? '処理中...' : '保存する'}
+                        {processState.status === 'processing' ? '処理中...' : '曲リストを保存する'}
                     </button>
                 </div>
             </div>
