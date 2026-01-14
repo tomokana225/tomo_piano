@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, UiConfig, RankingItem, Mode } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, LightBulbIcon, CloudUploadIcon, ChevronRightIcon, HeartIcon, TwitcasIcon, XSocialIcon, DocumentTextIcon, YouTubeIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, LightBulbIcon, CloudUploadIcon, ChevronRightIcon, HeartIcon, TwitcasIcon, XSocialIcon, DocumentTextIcon, YouTubeIcon, UserGroupIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -21,7 +21,7 @@ interface SearchViewProps {
     openSupportModal: () => void;
 }
 
-const MAX_RELATED_SONGS = 5;
+const MAX_RELATED_SONGS = 50; 
 
 const NavCard: React.FC<{
     icon: React.FC<{ className?: string, style?: React.CSSProperties }>;
@@ -30,32 +30,35 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, title, onClick }) => (
   <button
     onClick={onClick}
-    className="group w-full flex items-center gap-2 p-3 sm:gap-4 sm:p-4 rounded-xl bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark shadow-md hover:shadow-lg hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] dark:focus:ring-offset-card-background-dark"
+    className="group w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3 p-5 sm:gap-4 sm:p-4 rounded-2xl sm:rounded-xl bg-card-background-light dark:bg-card-background-dark border-2 border-border-light dark:border-border-dark shadow-md hover:shadow-xl hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
     aria-label={title}
   >
-    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-colors duration-300 bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/20 flex-shrink-0">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-300" style={{ color: 'var(--primary-color)' }} />
+    <div className="w-14 h-14 sm:w-10 sm:h-10 rounded-2xl sm:rounded-lg flex items-center justify-center transition-all duration-300 bg-[var(--primary-color)]/10 group-hover:bg-[var(--primary-color)]/20 flex-shrink-0">
+        <Icon className="w-7 h-7 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-110" style={{ color: 'var(--primary-color)' }} />
     </div>
-    <h3 className="font-bold text-sm sm:text-base text-text-primary-light dark:text-text-primary-dark text-left whitespace-nowrap truncate">{title}</h3>
-    <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-auto text-text-secondary-light/70 dark:text-text-secondary-dark/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[var(--primary-color)] flex-shrink-0" />
+    <div className="flex flex-col items-center sm:items-start flex-grow min-w-0">
+        <h3 className="font-bold text-base sm:text-base text-text-primary-light dark:text-text-primary-dark whitespace-nowrap text-center sm:text-left">{title}</h3>
+        <span className="hidden sm:inline text-[10px] text-text-secondary-light dark:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity">開く</span>
+    </div>
+    <ChevronRightIcon className="hidden sm:block w-4 h-4 ml-auto text-text-secondary-light/70 dark:text-text-secondary-dark/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[var(--primary-color)] flex-shrink-0" />
   </button>
 );
 
 
 export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, uiConfig, songRankingList, setMode, openSuggestModal, openSupportModal }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
+    const [matchedArtists, setMatchedArtists] = useState<{name: string, count: number}[]>([]);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
     const [isLiking, setIsLiking] = useState<string | null>(null);
     const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
     const [likeMessage, setLikeMessage] = useState('');
-    // FIX: Changed ref type from HTMLDivElement to HTMLFormElement to match the element it's attached to.
     const searchContainerRef = useRef<HTMLFormElement>(null);
     const initialSearchTermRef = useRef(searchTerm);
 
     const popularSongs = useMemo(() => {
         return songRankingList
-            .slice(0, 5) // Top 5
+            .slice(0, 5) 
             .map(rankItem => songs.find(s => s.title === rankItem.id && s.artist === rankItem.artist))
             .filter((s): s is Song => !!s);
     }, [songRankingList, songs]);
@@ -73,6 +76,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
     const performSearch = useCallback((term: string) => {
         if (!term.trim()) {
             setSearchResult(null);
+            setMatchedArtists([]);
             setSuggestions([]);
             return;
         }
@@ -80,20 +84,31 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         const normalizedTerm = normalizeForSearch(term);
         let foundSongs: Song[] = [];
         let relatedSongs: Song[] = [];
+        const artistMatchMap = new Map<string, number>();
 
         for (const { original, normalizedTitle, normalizedArtist, normalizedTitleKana, normalizedArtistKana } of normalizedSongs) {
-            const titleMatch = normalizedTitle === normalizedTerm || normalizedTitleKana === normalizedTerm;
-            const artistMatch = normalizedArtist === normalizedTerm || normalizedArtistKana === normalizedTerm;
+            const exactTitleMatch = normalizedTitle === normalizedTerm || normalizedTitleKana === normalizedTerm;
+            const exactArtistMatch = normalizedArtist === normalizedTerm || normalizedArtistKana === normalizedTerm;
 
-            if (titleMatch || artistMatch) {
+            if (exactTitleMatch || exactArtistMatch) {
                 foundSongs.push(original);
             } else if (
-                (normalizedTitle.includes(normalizedTerm) || normalizedTitleKana.includes(normalizedTerm) ||
-                 normalizedArtist.includes(normalizedTerm) || normalizedArtistKana.includes(normalizedTerm))
+                normalizedTitle.includes(normalizedTerm) || normalizedTitleKana.includes(normalizedTerm) ||
+                normalizedArtist.includes(normalizedTerm) || normalizedArtistKana.includes(normalizedTerm)
             ) {
                 relatedSongs.push(original);
             }
+            
+            if (normalizedArtist.includes(normalizedTerm) || normalizedArtistKana.includes(normalizedTerm)) {
+                artistMatchMap.set(original.artist, (artistMatchMap.get(original.artist) || 0) + 1);
+            }
         }
+        
+        const artists = Array.from(artistMatchMap.entries())
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count);
+        
+        setMatchedArtists(artists);
 
         if (foundSongs.length > 0) {
             setSearchResult({ status: 'found', songs: foundSongs, searchTerm: term });
@@ -107,11 +122,10 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
 
     }, [normalizedSongs, logSearch]);
     
-    // Auto-search if search term is passed in from another view
     useEffect(() => {
         if (initialSearchTermRef.current) {
             performSearch(initialSearchTermRef.current);
-            initialSearchTermRef.current = ''; // Prevent re-searching on subsequent renders
+            initialSearchTermRef.current = ''; 
         }
     }, [performSearch]);
 
@@ -120,6 +134,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         setSearchTerm(term);
         if (!term.trim()) {
             setSearchResult(null);
+            setMatchedArtists([]);
             setSuggestions([]);
             return;
         }
@@ -142,13 +157,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         const term = searchTerm.trim().toLowerCase();
 
         if (term === 'admin') {
-            const password = prompt("管理者パスワードを入力してください:");
-            // データベースから取得したパスワードと比較
-            if (password === (uiConfig.adminPassword || 'admin225')) {
-                onAdminLogin();
-            } else if (password) {
-                alert("パスワードが違います。");
-            }
+            onAdminLogin();
             setSearchTerm('');
             setSearchResult(null);
             setSuggestions([]);
@@ -163,6 +172,11 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         performSearch(song.title);
     };
     
+    const handleArtistFilterClick = (artistName: string) => {
+        setSearchTerm(artistName);
+        performSearch(artistName);
+    };
+    
     const showLikeMessage = (msg: string) => {
         setLikeMessage(msg);
         setTimeout(() => setLikeMessage(''), 3000);
@@ -174,7 +188,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         setIsLiking(song.title);
         await logLike(song.title, song.artist);
         setLikedSongs(prev => new Set(prev).add(song.title));
-        await refreshRankings(); // Update like ranking data
+        await refreshRankings();
         setIsLiking(null);
         showLikeMessage(`「${song.title}」にいいねしました！`);
     };
@@ -182,17 +196,10 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
     const onAdminTrigger = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.ctrlKey && e.key === 'a') {
             e.preventDefault();
-            const password = prompt("管理者パスワードを入力してください:");
-            // データベースから取得したパスワードと比較
-            if (password === (uiConfig.adminPassword || 'admin225')) {
-                onAdminLogin();
-            } else if (password) {
-                alert("パスワードが違います。");
-            }
+            onAdminLogin();
         }
-    }, [onAdminLogin, uiConfig.adminPassword]);
+    }, [onAdminLogin]);
     
-    // Close suggestions if clicked outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -208,30 +215,29 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         const buttonConfigs = {
             twitcas: {
                 href: uiConfig.twitcastingUrl,
-                icon: uiConfig.twitcastingIconUrl ? () => <img src={uiConfig.twitcastingIconUrl} alt="Twitcas" className="w-6 h-6"/> : TwitcasIcon,
+                icon: uiConfig.twitcastingIconUrl ? () => <img src={uiConfig.twitcastingIconUrl} alt="Twitcas" className="w-5 h-5 sm:w-6 sm:h-6"/> : TwitcasIcon,
                 config: uiConfig.specialButtons.twitcas,
                 colorClasses: 'bg-[#2190b8] hover:bg-[#1c7a9e]',
             },
             x: {
                 href: uiConfig.xUrl,
-                icon: uiConfig.xIconUrl ? () => <img src={uiConfig.xIconUrl} alt="X" className="w-6 h-6"/> : XSocialIcon,
+                icon: uiConfig.xIconUrl ? () => <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5 sm:w-6 sm:h-6"/> : XSocialIcon,
                 config: uiConfig.specialButtons.x,
                 colorClasses: 'bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 dark:text-black',
             },
-            youtube: { // YouTubeボタンの定義
+            youtube: {
                 href: uiConfig.youtubeUrl,
-                icon: uiConfig.youtubeIconUrl ? () => <img src={uiConfig.youtubeIconUrl} alt="YouTube" className="w-6 h-6"/> : YouTubeIcon,
+                icon: uiConfig.youtubeIconUrl ? () => <img src={uiConfig.youtubeIconUrl} alt="YouTube" className="w-5 h-5 sm:w-6 sm:h-6"/> : YouTubeIcon,
                 config: uiConfig.specialButtons.youtube,
                 colorClasses: 'bg-[#ff0000] hover:bg-[#cc0000]',
             },
             support: {
                 onClick: openSupportModal,
-                icon: uiConfig.supportIconUrl ? () => <img src={uiConfig.supportIconUrl} alt="Support" className="w-6 h-6"/> : HeartIcon,
+                icon: uiConfig.supportIconUrl ? () => <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5 sm:w-6 sm:h-6"/> : HeartIcon,
                 config: uiConfig.specialButtons.support,
                 colorClasses: 'bg-pink-500 hover:bg-pink-600',
             }
         };
-        // ボタンの表示順序
         const buttonOrder: (keyof typeof buttonConfigs)[] = ['twitcas', 'x', 'youtube', 'support'];
         return buttonOrder.map(key => buttonConfigs[key]).filter(btn => btn && btn.config?.enabled);
     }, [uiConfig, openSupportModal]);
@@ -241,7 +247,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
             <div className="text-center mb-8">
                 <p className="text-base sm:text-lg text-text-primary-light dark:text-text-primary-dark">{uiConfig.subtitle}</p>
             </div>
-            <form onSubmit={handleSearchSubmit} className="mb-6 relative" ref={searchContainerRef}>
+            <form onSubmit={handleSearchSubmit} className="mb-8 relative" ref={searchContainerRef}>
                 <div className="relative">
                     <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-text-secondary-light dark:text-text-secondary-dark pointer-events-none" />
                     <input
@@ -250,42 +256,68 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                         value={searchTerm}
                         onChange={handleSearchChange}
                         onKeyDown={onAdminTrigger}
-                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border-2 border-border-light dark:border-border-dark rounded-full py-3 sm:py-4 pl-12 pr-12 text-base sm:text-lg focus:outline-none focus:ring-2"
+                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border-2 border-border-light dark:border-border-dark rounded-full py-4 sm:py-4 pl-12 pr-12 text-lg focus:outline-none focus:ring-2"
                         style={{'--tw-ring-color': 'var(--primary-color)'} as React.CSSProperties}
                         aria-label="検索"
                     />
                     {searchTerm && (
-                        <button type="button" onClick={() => { setSearchTerm(''); setSearchResult(null); setSuggestions([]); }} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark">
+                        <button type="button" onClick={() => { setSearchTerm(''); setSearchResult(null); setMatchedArtists([]); setSuggestions([]); }} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark">
                             <XIcon className="w-6 h-6" />
                         </button>
                     )}
                 </div>
                 {suggestions.length > 0 && (
-                    <ul className="absolute z-10 w-full mt-2 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg">
+                    <ul className="absolute z-10 w-full mt-2 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg overflow-hidden">
                         {suggestions.map((song, index) => (
-                            <li key={index} onClick={() => handleSuggestionClick(song)} className="px-4 py-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/10">
-                                {song.title} <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">- {song.artist}</span>
+                            <li key={index} onClick={() => handleSuggestionClick(song)} className="px-4 py-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 border-b border-border-light/50 dark:border-border-dark/50 last:border-b-0">
+                                <div className="flex items-center gap-2">
+                                    <MusicNoteIcon className="w-4 h-4 opacity-50" />
+                                    <span>{song.title}</span>
+                                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate ml-auto">- {song.artist}</span>
+                                </div>
                             </li>
                         ))}
                     </ul>
                 )}
             </form>
 
-             {likeMessage && <p className="text-center text-pink-500 h-6 mb-4 flex items-center justify-center">{likeMessage}</p>}
+             {likeMessage && <p className="text-center text-pink-500 h-6 mb-4 flex items-center justify-center font-bold animate-pulse">{likeMessage}</p>}
 
             {searchResult ? (
                 <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        <span className="px-4 py-1.5 bg-[var(--primary-color)] text-white text-sm font-bold rounded-full shadow-sm">
+                            {searchResult.songs.length} 件見つかりました
+                        </span>
+                    </div>
+                    
+                    {matchedArtists.length > 0 && (
+                        <div className="mb-6 flex flex-wrap justify-center gap-2">
+                            {matchedArtists.slice(0, 5).map((artist, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleArtistFilterClick(artist.name)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg text-xs font-bold hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] transition-all shadow-sm group"
+                                >
+                                    <UserGroupIcon className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
+                                    <span>{artist.name}</span>
+                                    <span className="text-[10px] opacity-60">({artist.count}曲)</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     {searchResult.status === 'found' && (
-                         <>
-                            <h2 className="text-xl font-bold text-center">演奏できます！</h2>
+                         <div className="space-y-3">
+                            <h2 className="text-xl font-bold text-center mb-2">演奏できます！</h2>
                             {searchResult.songs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
-                        </>
+                        </div>
                     )}
                     {searchResult.status === 'related' && (
-                        <>
-                            <h2 className="text-xl font-bold text-center">もしかして？</h2>
+                        <div className="space-y-3">
+                            <h2 className="text-xl font-bold text-center mb-2">もしかして？</h2>
                             {searchResult.songs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
-                        </>
+                        </div>
                     )}
                     {searchResult.status === 'notFound' && (
                         <div className="text-center p-6 bg-input-bg-light dark:bg-card-background-dark/50 rounded-lg">
@@ -311,14 +343,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 </div>
             ) : (
                 <>
-                    <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="mb-8 grid grid-cols-2 gap-4">
                         {uiConfig.navButtons?.list?.enabled && <NavCard icon={MusicNoteIcon} title={uiConfig.navButtons.list.label} onClick={() => setMode('list')} />}
                         {uiConfig.navButtons?.news?.enabled && <NavCard icon={NewspaperIcon} title={uiConfig.navButtons.news.label} onClick={() => setMode('news')} />}
                         {uiConfig.navButtons?.suggest?.enabled && <NavCard icon={LightBulbIcon} title={uiConfig.navButtons.suggest.label} onClick={openSuggestModal} />}
                         {uiConfig.navButtons?.requests?.enabled && <NavCard icon={CloudUploadIcon} title={uiConfig.navButtons.requests.label} onClick={() => setMode('requests')} />}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
                         {specialButtons.map((btn, index) => (
                             <a
                                 key={index}
@@ -326,16 +358,16 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                                 onClick={'onClick' in btn ? btn.onClick : undefined}
                                 target={'href' in btn ? '_blank' : undefined}
                                 rel={'href' in btn ? 'noopener noreferrer' : undefined}
-                                className={`flex items-center justify-center gap-3 w-full text-center px-4 py-3 sm:px-6 sm:py-4 text-white rounded-lg font-bold transition-transform transform hover:scale-105 shadow-lg ${btn.colorClasses} whitespace-nowrap`}
+                                className={`flex items-center justify-center gap-2 w-full text-center px-3 py-2.5 sm:px-6 sm:py-4 text-white rounded-xl font-semibold text-xs sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${btn.colorClasses} whitespace-nowrap`}
                             >
-                                <btn.icon className="w-6 h-6 flex-shrink-0"/>
+                                <btn.icon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0"/>
                                 {btn.config.label}
                             </a>
                         ))}
                     </div>
                     
                     {popularSongs.length > 0 && (
-                         <div>
+                         <div className="mt-4">
                             <h2 className="text-xl font-bold text-center mb-4">人気の曲</h2>
                             <div className="space-y-3">
                                 {popularSongs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}

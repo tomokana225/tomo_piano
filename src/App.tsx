@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -18,8 +17,8 @@ import {
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon,
-    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon,
-    CheckCircleIcon
+    ChevronLeftIcon, XIcon, InformationCircleIcon,
+    CheckCircleIcon, UserGroupIcon, CogIcon
 } from './components/ui/Icons';
 
 
@@ -66,7 +65,6 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
     const [step, setStep] = useState(0);
 
     useEffect(() => {
-        // Reset to first step when modal is reopened
         if (isOpen) {
             setStep(0);
         }
@@ -78,7 +76,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
         if (step < tutorialSteps.length - 1) {
             setStep(s => s + 1);
         } else {
-            onClose(); // Finish on the last step
+            onClose();
         }
     };
     
@@ -93,7 +91,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="bg-card-background-light dark:bg-card-background-dark rounded-2xl shadow-2xl w-full max-w-md text-center p-6 sm:p-8 relative flex flex-col justify-between min-h-[380px]">
+            <div className="bg-card-background-light dark:bg-card-background-dark rounded-2xl shadow-2xl w-full max-md text-center p-6 sm:p-8 relative flex flex-col justify-between min-h-[380px]">
                 <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark">
                     <XIcon className="w-6 h-6" />
                 </button>
@@ -130,14 +128,13 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
         </div>
     );
 };
-// --- End of Tutorial Modal Component ---
 
 
 const App: React.FC = () => {
     const { 
         rawSongList, songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
         isLoading, error, activeUserCount,
-        rankingPeriod, setRankingPeriod,
+        rankingPeriod, setRankingPeriod: setPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
         logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings
     } = useApi();
@@ -153,10 +150,6 @@ const App: React.FC = () => {
     const [isInfoBannerVisible, setIsInfoBannerVisible] = useState(true);
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
-    const handleCloseTutorial = () => {
-        setIsTutorialOpen(false);
-    };
-
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         setIsDarkMode(isDark);
@@ -168,7 +161,7 @@ const App: React.FC = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsInfoBannerVisible(false);
-        }, 4000); // Hide after 4 seconds
+        }, 4000);
         return () => clearTimeout(timer);
     }, []);
     
@@ -184,14 +177,39 @@ const App: React.FC = () => {
     useEffect(() => {
         const root = document.documentElement;
         root.style.setProperty('--primary-color', uiConfig.primaryColor);
-        // This is a simple way to get a secondary color. A more complex function could derive it.
-        // For pink, a nice pair is sky blue.
-        if (uiConfig.primaryColor.includes('ec4899')) { // Default Pink
-             root.style.setProperty('--secondary-color', '#38bdf8'); // sky-400
+        
+        // 角の丸み設定
+        const radiusMap = {
+            none: '0px',
+            small: '4px',
+            medium: '12px',
+            large: '24px',
+            full: '9999px'
+        };
+        root.style.setProperty('--app-radius', radiusMap[uiConfig.borderRadius || 'medium']);
+
+        // 影のスタイル設定
+        const shadowOpacity = uiConfig.shadowIntensity ?? 0.1;
+        const shadowStyle = uiConfig.cardStyle === 'elevated' 
+            ? `0 10px 25px -5px rgba(0, 0, 0, ${shadowOpacity * 2}), 0 8px 10px -6px rgba(0, 0, 0, ${shadowOpacity})`
+            : `0 4px 6px -1px rgba(0, 0, 0, ${shadowOpacity}), 0 2px 4px -1px rgba(0, 0, 0, ${shadowOpacity / 2})`;
+        root.style.setProperty('--card-shadow', shadowStyle);
+
+        // グラスモーフィズム対応
+        if (uiConfig.cardStyle === 'glass') {
+            root.style.setProperty('--card-bg-opacity', '0.6');
+            root.style.setProperty('--card-blur', '12px');
         } else {
-            // A generic brighter version or a fixed alternative
-             root.style.setProperty('--secondary-color', '#67e8f9'); // cyan-300
+            root.style.setProperty('--card-bg-opacity', '1');
+            root.style.setProperty('--card-blur', '0px');
         }
+
+        if (uiConfig.primaryColor.includes('ec4899')) {
+             root.style.setProperty('--secondary-color', '#38bdf8');
+        } else {
+             root.style.setProperty('--secondary-color', '#67e8f9');
+        }
+
         root.style.setProperty('--heading-font', uiConfig.headingFontFamily || "'Kiwi Maru', serif");
         root.style.setProperty('--body-font', uiConfig.bodyFontFamily || "'Noto Sans JP', sans-serif");
         root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
@@ -212,14 +230,32 @@ const App: React.FC = () => {
         setIsSuggestModalOpen(false);
     }, []);
 
-    const handleSetlistSuccess = useCallback(() => {
+    const handleSetlistSuccessRedirect = useCallback(() => {
         setMode('search');
     }, []);
 
+    // 管理者ログイン要求
     const handleAdminLogin = useCallback(() => {
-        setIsAdminAuthenticated(true);
-        setIsAdminModalOpen(true);
-    }, []);
+        console.log("handleAdminLogin called. Authenticated:", isAdminAuthenticated);
+        
+        // すでに認証済みならそのまま開く
+        if (isAdminAuthenticated) {
+            setIsAdminModalOpen(true);
+            setIsMenuOpen(false);
+            return;
+        }
+
+        const password = prompt("管理者パスワードを入力してください:");
+        const expectedPassword = uiConfig.adminPassword || 'admin225';
+        
+        if (password === expectedPassword) {
+            setIsAdminAuthenticated(true);
+            setIsAdminModalOpen(true);
+            setIsMenuOpen(false);
+        } else if (password !== null) {
+            alert("パスワードが違います。");
+        }
+    }, [uiConfig.adminPassword, isAdminAuthenticated]);
 
     const renderView = () => {
         if (isLoading && songs.length === 0) {
@@ -237,13 +273,13 @@ const App: React.FC = () => {
             case 'list':
                 return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
             case 'ranking':
-                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} songLikeRanking={songLikeRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
+                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} songLikeRanking={songLikeRankingList} period={rankingPeriod} setPeriod={setPeriod} />;
             case 'requests':
                 return <RequestRankingView recentRequests={recentRequests} logRequest={logRequest} refreshRankings={refreshRankings} uiConfig={uiConfig} />;
             case 'news':
                 return <BlogView posts={posts} />;
             case 'setlist':
-                 return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
+                 return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccessRedirect}/>;
             default:
                 return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} openSupportModal={() => setIsSupportModalOpen(true)} />;
         }
@@ -282,18 +318,9 @@ const App: React.FC = () => {
         }
         return isDark ? '#020617' : '#f1f5f9';
     }, [uiConfig.backgroundType, uiConfig.backgroundColor, uiConfig.darkBackgroundColor, isDarkMode]);
-    
-    if (isLoading && !rawSongList) {
-        return (
-            <div className="min-h-screen w-full flex flex-col justify-center items-center bg-background-light dark:bg-background-dark">
-                <LoadingSpinner className="w-12 h-12" style={{color: 'var(--primary-color)'}}/>
-                <p className="mt-4 text-text-secondary-light dark:text-text-secondary-dark">読み込み中...</p>
-            </div>
-        );
-    }
 
     const SidebarContent = () => (
-        <>
+        <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
                 <h2 className="font-bold text-lg whitespace-nowrap overflow-hidden">メニュー</h2>
                 <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10">
@@ -317,25 +344,31 @@ const App: React.FC = () => {
                     return null;
                 })}
             </nav>
-        </>
+            
+            {/* サイドバー下部に常設の管理者ログイン */}
+            <div className="p-4 border-t border-border-light dark:border-border-dark mt-auto bg-black/5 dark:bg-white/5">
+                <NavButton 
+                    onClick={handleAdminLogin} 
+                    IconComponent={CogIcon} 
+                    label={isAdminAuthenticated ? "管理画面を開く" : "管理者ログイン"} 
+                    className="bg-gray-100 dark:bg-gray-800 text-sm opacity-80 hover:opacity-100 transition-opacity"
+                />
+            </div>
+        </div>
     );
 
     return (
         <>
             <div className="flex h-screen bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
-                {/* Overlay for slide-out menu */}
                 <div className={`fixed inset-0 bg-black/95 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
 
-                {/* Slide-out Menu */}
                 <aside className={`fixed z-40 h-full bg-card-background-light dark:bg-card-background-dark border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <SidebarContent />
                 </aside>
                 
-                {/* Main Content */}
                 <div className="flex-1 flex flex-col overflow-x-hidden">
                     <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg px-4 sm:px-6 py-2 sm:py-4 border-b-2" style={{ borderColor: 'var(--primary-color)' }}>
                         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-3">
-                            {/* Left Section: Menu Button */}
                             <div className="flex-1 flex justify-start order-2 sm:order-1">
                                 <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                                     <MenuIcon className="w-6 h-6" />
@@ -343,14 +376,11 @@ const App: React.FC = () => {
                                 </button>
                             </div>
 
-                            {/* Center Section: Title */}
                             <div className="w-full sm:w-auto flex-shrink-0 px-2 text-center order-1 sm:order-2">
                                  <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-normal sm:whitespace-nowrap" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
                             </div>
 
-                            {/* Right Section: Icons */}
                             <div className="flex-1 flex justify-end items-center gap-2 relative order-3 sm:order-3">
-                                {/* Visitor count & dark mode toggle */}
                                 <div className="hidden sm:flex items-center gap-2">
                                     <div className="flex items-center gap-1 sm:gap-2 bg-black/5 dark:bg-white/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full" title="現在の訪問者数">
                                         <UserGroupIcon className="w-4 h-4 sm:w-5 sm:h-5 text-text-secondary-light dark:text-text-secondary-dark" />
@@ -365,11 +395,8 @@ const App: React.FC = () => {
                     </header>
                     <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
                          {error && (
-                            <div 
-                                className="mb-4 bg-yellow-100 dark:bg-yellow-900/80 border border-yellow-500 text-yellow-800 dark:text-yellow-200 p-2 text-center text-sm z-20 shadow-md rounded-lg"
-                                role="alert"
-                            >
-                                <strong>開発者向け情報:</strong> {error}
+                            <div className="mb-4 bg-yellow-100 dark:bg-yellow-900/80 border border-yellow-500 text-yellow-800 dark:text-yellow-200 p-2 text-center text-sm z-20 shadow-md rounded-lg">
+                                <strong>開発用情報:</strong> {error}
                             </div>
                         )}
                         
@@ -398,7 +425,6 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
-                     {/* Mobile Bottom Bar */}
                     <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-t-lg border-t border-border-light dark:border-border-dark p-2 flex justify-around items-center">
                         <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-full" title="現在の訪問者数">
                             <UserGroupIcon className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
@@ -440,9 +466,10 @@ const App: React.FC = () => {
                 uiConfig={uiConfig}
             />
             
-            <TutorialModal isOpen={isTutorialOpen} onClose={handleCloseTutorial} />
+            <TutorialModal isOpen={isTutorialOpen} onClose={() => setIsTutorialOpen(false)} />
         </>
     );
 };
 
+// FIX: Exporting the App component as default.
 export default App;

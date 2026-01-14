@@ -7,52 +7,100 @@ interface SettingsTabProps {
     onSaveUiConfig: (config: UiConfig) => Promise<boolean>;
 }
 
+// フルデザインプリセットの定義
+const designPresets = [
+    {
+        name: 'サクラ・ドリーム',
+        config: {
+            primaryColor: '#ec4899',
+            backgroundColor: '#fff1f2',
+            darkBackgroundColor: '#4c0519',
+            borderRadius: 'large',
+            cardStyle: 'elevated',
+            shadowIntensity: 0.15,
+            headingFontFamily: "'Kiwi Maru', serif",
+            backgroundImageUrl: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?q=80&w=2076&auto=format&fit=crop',
+            backgroundType: 'image',
+            backgroundOpacity: 0.15
+        }
+    },
+    {
+        name: 'ミッドナイト・ジャズ',
+        config: {
+            primaryColor: '#eab308', // Gold
+            backgroundColor: '#f8fafc',
+            darkBackgroundColor: '#020617',
+            borderRadius: 'none',
+            cardStyle: 'flat',
+            shadowIntensity: 0.3,
+            headingFontFamily: "'Shippori Mincho', serif",
+            backgroundImageUrl: 'https://images.unsplash.com/photo-1520527053377-47393ba91f39?q=80&w=2070&auto=format&fit=crop',
+            backgroundType: 'image',
+            backgroundOpacity: 0.2
+        }
+    },
+    {
+        name: 'フォレスト・ヒーリング',
+        config: {
+            primaryColor: '#16a34a',
+            backgroundColor: '#f0fdf4',
+            darkBackgroundColor: '#052e16',
+            borderRadius: 'medium',
+            cardStyle: 'elevated',
+            shadowIntensity: 0.1,
+            headingFontFamily: "'Yuji Syuku', serif",
+            backgroundImageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2071&auto=format&fit=crop',
+            backgroundType: 'image',
+            backgroundOpacity: 0.1
+        }
+    },
+    {
+        name: 'サイバー・ミュージック',
+        config: {
+            primaryColor: '#06b6d4', // Cyan
+            backgroundColor: '#0f172a',
+            darkBackgroundColor: '#000000',
+            borderRadius: 'small',
+            cardStyle: 'glass',
+            shadowIntensity: 0.5,
+            headingFontFamily: "'Zen Kaku Gothic New', sans-serif",
+            backgroundImageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop',
+            backgroundType: 'image',
+            backgroundOpacity: 0.3
+        }
+    },
+    {
+        name: 'モダン・ミニマル',
+        config: {
+            primaryColor: '#475569',
+            backgroundColor: '#f8fafc',
+            darkBackgroundColor: '#1e293b',
+            borderRadius: 'small',
+            cardStyle: 'flat',
+            shadowIntensity: 0.05,
+            headingFontFamily: "'Noto Sans JP', sans-serif",
+            backgroundImageUrl: '',
+            backgroundType: 'color',
+            backgroundOpacity: 0
+        }
+    }
+];
+
 const backgroundPresets = [
   { name: '楽譜', url: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop' },
   { name: 'ピアノ', url: 'https://images.unsplash.com/photo-1520444453406-52ab68434346?q=80&w=2070&auto=format&fit=crop' },
   { name: 'ステージ', url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop' },
-  { name: 'ギター', url: 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=2070&auto=format&fit=crop' },
+  { name: '森', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2071&auto=format&fit=crop' },
   { name: 'レコード', url: 'https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5b?q=80&w=1974&auto=format&fit=crop' },
 ];
 
-const colorPresets = [
-    { name: 'デフォルトピンク', primaryColor: '#ec4899', backgroundColor: '#f3f4f6', darkBackgroundColor: '#111827' },
-    { name: 'オーシャンシアン', primaryColor: '#06b6d4', backgroundColor: '#f0f9ff', darkBackgroundColor: '#082f49' },
-    { name: 'フォレストグリーン', primaryColor: '#16a34a', backgroundColor: '#f0fdf4', darkBackgroundColor: '#14532d' },
-    { name: 'サンセットオレンジ', primaryColor: '#f97316', backgroundColor: '#fff7ed', darkBackgroundColor: '#431407' },
-    { name: 'ロイヤルパープル', primaryColor: '#8b5cf6', backgroundColor: '#f5f3ff', darkBackgroundColor: '#2e1065' },
-];
-
 const headingFontOptions = [
-    // Serif fonts
     { name: 'Kiwi Maru (明朝)', value: "'Kiwi Maru', serif" },
     { name: 'しっぽり明朝', value: "'Shippori Mincho', serif" },
     { name: 'Yuji Syuku (明朝)', value: "'Yuji Syuku', serif" },
-    { name: 'さわらび明朝', value: "'Sawarabi Mincho', serif" },
-    { name: 'Merriweather (明朝)', value: "'Merriweather', serif" },
-    // Sans-serif (Gothic) fonts
     { name: 'Noto Sans JP (ゴシック)', value: "'Noto Sans JP', sans-serif" },
-    { name: 'M PLUS Rounded 1c (ゴシック)', value: "'M PLUS Rounded 1c', sans-serif" },
     { name: 'Zen Kaku Gothic New (ゴシック)', value: "'Zen Kaku Gothic New', sans-serif" },
-    { name: 'さわらびゴシック', value: "'Sawarabi Gothic', sans-serif" },
-    { name: 'Roboto (ゴシック)', value: "'Roboto', sans-serif" },
 ];
-
-const bodyFontOptions = [
-    // Sans-serif (Gothic) fonts
-    { name: 'Noto Sans JP (ゴシック)', value: "'Noto Sans JP', sans-serif" },
-    { name: 'M PLUS Rounded 1c (ゴシック)', value: "'M PLUS Rounded 1c', sans-serif" },
-    { name: 'Zen Kaku Gothic New (ゴシック)', value: "'Zen Kaku Gothic New', sans-serif" },
-    { name: 'さわらびゴシック', value: "'Sawarabi Gothic', sans-serif" },
-    { name: 'Roboto (ゴシック)', value: "'Roboto', sans-serif" },
-    // Serif fonts
-    { name: 'Kiwi Maru (明朝)', value: "'Kiwi Maru', serif" },
-    { name: 'しっぽり明朝', value: "'Shippori Mincho', serif" },
-    { name: 'Yuji Syuku (明朝)', value: "'Yuji Syuku', serif" },
-    { name: 'さわらび明朝', value: "'Sawarabi Mincho', serif" },
-    { name: 'Merriweather (明朝)', value: "'Merriweather', serif" },
-];
-
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConfig }) => {
     const [config, setConfig] = useState<UiConfig>(uiConfig);
@@ -63,12 +111,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         setConfig(uiConfig);
     }, [uiConfig]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setConfig(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setConfig(prev => ({ ...prev, [name]: value }));
     };
@@ -78,29 +121,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         setConfig(prev => ({ ...prev, [name]: Number(value) }));
     };
     
-    const handleSpecialNavChange = (key: keyof UiConfig['specialButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
+    const applyDesignPreset = (preset: typeof designPresets[0]) => {
         setConfig(prev => ({
             ...prev,
-            specialButtons: {
-                ...prev.specialButtons,
-                [key]: {
-                    ...prev.specialButtons[key],
-                    [field]: value
-                }
-            }
-        }));
-    };
-
-    const handleNavChange = (key: keyof UiConfig['navButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
-        setConfig(prev => ({
-            ...prev,
-            navButtons: {
-                ...prev.navButtons,
-                [key]: {
-                    ...prev.navButtons[key],
-                    [field]: value
-                }
-            }
+            ...preset.config as any
         }));
     };
 
@@ -113,254 +137,207 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         setTimeout(() => setSaveStatus('idle'), 4000);
     };
 
-    const applyColorPreset = (preset: typeof colorPresets[0]) => {
+    const handleNavChange = (key: keyof UiConfig['navButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
         setConfig(prev => ({
             ...prev,
-            primaryColor: preset.primaryColor,
-            backgroundColor: preset.backgroundColor,
-            darkBackgroundColor: preset.darkBackgroundColor
+            navButtons: { ...prev.navButtons, [key]: { ...prev.navButtons[key], [field]: value } }
         }));
     };
-    
+
+    const handleSpecialNavChange = (key: keyof UiConfig['specialButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
+        setConfig(prev => ({
+            ...prev,
+            specialButtons: { ...prev.specialButtons, [key]: { ...prev.specialButtons[key], [field]: value } }
+        }));
+    };
+
     const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist', 'printGakufu'];
 
     return (
-        <div>
-            <h3 className="text-lg font-semibold mb-4">テーマプリセット</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
-                {colorPresets.map(preset => (
-                    <button
-                        key={preset.name}
-                        onClick={() => applyColorPreset(preset)}
-                        className="rounded-lg border-2 border-transparent hover:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition p-2 text-left bg-gray-100 dark:bg-gray-800 shadow-sm"
-                    >
-                        <div className="flex">
-                            <div className="w-1/3 h-16 rounded-l-md" style={{ backgroundColor: preset.darkBackgroundColor }}></div>
-                            <div className="w-2/3 h-16 rounded-r-md" style={{ backgroundColor: preset.backgroundColor }}></div>
-                        </div>
-                         <div className="w-full h-4 mt-2 rounded-md" style={{ backgroundColor: preset.primaryColor }}></div>
-                        <p className="text-sm font-semibold mt-2 text-center text-gray-700 dark:text-gray-300">{preset.name}</p>
-                    </button>
-                ))}
-            </div>
+        <div className="space-y-10">
+            {/* デザインプリセットギャラリー */}
+            <section>
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <span className="w-2 h-6 bg-cyan-500 rounded-full"></span>
+                    デザインプリセットを選択
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    {designPresets.map(preset => (
+                        <button
+                            key={preset.name}
+                            onClick={() => applyDesignPreset(preset)}
+                            className="group relative rounded-xl overflow-hidden border-2 border-transparent hover:border-cyan-500 transition shadow-md bg-white dark:bg-gray-800 p-2"
+                        >
+                            <div className="h-24 w-full rounded-lg mb-2 flex overflow-hidden border border-gray-100 dark:border-gray-700">
+                                <div className="w-1/3 h-full" style={{ backgroundColor: preset.config.darkBackgroundColor }}></div>
+                                <div className="w-2/3 h-full" style={{ backgroundColor: preset.config.backgroundColor }}></div>
+                            </div>
+                            <div className="h-4 w-full rounded-full mb-1" style={{ backgroundColor: preset.config.primaryColor }}></div>
+                            <p className="text-xs font-bold text-center text-gray-700 dark:text-gray-300 truncate">{preset.name}</p>
+                            {config.primaryColor === preset.config.primaryColor && (
+                                <div className="absolute top-1 right-1 bg-cyan-500 text-white p-0.5 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </section>
 
-            <h3 className="text-lg font-semibold mb-4">基本設定</h3>
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">メインタイトル</label>
-                    <input type="text" name="mainTitle" value={config.mainTitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サブタイトル</label>
-                    <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">管理者パスワード</label>
-                    <input type="text" name="adminPassword" value={config.adminPassword || ''} onChange={handleInputChange} placeholder="パスワードを入力" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">検索窓に「admin」と入力した際、または Ctrl+A を押した際に求められるパスワードです。</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ツイキャスURL</label>
-                    <input type="text" name="twitcastingUrl" value={config.twitcastingUrl || ''} onChange={handleInputChange} placeholder="https://twitcasting.tv/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ツイキャスアイコンURL</label>
-                    <input type="text" name="twitcastingIconUrl" value={config.twitcastingIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのツイキャスアイコンが表示されます。</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">X (Twitter) URL</label>
-                    <input type="text" name="xUrl" value={config.xUrl || ''} onChange={handleInputChange} placeholder="https://x.com/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">X (Twitter) アイコンURL</label>
-                    <input type="text" name="xIconUrl" value={config.xIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのXアイコンが表示されます。</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">YouTube チャンネルURL</label>
-                    <input type="text" name="youtubeUrl" value={config.youtubeUrl || ''} onChange={handleInputChange} placeholder="https://www.youtube.com/@..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">YouTube アイコンURL</label>
-                    <input type="text" name="youtubeIconUrl" value={config.youtubeIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURL。空の場合、YouTubeのデフォルトアイコンが表示されます。</p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ぷりんと楽譜 URL</label>
-                    <input type="text" name="printGakufuUrl" value={config.printGakufuUrl || ''} onChange={handleInputChange} placeholder="https://www.print-gakufu.com/" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">テーマカラー</label>
-                    <input type="color" name="primaryColor" value={config.primaryColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
-                </div>
-            </div>
-            
-             <h3 className="text-lg font-semibold mb-4 mt-8">フォント設定</h3>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Heading Font Section */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">見出しフォント</label>
-                        <select name="headingFontFamily" value={config.headingFontFamily} onChange={handleSelectChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
-                            {headingFontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.name}</option>)}
-                        </select>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 pt-2">見出しの大きさ: {Math.round((config.headingFontScale || 1) * 100)}%</label>
-                        <input type="range" name="headingFontScale" min="0.8" max="1.5" step="0.05" value={config.headingFontScale || 1} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
-                    </div>
-                    {/* Body Font Section */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">本文フォント</label>
-                        <select name="bodyFontFamily" value={config.bodyFontFamily} onChange={handleSelectChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
-                            {bodyFontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.name}</option>)}
-                        </select>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 pt-2">本文の大きさ: {Math.round((config.bodyFontScale || 1) * 100)}%</label>
-                        <input type="range" name="bodyFontScale" min="0.8" max="1.5" step="0.05" value={config.bodyFontScale || 1} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
-                    </div>
-                </div>
-            </div>
-
-            <h3 className="text-lg font-semibold mb-4 mt-8">背景設定</h3>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-4">
-                 <div className="flex items-center gap-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="backgroundType" value="color" checked={config.backgroundType === 'color'} onChange={handleInputChange} className="form-radio h-4 w-4 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-cyan-500" />
-                        単色
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="backgroundType" value="image" checked={config.backgroundType === 'image'} onChange={handleInputChange} className="form-radio h-4 w-4 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-cyan-500" />
-                        画像
-                    </label>
-                </div>
-                {config.backgroundType === 'color' ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* スタイル詳細設定 */}
+            <section className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-light dark:border-border-dark">
+                <h3 className="text-lg font-bold mb-6">UIスタイルのカスタマイズ</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">背景色 (ライトテーマ)</label>
-                            <input type="color" name="backgroundColor" value={config.backgroundColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
-                        </div>
-                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">背景色 (ダークテーマ)</label>
-                            <input type="color" name="darkBackgroundColor" value={config.darkBackgroundColor || '#111827'} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">プリセットから選択</label>
-                            <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-2">
-                                {backgroundPresets.map(preset => (
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">角の丸み</label>
+                            <div className="grid grid-cols-5 gap-2">
+                                {(['none', 'small', 'medium', 'large', 'full'] as const).map(radius => (
                                     <button
-                                        key={preset.name}
-                                        type="button"
-                                        onClick={() => setConfig(prev => ({ ...prev, backgroundImageUrl: preset.url }))}
-                                        className={`relative rounded-lg overflow-hidden border-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-cyan-500 ${config.backgroundImageUrl === preset.url ? 'border-cyan-500' : 'border-transparent hover:border-gray-500'}`}
+                                        key={radius}
+                                        onClick={() => setConfig(prev => ({ ...prev, borderRadius: radius }))}
+                                        className={`py-2 text-xs font-bold border-2 rounded-md transition ${config.borderRadius === radius ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}
                                     >
-                                        <img src={preset.url} alt={preset.name} className="h-20 w-full object-cover" />
-                                        <div className="absolute inset-0 bg-black/30 flex items-end justify-center p-1">
-                                            <p className="text-white text-xs font-semibold text-center leading-tight">{preset.name}</p>
-                                        </div>
+                                        {radius.toUpperCase()}
                                     </button>
                                 ))}
                             </div>
                         </div>
-
                         <div>
-                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">または、カスタム画像URL</label>
-                             <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="https://example.com/background.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2"/>
-                            {config.backgroundImageUrl && (
-                                <div className="mt-2">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">プレビュー:</p>
-                                    <img src={config.backgroundImageUrl} alt="Preview" className="max-h-32 rounded-md border-2 border-gray-300 dark:border-gray-600" onError={(e) => e.currentTarget.style.display = 'none'} onLoad={(e) => e.currentTarget.style.display = 'block'}/>
-                                </div>
-                            )}
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">カードの見た目</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {(['flat', 'elevated', 'glass'] as const).map(style => (
+                                    <button
+                                        key={style}
+                                        onClick={() => setConfig(prev => ({ ...prev, cardStyle: style }))}
+                                        className={`py-2 text-xs font-bold border-2 rounded-md transition ${config.cardStyle === style ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}
+                                    >
+                                        {style.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
+                    </div>
+                    <div className="space-y-6">
                         <div>
-                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">画像の不透明度: {Math.round(config.backgroundOpacity * 100)}%</label>
-                             <input type="range" name="backgroundOpacity" min="0" max="1" step="0.01" value={config.backgroundOpacity} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">影の強さ: {Math.round((config.shadowIntensity ?? 0.1) * 100)}%</label>
+                            <input type="range" name="shadowIntensity" min="0" max="1" step="0.05" value={config.shadowIntensity ?? 0.1} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">テーマカラー</label>
+                            <div className="flex gap-4 items-center">
+                                <input type="color" name="primaryColor" value={config.primaryColor} onChange={handleInputChange} className="h-10 w-20 block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
+                                <span className="text-xs font-mono text-gray-500">{config.primaryColor.toUpperCase()}</span>
+                            </div>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            </section>
 
-            <h3 className="text-lg font-semibold mb-4 mt-8">投げ銭・サポート設定</h3>
-            <div className="space-y-4">
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">OFUSE URL</label>
-                    <input type="text" name="ofuseUrl" value={config.ofuseUrl || ''} onChange={handleInputChange} placeholder="https://ofuse.me/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Doneru URL</label>
-                    <input type="text" name="doneruUrl" value={config.doneruUrl || ''} onChange={handleInputChange} placeholder="https://doneru.jp/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amazon ほしい物リスト URL</label>
-                    <input type="text" name="amazonWishlistUrl" value={config.amazonWishlistUrl || ''} onChange={handleInputChange} placeholder="https://www.amazon.jp/hz/wishlist/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サポートボタン アイコンURL</label>
-                    <input type="text" name="supportIconUrl" value={config.supportIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border(--primary-color)] sm:text-sm p-2" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのハートアイコンが表示されます。</p>
-                </div>
-            </div>
-            
-            <h3 className="text-lg font-semibold mb-4 mt-8">特別ボタン設定</h3>
-            <div className="space-y-3">
-                {config.specialButtons?.twitcas && (
-                    <div key="twitcas" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
-                        <input type="checkbox" checked={config.specialButtons.twitcas.enabled} onChange={(e) => handleSpecialNavChange('twitcas', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
-                        <div className="flex-grow">
-                             <input type="text" value={config.specialButtons.twitcas.label} onChange={(e) => handleSpecialNavChange('twitcas', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
-                        </div>
+            {/* 基本設定セクション */}
+            <section className="space-y-6">
+                <h3 className="text-lg font-bold">基本情報</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">メインタイトル</label>
+                        <input type="text" name="mainTitle" value={config.mainTitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2" />
                     </div>
-                )}
-                {config.specialButtons?.x && (
-                    <div key="x" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
-                        <input type="checkbox" checked={config.specialButtons.x.enabled} onChange={(e) => handleSpecialNavChange('x', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
-                        <div className="flex-grow">
-                             <input type="text" value={config.specialButtons.x.label} onChange={(e) => handleSpecialNavChange('x', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サブタイトル</label>
+                        <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2" />
                     </div>
-                )}
-                {config.specialButtons?.youtube && (
-                    <div key="youtube" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
-                        <input type="checkbox" checked={config.specialButtons.youtube.enabled} onChange={(e) => handleSpecialNavChange('youtube', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
-                        <div className="flex-grow">
-                             <input type="text" value={config.specialButtons.youtube.label} onChange={(e) => handleSpecialNavChange('youtube', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
-                        </div>
-                    </div>
-                )}
-                 {config.specialButtons?.support && (
-                    <div key="support" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
-                        <input type="checkbox" checked={config.specialButtons.support.enabled} onChange={(e) => handleSpecialNavChange('support', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
-                        <div className="flex-grow">
-                             <input type="text" value={config.specialButtons.support.label} onChange={(e) => handleSpecialNavChange('support', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
-                        </div>
-                    </div>
-                )}
-            </div>
+                </div>
+            </section>
 
-            <h3 className="text-lg font-semibold mb-4 mt-8">ナビゲーションボタン設定</h3>
-            <div className="space-y-3">
-                {navButtonKeys.map(key => config.navButtons[key] && (
-                    <div key={key} className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
-                        <input type="checkbox" checked={config.navButtons[key].enabled} onChange={(e) => handleNavChange(key, 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
-                        <div className="flex-grow">
-                             <input type="text" value={config.navButtons[key].label} onChange={(e) => handleNavChange(key, 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
-                        </div>
+             {/* フォント設定セクション */}
+            <section className="space-y-4">
+                <h3 className="text-lg font-bold">フォント</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">見出しフォント</label>
+                        <select name="headingFontFamily" value={config.headingFontFamily} onChange={handleInputChange} className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-2">
+                            {headingFontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.name}</option>)}
+                        </select>
                     </div>
-                ))}
-            </div>
+                    <div>
+                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">フォントサイズ (見出し): {Math.round(config.headingFontScale * 100)}%</label>
+                         <input type="range" name="headingFontScale" min="0.8" max="1.5" step="0.05" value={config.headingFontScale} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+                </div>
+            </section>
 
-            <div className="mt-6 flex items-center justify-end gap-4">
-                 {saveStatus === 'success' && <p className="text-green-500 dark:text-green-400">保存しました！</p>}
-                {saveStatus === 'error' && <p className="text-red-500 dark:text-red-400">保存に失敗しました。</p>}
+            {/* 背景設定セクション */}
+            <section className="space-y-4">
+                <h3 className="text-lg font-bold">背景</h3>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl space-y-4">
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="backgroundType" value="color" checked={config.backgroundType === 'color'} onChange={handleInputChange} className="text-cyan-600" />
+                            単色
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="backgroundType" value="image" checked={config.backgroundType === 'image'} onChange={handleInputChange} className="text-cyan-600" />
+                            画像
+                        </label>
+                    </div>
+                    {config.backgroundType === 'image' && (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-5 gap-2">
+                                {backgroundPresets.map(preset => (
+                                    <button key={preset.name} onClick={() => setConfig(prev => ({ ...prev, backgroundImageUrl: preset.url }))} className={`h-12 border-2 rounded-md overflow-hidden ${config.backgroundImageUrl === preset.url ? 'border-cyan-500' : 'border-transparent'}`}>
+                                        <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                             <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="カスタム画像URL" className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-2" />
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">不透明度: {Math.round(config.backgroundOpacity * 100)}%</label>
+                                <input type="range" name="backgroundOpacity" min="0" max="1" step="0.01" value={config.backgroundOpacity} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* 特別ボタン・ナビゲーション */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 className="text-lg font-bold mb-4">特別ボタン</h3>
+                    <div className="space-y-2">
+                        {(['twitcas', 'x', 'youtube', 'support'] as const).map(key => (
+                            <div key={key} className="bg-white dark:bg-gray-800 p-3 rounded-lg flex items-center gap-3">
+                                <input type="checkbox" checked={config.specialButtons[key].enabled} onChange={(e) => handleSpecialNavChange(key, 'enabled', e.target.checked)} className="text-cyan-600" />
+                                <input type="text" value={config.specialButtons[key].label} onChange={(e) => handleSpecialNavChange(key, 'label', e.target.value)} className="flex-grow bg-gray-100 dark:bg-gray-700 text-sm p-1.5 rounded" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold mb-4">ナビゲーション</h3>
+                    <div className="space-y-2 max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                        {navButtonKeys.map(key => (
+                            <div key={key} className="bg-white dark:bg-gray-800 p-2 rounded-lg flex items-center gap-3">
+                                <input type="checkbox" checked={config.navButtons[key].enabled} onChange={(e) => handleNavChange(key, 'enabled', e.target.checked)} className="text-cyan-600" />
+                                <span className="text-sm font-medium flex-grow">{config.navButtons[key].label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* 保存ボタン */}
+            <div className="sticky bottom-0 bg-background-light dark:bg-background-dark py-4 border-t border-border-light dark:border-border-dark flex items-center justify-end gap-4 z-10">
+                 {saveStatus === 'success' && <p className="text-green-500 font-bold animate-fade-in">保存完了！</p>}
+                 {saveStatus === 'error' && <p className="text-red-500 font-bold">保存失敗...</p>}
                 <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-full shadow-lg disabled:opacity-50 flex items-center gap-2 transition-transform transform active:scale-95"
                 >
-                    {isSaving && <LoadingSpinner className="w-5 h-5" />}
-                    {isSaving ? '保存中...' : '設定を保存'}
+                    {isSaving ? <LoadingSpinner className="w-5 h-5" /> : null}
+                    {isSaving ? '保存中...' : '設定をすべて保存'}
                 </button>
             </div>
         </div>

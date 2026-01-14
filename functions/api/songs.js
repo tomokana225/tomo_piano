@@ -13,10 +13,10 @@ const DEFAULT_UI_CONFIG = {
     mainTitle: 'ともかなのリクエスト曲ー検索',
     subtitle: 'ピアノの配信でリクエストをする際に、その曲が配信者の弾ける曲かどうかを調べるアプリ',
     primaryColor: '#ec4899',
-    adminPassword: 'admin225', // デフォルトパスワード
+    adminPassword: 'admin225',
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',
-    youtubeUrl: 'https://www.youtube.com/', // デフォルト
+    youtubeUrl: 'https://www.youtube.com/',
     printGakufuUrl: 'https://www.print-gakufu.com/',
     ofuseUrl: '',
     doneruUrl: '',
@@ -28,16 +28,21 @@ const DEFAULT_UI_CONFIG = {
     backgroundOpacity: 0.1,
     twitcastingIconUrl: '',
     xIconUrl: '',
-    youtubeIconUrl: '', // アイコン
+    youtubeIconUrl: '',
     supportIconUrl: '',
     headingFontFamily: "'Kiwi Maru', serif",
     bodyFontFamily: "'Noto Sans JP', sans-serif",
     headingFontScale: 1.0,
     bodyFontScale: 1.0,
+    // --- スタイルデフォルト ---
+    borderRadius: 'medium',
+    cardStyle: 'elevated',
+    shadowIntensity: 0.1,
+    // ------------------------
     specialButtons: {
         twitcas: { label: 'ツイキャスはこちら', enabled: true },
         x: { label: 'X (Twitter) はこちら', enabled: true },
-        youtube: { label: 'YouTubeはこちら', enabled: true }, // 設定
+        youtube: { label: 'YouTubeはこちら', enabled: true },
         support: { label: '配信者をサポート', enabled: true },
     },
     navButtons: {
@@ -60,7 +65,6 @@ const CORS_HEADERS = {
 };
 
 // --- Firebase Initialization ---
-// This helper function ensures Firebase is initialized only once.
 async function getFirebaseApp(env) {
     if (getApps().length) {
         return getApps()[0];
@@ -75,15 +79,13 @@ async function getFirebaseApp(env) {
         measurementId: env.FIREBASE_MEASUREMENT_ID,
     };
     
-    // Basic validation to ensure environment variables are present
     if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-        throw new Error("Firebase environment variables (FIREBASE_API_KEY, FIREBASE_PROJECT_ID) are not set correctly on the server.");
+        throw new Error("Firebase environment variables are not set correctly.");
     }
     
     return initializeApp(firebaseConfig);
 }
 
-// --- Generic Response Helpers ---
 const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
     status,
     headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
@@ -91,11 +93,9 @@ const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), 
 
 const errorResponse = (message, status = 500) => jsonResponse({ error: message }, status);
 
-// --- Main Request Handler ---
 export async function onRequest(context) {
     const { request, env } = context;
 
-    // Handle CORS preflight requests
     if (request.method === 'OPTIONS') {
         return new Response(null, { headers: CORS_HEADERS });
     }
@@ -104,8 +104,6 @@ export async function onRequest(context) {
     try {
         app = await getFirebaseApp(env);
     } catch (e) {
-        console.error("Firebase Initialization Failed:", e.message);
-        // This is a critical server error, so we inform the client.
         return errorResponse("Server configuration error.", 500);
     }
     
@@ -113,9 +111,8 @@ export async function onRequest(context) {
     const url = new URL(request.url);
     const action = url.searchParams.get('action');
 
-    // --- Action: Get Firebase Config (for client-side initialization) ---
     if (action === 'getFirebaseConfig') {
-        const firebaseConfig = {
+        return jsonResponse({
             apiKey: env.FIREBASE_API_KEY,
             authDomain: env.FIREBASE_AUTH_DOMAIN,
             projectId: env.FIREBASE_PROJECT_ID,
@@ -123,18 +120,15 @@ export async function onRequest(context) {
             messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID,
             appId: env.FIREBASE_APP_ID,
             measurementId: env.FIREBASE_MEASUREMENT_ID,
-        };
-        return jsonResponse(firebaseConfig);
+        });
     }
 
-    // --- Action: Get UI Config ---
     if (action === 'getUiConfig') {
         try {
             const docRef = doc(db, 'config/ui');
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const firestoreConfig = docSnap.data();
-                // Deep merge for nested button configurations
                 const finalConfig = {
                     ...DEFAULT_UI_CONFIG,
                     ...firestoreConfig,
@@ -147,24 +141,14 @@ export async function onRequest(context) {
                         ...(firestoreConfig.navButtons || {}),
                     }
                 };
-
-                // Fallback logic
-                if (!finalConfig.twitcastingUrl) finalConfig.twitcastingUrl = DEFAULT_UI_CONFIG.twitcastingUrl;
-                if (!finalConfig.xUrl) finalConfig.xUrl = DEFAULT_UI_CONFIG.xUrl;
-                if (!finalConfig.youtubeUrl) finalConfig.youtubeUrl = DEFAULT_UI_CONFIG.youtubeUrl;
-                if (!finalConfig.printGakufuUrl) finalConfig.printGakufuUrl = DEFAULT_UI_CONFIG.printGakufuUrl;
-                if (!finalConfig.adminPassword) finalConfig.adminPassword = DEFAULT_UI_CONFIG.adminPassword;
-                
                 return jsonResponse(finalConfig);
             }
             return jsonResponse(DEFAULT_UI_CONFIG);
         } catch (error) {
-            console.error('getUiConfig failed:', error);
             return errorResponse('Failed to fetch UI config.');
         }
     }
 
-    // --- Action: Get Published Blog Posts ---
     if (action === 'getBlogPosts') {
         try {
             const postsRef = collection(db, 'blogPosts');
@@ -174,12 +158,10 @@ export async function onRequest(context) {
             const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             return jsonResponse(posts);
         } catch (error) {
-            console.error('getBlogPosts failed:', error);
             return errorResponse('Failed to fetch blog posts.');
         }
     }
 
-    // --- Action: Get All Blog Posts (for Admin) ---
     if (action === 'getAdminBlogPosts') {
          try {
             const postsRef = collection(db, 'blogPosts');
@@ -188,12 +170,10 @@ export async function onRequest(context) {
             const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             return jsonResponse(posts);
         } catch (error) {
-            console.error('getAdminBlogPosts failed:', error);
             return errorResponse('Failed to fetch admin blog posts.');
         }
     }
 
-    // --- Action: Get Setlist Suggestions ---
     if (action === 'getSetlistSuggestions') {
         try {
             const suggestionsRef = collection(db, 'setlistSuggestions');
@@ -202,12 +182,10 @@ export async function onRequest(context) {
             const suggestions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             return jsonResponse(suggestions);
         } catch (error) {
-            console.error('getSetlistSuggestions failed:', error);
             return errorResponse('Failed to fetch setlist suggestions.');
         }
     }
 
-    // --- Action: Get Recent Requests ---
     if (action === 'getRecentRequests') {
         try {
             const requestsRef = collection(db, 'songRequests');
@@ -216,31 +194,26 @@ export async function onRequest(context) {
             const requests = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             return jsonResponse(requests);
         } catch (error) {
-            console.error('getRecentRequests failed:', error);
             return errorResponse('Failed to fetch recent requests.');
         }
     }
     
-    // --- POST Requests Router ---
     if (request.method === 'POST') {
         try {
             const data = await request.json();
             
-            // --- Action: Save Song List ---
             if (data.list) {
                 const docRef = doc(db, 'songlist/default');
                 await setDoc(docRef, { list: data.list });
                 return jsonResponse({ success: true });
             }
             
-            // --- Action: Save UI Config ---
             if (action === 'saveUiConfig') {
                 const docRef = doc(db, 'config/ui');
                 await setDoc(docRef, data, { merge: true });
                 return jsonResponse({ success: true });
             }
 
-            // --- Action: Save Blog Post ---
             if (action === 'saveBlogPost') {
                 const { id, ...postData } = data;
                 const docRef = id ? doc(db, 'blogPosts', id) : doc(collection(db, 'blogPosts'));
@@ -251,7 +224,6 @@ export async function onRequest(context) {
                 return jsonResponse({ success: true });
             }
             
-            // --- Action: Delete Blog Post ---
             if (action === 'deleteBlogPost') {
                 if (!data.id) return errorResponse('Post ID is required.', 400);
                 const docRef = doc(db, 'blogPosts', data.id);
@@ -259,9 +231,7 @@ export async function onRequest(context) {
                 return jsonResponse({ success: true });
             }
 
-            // --- Action: Save Setlist Suggestion ---
             if (action === 'saveSetlistSuggestion') {
-                if (!data.songs || !data.requester) return errorResponse('Invalid suggestion data.', 400);
                 const docRef = doc(collection(db, 'setlistSuggestions'));
                 await setDoc(docRef, {
                     songs: data.songs,
@@ -274,26 +244,20 @@ export async function onRequest(context) {
             return errorResponse('Invalid POST action.', 400);
 
         } catch (error) {
-            console.error('POST request failed:', error);
             return errorResponse('Failed to process POST request.');
         }
     }
 
-    // --- Default Action: Get Song List (GET request) ---
     try {
         const docRef = doc(db, 'songlist/default');
         const docSnap = await getDoc(docRef);
-        
         if (docSnap.exists() && docSnap.data().list) {
             return jsonResponse({ list: docSnap.data().list });
         } else {
-            // If the document doesn't exist or is empty, save and return the default list
             await setDoc(docRef, { list: PLAYABLE_SONGS_EXAMPLE_STR });
             return jsonResponse({ list: PLAYABLE_SONGS_EXAMPLE_STR });
         }
     } catch (error) {
-        console.error('Default action (get song list) failed:', error);
-        // Fallback to default list on error
         return jsonResponse({ list: PLAYABLE_SONGS_EXAMPLE_STR });
     }
 }

@@ -59,10 +59,10 @@ export interface UiConfig {
     mainTitle: string;
     subtitle: string;
     primaryColor: string;
-    adminPassword?: string; // 管理者パスワードを追加
+    adminPassword?: string;
     twitcastingUrl?: string;
     xUrl?: string;
-    youtubeUrl?: string; // YouTube URLを追加
+    youtubeUrl?: string;
     printGakufuUrl?: string;
     ofuseUrl?: string;
     doneruUrl?: string;
@@ -74,17 +74,22 @@ export interface UiConfig {
     backgroundOpacity: number;
     twitcastingIconUrl?: string;
     xIconUrl?: string;
-    youtubeIconUrl?: string; // YouTubeアイコンURLを追加
+    youtubeIconUrl?: string;
     supportIconUrl?: string;
     headingFontFamily: string;
     bodyFontFamily: string;
     headingFontScale: number;
     bodyFontScale: number;
+    // --- 新しいデザイン設定 ---
+    borderRadius?: 'none' | 'small' | 'medium' | 'large' | 'full';
+    cardStyle?: 'flat' | 'elevated' | 'glass';
+    shadowIntensity?: number; // 0 to 1
+    // ------------------------
     specialButtons: {
         twitcas: NavButtonConfig;
         support: NavButtonConfig;
         x: NavButtonConfig;
-        youtube: NavButtonConfig; // YouTubeボタン設定を追加
+        youtube: NavButtonConfig;
     };
     navButtons: {
         search: NavButtonConfig;
