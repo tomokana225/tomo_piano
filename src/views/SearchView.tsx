@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, UiConfig, RankingItem, Mode } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
@@ -30,14 +31,14 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, title, onClick }) => (
   <button
     onClick={onClick}
-    className="group w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3 p-5 sm:gap-4 sm:p-4 rounded-2xl sm:rounded-xl bg-card-background-light dark:bg-card-background-dark border-2 border-border-light dark:border-border-dark shadow-md hover:shadow-xl hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
+    className="group w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 p-6 sm:gap-4 sm:p-4 rounded-3xl sm:rounded-xl bg-card-background-light dark:bg-card-background-dark border-2 border-border-light dark:border-border-dark shadow-md hover:shadow-2xl hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-2 sm:hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/50"
     aria-label={title}
   >
-    <div className="w-14 h-14 sm:w-10 sm:h-10 rounded-2xl sm:rounded-lg flex items-center justify-center transition-all duration-300 bg-[var(--primary-color)]/10 group-hover:bg-[var(--primary-color)]/20 flex-shrink-0">
-        <Icon className="w-7 h-7 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-110" style={{ color: 'var(--primary-color)' }} />
+    <div className="w-16 h-16 sm:w-10 sm:h-10 rounded-2xl sm:rounded-lg flex items-center justify-center transition-all duration-300 bg-[var(--primary-color)]/15 group-hover:bg-[var(--primary-color)]/25 flex-shrink-0">
+        <Icon className="w-8 h-8 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-125" style={{ color: 'var(--primary-color)' }} />
     </div>
     <div className="flex flex-col items-center sm:items-start flex-grow min-w-0">
-        <h3 className="font-bold text-base sm:text-base text-text-primary-light dark:text-text-primary-dark whitespace-nowrap text-center sm:text-left">{title}</h3>
+        <h3 className="font-bold text-lg sm:text-base text-text-primary-light dark:text-text-primary-dark whitespace-nowrap text-center sm:text-left">{title}</h3>
         <span className="hidden sm:inline text-[10px] text-text-secondary-light dark:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity">開く</span>
     </div>
     <ChevronRightIcon className="hidden sm:block w-4 h-4 ml-auto text-text-secondary-light/70 dark:text-text-secondary-dark/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[var(--primary-color)] flex-shrink-0" />
@@ -215,25 +216,25 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         const buttonConfigs = {
             twitcas: {
                 href: uiConfig.twitcastingUrl,
-                icon: uiConfig.twitcastingIconUrl ? () => <img src={uiConfig.twitcastingIconUrl} alt="Twitcas" className="w-5 h-5 sm:w-6 sm:h-6"/> : TwitcasIcon,
+                icon: uiConfig.twitcastingIconUrl ? () => <img src={uiConfig.twitcastingIconUrl} alt="Twitcas" className="w-4 h-4 sm:w-6 sm:h-6"/> : TwitcasIcon,
                 config: uiConfig.specialButtons.twitcas,
                 colorClasses: 'bg-[#2190b8] hover:bg-[#1c7a9e]',
             },
             x: {
                 href: uiConfig.xUrl,
-                icon: uiConfig.xIconUrl ? () => <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5 sm:w-6 sm:h-6"/> : XSocialIcon,
+                icon: uiConfig.xIconUrl ? () => <img src={uiConfig.xIconUrl} alt="X" className="w-4 h-4 sm:w-6 sm:h-6"/> : XSocialIcon,
                 config: uiConfig.specialButtons.x,
                 colorClasses: 'bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 dark:text-black',
             },
             youtube: {
                 href: uiConfig.youtubeUrl,
-                icon: uiConfig.youtubeIconUrl ? () => <img src={uiConfig.youtubeIconUrl} alt="YouTube" className="w-5 h-5 sm:w-6 sm:h-6"/> : YouTubeIcon,
+                icon: uiConfig.youtubeIconUrl ? () => <img src={uiConfig.youtubeIconUrl} alt="YouTube" className="w-4 h-4 sm:w-6 sm:h-6"/> : YouTubeIcon,
                 config: uiConfig.specialButtons.youtube,
                 colorClasses: 'bg-[#ff0000] hover:bg-[#cc0000]',
             },
             support: {
                 onClick: openSupportModal,
-                icon: uiConfig.supportIconUrl ? () => <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5 sm:w-6 sm:h-6"/> : HeartIcon,
+                icon: uiConfig.supportIconUrl ? () => <img src={uiConfig.supportIconUrl} alt="Support" className="w-4 h-4 sm:w-6 sm:h-6"/> : HeartIcon,
                 config: uiConfig.specialButtons.support,
                 colorClasses: 'bg-pink-500 hover:bg-pink-600',
             }
@@ -247,7 +248,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
             <div className="text-center mb-8">
                 <p className="text-base sm:text-lg text-text-primary-light dark:text-text-primary-dark">{uiConfig.subtitle}</p>
             </div>
-            <form onSubmit={handleSearchSubmit} className="mb-8 relative" ref={searchContainerRef}>
+            <form onSubmit={handleSearchSubmit} className="mb-10 relative" ref={searchContainerRef}>
                 <div className="relative">
                     <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-text-secondary-light dark:text-text-secondary-dark pointer-events-none" />
                     <input
@@ -256,7 +257,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                         value={searchTerm}
                         onChange={handleSearchChange}
                         onKeyDown={onAdminTrigger}
-                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border-2 border-border-light dark:border-border-dark rounded-full py-4 sm:py-4 pl-12 pr-12 text-lg focus:outline-none focus:ring-2"
+                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border-2 border-border-light dark:border-border-dark rounded-full py-4 sm:py-4 pl-12 pr-12 text-lg focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/30"
                         style={{'--tw-ring-color': 'var(--primary-color)'} as React.CSSProperties}
                         aria-label="検索"
                     />
@@ -343,14 +344,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 </div>
             ) : (
                 <>
-                    <div className="mb-8 grid grid-cols-2 gap-4">
+                    <div className="mb-10 grid grid-cols-2 gap-5 sm:gap-4">
                         {uiConfig.navButtons?.list?.enabled && <NavCard icon={MusicNoteIcon} title={uiConfig.navButtons.list.label} onClick={() => setMode('list')} />}
                         {uiConfig.navButtons?.news?.enabled && <NavCard icon={NewspaperIcon} title={uiConfig.navButtons.news.label} onClick={() => setMode('news')} />}
                         {uiConfig.navButtons?.suggest?.enabled && <NavCard icon={LightBulbIcon} title={uiConfig.navButtons.suggest.label} onClick={openSuggestModal} />}
                         {uiConfig.navButtons?.requests?.enabled && <NavCard icon={CloudUploadIcon} title={uiConfig.navButtons.requests.label} onClick={() => setMode('requests')} />}
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-8 bg-black/5 dark:bg-white/5 p-3 rounded-2xl">
                         {specialButtons.map((btn, index) => (
                             <a
                                 key={index}
@@ -358,16 +359,16 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                                 onClick={'onClick' in btn ? btn.onClick : undefined}
                                 target={'href' in btn ? '_blank' : undefined}
                                 rel={'href' in btn ? 'noopener noreferrer' : undefined}
-                                className={`flex items-center justify-center gap-2 w-full text-center px-3 py-2.5 sm:px-6 sm:py-4 text-white rounded-xl font-semibold text-xs sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${btn.colorClasses} whitespace-nowrap`}
+                                className={`flex items-center justify-center gap-2 w-full text-center px-2 py-1.5 sm:px-6 sm:py-4 text-white rounded-xl font-bold text-[10px] sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md ${btn.colorClasses} whitespace-nowrap`}
                             >
-                                <btn.icon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0"/>
+                                <btn.icon className="w-3.5 h-3.5 sm:w-6 sm:h-6 flex-shrink-0"/>
                                 {btn.config.label}
                             </a>
                         ))}
                     </div>
                     
                     {popularSongs.length > 0 && (
-                         <div className="mt-4">
+                         <div className="mt-8">
                             <h2 className="text-xl font-bold text-center mb-4">人気の曲</h2>
                             <div className="space-y-3">
                                 {popularSongs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}

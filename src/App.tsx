@@ -132,7 +132,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
 
 const App: React.FC = () => {
     const { 
-        rawSongList, songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
+        songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
         isLoading, error, activeUserCount,
         rankingPeriod, setRankingPeriod: setPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
@@ -471,5 +471,4 @@ const App: React.FC = () => {
     );
 };
 
-// FIX: Exporting the App component as default.
 export default App;

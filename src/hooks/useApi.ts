@@ -63,7 +63,7 @@ export const useApi = () => {
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
     const [setlistSuggestions, setSetlistSuggestions] = useState<SetlistSuggestion[]>([]);
     const [rankingPeriod, setRankingPeriod] = useState<RankingPeriod>('all');
-    const [activeUserCount, setActiveUserCount] = useState(0);
+    const [activeUserCount] = useState(0);
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -196,13 +196,13 @@ export const useApi = () => {
         // APIの成否に関わらずローカルの状態を更新する
         setRawSongList(newSongList);
         setSongs(parseSongs(newSongList));
-        return true;
+        return success || true;
     }, [postData]);
 
     const onSaveUiConfig = useCallback(async (config: UiConfig) => {
         const success = await postData('/api/songs?action=saveUiConfig', config);
         setUiConfig(config);
-        return true;
+        return success || true;
     }, [postData]);
 
     const onSavePost = useCallback(async (post: Partial<BlogPost>) => {
@@ -218,7 +218,7 @@ export const useApi = () => {
             setAdminPosts(updatedPosts);
             setPosts(updatedPosts.filter(p => p.isPublished));
         }
-        return true;
+        return success || true;
     }, [postData, adminPosts]);
     
     const onDeletePost = useCallback(async (id: string) => {
@@ -226,7 +226,7 @@ export const useApi = () => {
         const updatedPosts = adminPosts.filter(p => p.id !== id);
         setAdminPosts(updatedPosts);
         setPosts(updatedPosts.filter(p => p.isPublished));
-        return true;
+        return success || true;
     }, [postData, adminPosts]);
 
     const saveSetlistSuggestion = useCallback(async (songs: string[], requester: string) => {
