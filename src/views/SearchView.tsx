@@ -31,14 +31,14 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, title, onClick }) => (
   <button
     onClick={onClick}
-    className="group w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 p-6 sm:gap-4 sm:p-4 rounded-3xl sm:rounded-xl bg-card-background-light dark:bg-card-background-dark border-2 border-border-light dark:border-border-dark shadow-md hover:shadow-2xl hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-2 sm:hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/50"
+    className="group w-full flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3 p-5 sm:gap-4 sm:p-4 rounded-3xl sm:rounded-xl bg-card-background-light dark:bg-card-background-dark border-2 border-border-light dark:border-border-dark shadow-md hover:shadow-2xl hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-2 sm:hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[var(--primary-color)]/50"
     aria-label={title}
   >
-    <div className="w-16 h-16 sm:w-10 sm:h-10 rounded-2xl sm:rounded-lg flex items-center justify-center transition-all duration-300 bg-[var(--primary-color)]/15 group-hover:bg-[var(--primary-color)]/25 flex-shrink-0">
-        <Icon className="w-8 h-8 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-125" style={{ color: 'var(--primary-color)' }} />
+    <div className="w-14 h-14 sm:w-10 sm:h-10 rounded-2xl sm:rounded-lg flex items-center justify-center transition-all duration-300 bg-[var(--primary-color)]/15 group-hover:bg-[var(--primary-color)]/25 flex-shrink-0">
+        <Icon className="w-7 h-7 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-125" style={{ color: 'var(--primary-color)' }} />
     </div>
     <div className="flex flex-col items-center sm:items-start flex-grow min-w-0">
-        <h3 className="font-bold text-lg sm:text-base text-text-primary-light dark:text-text-primary-dark whitespace-nowrap text-center sm:text-left">{title}</h3>
+        <h3 className="font-bold text-sm sm:text-base text-text-primary-light dark:text-text-primary-dark break-words text-center sm:text-left leading-tight">{title}</h3>
         <span className="hidden sm:inline text-[10px] text-text-secondary-light dark:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity">開く</span>
     </div>
     <ChevronRightIcon className="hidden sm:block w-4 h-4 ml-auto text-text-secondary-light/70 dark:text-text-secondary-dark/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[var(--primary-color)] flex-shrink-0" />
@@ -344,7 +344,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 </div>
             ) : (
                 <>
-                    <div className="mb-10 grid grid-cols-2 gap-5 sm:gap-4">
+                    <div className="mb-10 grid grid-cols-2 gap-4">
                         {uiConfig.navButtons?.list?.enabled && <NavCard icon={MusicNoteIcon} title={uiConfig.navButtons.list.label} onClick={() => setMode('list')} />}
                         {uiConfig.navButtons?.news?.enabled && <NavCard icon={NewspaperIcon} title={uiConfig.navButtons.news.label} onClick={() => setMode('news')} />}
                         {uiConfig.navButtons?.suggest?.enabled && <NavCard icon={LightBulbIcon} title={uiConfig.navButtons.suggest.label} onClick={openSuggestModal} />}
@@ -359,10 +359,10 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                                 onClick={'onClick' in btn ? btn.onClick : undefined}
                                 target={'href' in btn ? '_blank' : undefined}
                                 rel={'href' in btn ? 'noopener noreferrer' : undefined}
-                                className={`flex items-center justify-center gap-2 w-full text-center px-2 py-1.5 sm:px-6 sm:py-4 text-white rounded-xl font-bold text-[10px] sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md ${btn.colorClasses} whitespace-nowrap`}
+                                className={`flex items-center justify-center gap-2 w-full text-center px-2 py-2 sm:px-6 sm:py-4 text-white rounded-xl font-bold text-xs sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md ${btn.colorClasses}`}
                             >
-                                <btn.icon className="w-3.5 h-3.5 sm:w-6 sm:h-6 flex-shrink-0"/>
-                                {btn.config.label}
+                                <btn.icon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0"/>
+                                <span className="break-words leading-tight">{btn.config.label}</span>
                             </a>
                         ))}
                     </div>
