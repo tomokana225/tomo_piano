@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { UiConfig, NavButtonConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -236,7 +235,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                             />
                             <p className="text-[10px] text-gray-400 leading-relaxed">
                                 ※入力すると、通知時にあなたへメンションを飛ばします（スマホ通知がより確実になります）。<br/>
-                                <strong>IDの取得方法:</strong> Discord設定 > 詳細設定 > 「開発者モード」をONにした後、自分のプロフィールを右クリック（または詳細メニュー）から「ユーザーIDをコピー」を選択してください。
+                                <strong>IDの取得方法:</strong> Discord設定 &gt; 詳細設定 &gt; 「開発者モード」をONにした後、自分のプロフィールを右クリック（または詳細メニュー）から「ユーザーIDをコピー」を選択してください。
                             </p>
                         </div>
                     </div>
