@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
@@ -8,22 +8,19 @@ import { ListView } from './views/ListView';
 import { RankingView } from './views/RankingView';
 import { RequestRankingView } from './views/RequestRankingView';
 import { BlogView } from './views/BlogView';
-import { SetlistSuggestionView } from './views/SetlistSuggestionView';
 import { ProfileView } from './views/ProfileView';
 import { NavButton } from './components/ui/NavButton';
 import { AdminModal } from './features/admin/AdminModal';
 import { SuggestSongModal } from './features/suggest/SuggestSongModal';
 import { SupportModal } from './features/support/SupportModal';
 import { 
-    SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
-    DiceIcon, MenuIcon, SunIcon, MoonIcon, 
-    DocumentTextIcon, CloudUploadIcon, HeartIcon,
-    ChevronLeftIcon, XIcon, InformationCircleIcon,
-    CheckCircleIcon, UserGroupIcon, UserIcon, LightBulbIcon
+    SearchIcon, MusicNoteIcon, NewspaperIcon, 
+    MenuIcon, SunIcon, MoonIcon, 
+    CloudUploadIcon, HeartIcon,
+    XIcon, InformationCircleIcon,
+    UserIcon, LightBulbIcon
 } from './components/ui/Icons';
 
-
-// --- Helper for dynamic contrast ---
 const getContrastColor = (hexColor: string) => {
     if (!hexColor || hexColor.length < 6) return '#ffffff';
     const color = hexColor.startsWith('#') ? hexColor.slice(1) : hexColor;
@@ -34,104 +31,34 @@ const getContrastColor = (hexColor: string) => {
     return (yiq >= 150) ? '#000000' : '#ffffff';
 };
 
-// --- Tutorial Modal Component ---
 const tutorialSteps = [
-    {
-        icon: LightBulbIcon,
-        title: "ようこそ！",
-        text: "このアプリは、ピアノ配信でリクエストできる曲を簡単に検索・管理するためのツールです。基本的な使い方を簡単にご紹介します。"
-    },
-    {
-        icon: SearchIcon,
-        title: "曲を検索する",
-        text: "メイン画面の検索バーに曲名やアーティスト名を入力して、レパートリーにあるかすぐに確認できます。入力中に候補も表示されます。"
-    },
-    {
-        icon: CloudUploadIcon,
-        title: "曲をリクエストする",
-        text: "検索して見つからなかった曲は、その場で簡単にリクエストできます。あなたのリクエストが次の演奏曲になるかもしれません！"
-    },
-    {
-        icon: HeartIcon,
-        title: "「いいね！」で応援",
-        text: "曲の詳細カードにあるハートマークを押すと「いいね」ができます。たくさん「いいね」された曲は、配信者が練習する際の参考になります。"
-    },
-    {
-        icon: MenuIcon,
-        title: "いろんな機能を探そう",
-        text: "「メニュー」ボタンから、全曲リスト、人気ランキング、お知らせなど、さまざまな機能にアクセスできます。おまかせ選曲ルーレットも試してみてくださいね！"
-    },
-    {
-        icon: CheckCircleIcon,
-        title: "準備完了！",
-        text: "これで基本的な使い方はバッチリです。さっそくアプリを使ってみましょう！"
-    }
+    { icon: LightBulbIcon, title: "ようこそ！", text: "このアプリは、ピアノ配信でリクエストできる曲を簡単に検索・管理するためのツールです。" },
+    { icon: SearchIcon, title: "曲を検索する", text: "メイン画面の検索バーに曲名やアーティスト名を入力して、レパートリーにあるか確認できます。" },
+    { icon: CloudUploadIcon, title: "曲をリクエストする", text: "見つからなかった曲は、その場でリクエストできます。" },
+    { icon: HeartIcon, title: "応援", text: "「いいね」された曲は、配信者が練習する際の参考になります。" }
 ];
 
-interface TutorialModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
-
-const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
+const TutorialModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
     const [step, setStep] = useState(0);
-
-    useEffect(() => {
-        if (isOpen) {
-            setStep(0);
-        }
-    }, [isOpen]);
-
     if (!isOpen) return null;
-
-    const handleNext = () => {
-        if (step < tutorialSteps.length - 1) {
-            setStep(s => s + 1);
-        } else {
-            onClose();
-        }
-    };
-    
-    const handlePrev = () => {
-        if (step > 0) {
-            setStep(s => s - 1);
-        }
-    };
-
     const currentStep = tutorialSteps[step];
     const Icon = currentStep.icon;
-
     return (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="bg-card-background-light dark:bg-card-background-dark rounded-2xl shadow-2xl w-full max-md text-center p-6 sm:p-8 relative flex flex-col justify-between min-h-[380px]">
-                <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark">
-                    <XIcon className="w-6 h-6" />
-                </button>
-
-                <div>
-                    <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'var(--primary-color)', opacity: 0.2 }}>
-                        <Icon className="w-8 h-8" style={{ color: 'var(--primary-color)' }} />
-                    </div>
+            <div className="bg-card-background-light dark:bg-card-background-dark rounded-2xl shadow-2xl w-full max-w-md text-center p-8 relative flex flex-col min-h-[380px]">
+                <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary-light dark:text-text-secondary-dark"><XIcon className="w-6 h-6" /></button>
+                <div className="flex-grow flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-pink-500/10"><Icon className="w-8 h-8 text-pink-500" /></div>
                     <h2 className="text-2xl font-bold mb-3">{currentStep.title}</h2>
-                    <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">{currentStep.text}</p>
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark">{currentStep.text}</p>
                 </div>
-
                 <div className="mt-6">
                     <div className="flex justify-center gap-2 mb-6">
-                        {tutorialSteps.map((_, index) => (
-                            <div
-                                key={index}
-                                className={`w-2 h-2 rounded-full transition-colors ${step === index ? 'bg-[var(--primary-color)]' : 'bg-border-light dark:bg-border-dark'}`}
-                            />
-                        ))}
+                        {tutorialSteps.map((_, i) => <div key={i} className={`w-2 h-2 rounded-full ${step === i ? 'bg-pink-500' : 'bg-gray-300'}`} />)}
                     </div>
-                    <div className="flex items-center gap-4">
-                        {step > 0 && (
-                            <button onClick={handlePrev} className="w-full font-semibold py-3 px-6 rounded-lg transition-colors bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-text-primary-light dark:text-text-primary-dark">
-                                戻る
-                            </button>
-                        )}
-                        <button onClick={handleNext} className="w-full font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow" style={{ backgroundColor: 'var(--primary-color)', color: 'var(--text-on-primary)' }}>
+                    <div className="flex gap-4">
+                        {step > 0 && <button onClick={() => setStep(s => s - 1)} className="w-full py-3 bg-gray-100 dark:bg-white/10 rounded-lg">戻る</button>}
+                        <button onClick={() => step < tutorialSteps.length - 1 ? setStep(s => s + 1) : onClose()} className="w-full py-3 bg-pink-500 text-white rounded-lg font-bold">
                             {step === tutorialSteps.length - 1 ? '完了' : '次へ'}
                         </button>
                     </div>
@@ -141,428 +68,153 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
     );
 };
 
-
 const App: React.FC = () => {
     const { 
-        songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
-        isLoading, error, activeUserCount,
-        rankingPeriod, setRankingPeriod: setPeriod,
-        onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
-        logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings
+        songs, posts, adminPosts, uiConfig, isLoading,
+        setAdminPassword, onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
+        logSearch, logRequest, logLike, refreshRankings
     } = useApi();
     
     const [mode, setMode] = useState<Mode>('search');
     const [searchTerm, setSearchTerm] = useState('');
+    const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isInfoBannerVisible, setIsInfoBannerVisible] = useState(true);
     const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+    const [isInfoBannerVisible, setIsInfoBannerVisible] = useState(true);
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         setIsDarkMode(isDark);
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-        }
+        if (isDark) document.documentElement.classList.add('dark');
+        setTimeout(() => setIsInfoBannerVisible(false), 6000);
     }, []);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsInfoBannerVisible(false);
-        }, 6000);
-        return () => clearTimeout(timer);
-    }, []);
-    
-    const toggleDarkMode = () => {
-        setIsDarkMode(prev => {
-            const newIsDark = !prev;
-            if (newIsDark) document.documentElement.classList.add('dark');
-            else document.documentElement.classList.remove('dark');
-            return newIsDark;
-        });
-    };
-    
     useEffect(() => {
         const root = document.documentElement;
         root.style.setProperty('--primary-color', uiConfig.primaryColor);
-        
-        // --- Calculate contrast color for text on primary background ---
-        const primaryContrast = getContrastColor(uiConfig.primaryColor);
-        root.style.setProperty('--text-on-primary', primaryContrast);
-        
-        // 角の丸み設定
-        const radiusMap = {
-            none: '0px',
-            small: '4px',
-            medium: '12px',
-            large: '24px',
-            full: '9999px'
-        };
-        root.style.setProperty('--app-radius', radiusMap[uiConfig.borderRadius || 'medium']);
-
-        // 影のスタイル設定
-        const shadowOpacity = uiConfig.shadowIntensity ?? 0.1;
-        const shadowStyle = uiConfig.cardStyle === 'elevated' 
-            ? `0 10px 25px -5px rgba(0, 0, 0, ${shadowOpacity * 2}), 0 8px 10px -6px rgba(0, 0, 0, ${shadowOpacity})`
-            : `0 4px 6px -1px rgba(0, 0, 0, ${shadowOpacity}), 0 2px 4px -1px rgba(0, 0, 0, ${shadowOpacity / 2})`;
-        root.style.setProperty('--card-shadow', shadowStyle);
-
-        // グラスモーフィズム対応
-        if (uiConfig.cardStyle === 'glass') {
-            root.style.setProperty('--card-bg-opacity', '0.6');
-            root.style.setProperty('--card-blur', '12px');
-        } else {
-            root.style.setProperty('--card-bg-opacity', '1');
-            root.style.setProperty('--card-blur', '0px');
-        }
-
-        if (uiConfig.primaryColor.includes('ec4899')) {
-             root.style.setProperty('--secondary-color', '#38bdf8');
-        } else {
-             root.style.setProperty('--secondary-color', '#67e8f9');
-        }
-        
-        const secondaryColor = getComputedStyle(root).getPropertyValue('--secondary-color');
-        root.style.setProperty('--text-on-secondary', getContrastColor(secondaryColor.trim()));
-
-        root.style.setProperty('--heading-font', uiConfig.headingFontFamily || "'Kiwi Maru', serif");
-        root.style.setProperty('--body-font', uiConfig.bodyFontFamily || "'Noto Sans JP', sans-serif");
-        root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
-        root.style.setProperty('--body-font-scale', String(uiConfig.bodyFontScale || 1));
-
-        // 背景色の設定 (ライト・ダークそれぞれ)
+        root.style.setProperty('--text-on-primary', getContrastColor(uiConfig.primaryColor));
         root.style.setProperty('--background-light', uiConfig.backgroundColor);
         root.style.setProperty('--background-dark', uiConfig.darkBackgroundColor);
-
-        // 現在の背景色に応じた動的な文字色の計算
-        const currentBgColor = isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
-        const dynamicTextColor = getContrastColor(currentBgColor);
-        root.style.setProperty('--text-primary-dynamic', dynamicTextColor);
         
-        // サブテキスト用の色 (少し透明度を持たせる)
-        const secondaryDynamic = dynamicTextColor === '#000000' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)';
-        root.style.setProperty('--text-secondary-dynamic', secondaryDynamic);
-
-        // 境界線用の色
-        const borderDynamic = dynamicTextColor === '#000000' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
-        root.style.setProperty('--border-dynamic', borderDynamic);
-        
+        const currentBg = isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
+        const dynText = getContrastColor(currentBg);
+        root.style.setProperty('--text-primary-dynamic', dynText);
+        root.style.setProperty('--text-secondary-dynamic', dynText === '#000000' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)');
     }, [uiConfig, isDarkMode]);
 
-    const handleSuggestSelect = useCallback((text: string) => {
-        setSearchTerm(text);
-        setMode('search');
-        setIsSuggestModalOpen(false);
-    }, []);
-
-    const handleSetlistSuccessRedirect = useCallback(() => {
-        setMode('search');
-    }, []);
-
-    // 管理者ログイン要求
-    const handleAdminLogin = useCallback(() => {
+    const handleAdminLogin = useCallback(async () => {
         if (isAdminAuthenticated) {
             setIsAdminModalOpen(true);
-            setIsMenuOpen(false);
             return;
         }
-
         const password = prompt("管理者パスワードを入力してください:");
-        const expectedPassword = uiConfig.adminPassword || 'admin225';
-        
-        if (password === expectedPassword) {
+        if (!password) return;
+
+        // サーバーサイドでパスワードを検証
+        const testRes = await fetch('/api/songs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password },
+            body: JSON.stringify({ ping: true })
+        });
+
+        if (testRes.ok) {
+            setAdminPassword(password);
             setIsAdminAuthenticated(true);
             setIsAdminModalOpen(true);
-            setIsMenuOpen(false);
-        } else if (password !== null) {
+        } else {
             alert("パスワードが違います。");
         }
-    }, [uiConfig.adminPassword, isAdminAuthenticated]);
+    }, [isAdminAuthenticated, setAdminPassword]);
 
     const renderView = () => {
         switch (mode) {
-            case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} openSupportModal={() => setIsSupportModalOpen(true)} />;
-            case 'list':
-                return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
-            case 'ranking':
-                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} songLikeRanking={songLikeRankingList} period={rankingPeriod} setPeriod={setPeriod} />;
-            case 'requests':
-                return <RequestRankingView recentRequests={recentRequests} logRequest={logRequest} refreshRankings={refreshRankings} uiConfig={uiConfig} />;
-            case 'news':
-                return <BlogView posts={posts} />;
-            case 'setlist':
-                 return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccessRedirect}/>;
-            case 'profile':
-                 return <ProfileView uiConfig={uiConfig} openSupportModal={() => setIsSupportModalOpen(true)} />;
-            default:
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} openSupportModal={() => setIsSupportModalOpen(true)} />;
+            case 'list': return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
+            case 'ranking': return <RankingView songs={songs} songRanking={[]} artistRanking={[]} songLikeRanking={[]} period="all" setPeriod={() => {}} />;
+            case 'requests': return <RequestRankingView recentRequests={[]} logRequest={logRequest} refreshRankings={refreshRankings} uiConfig={uiConfig} />;
+            case 'news': return <BlogView posts={posts} />;
+            case 'profile': return <ProfileView uiConfig={uiConfig} openSupportModal={() => setIsSupportModalOpen(true)} />;
+            default: return <SearchView 
+                songs={songs} 
+                logSearch={logSearch} 
+                logLike={logLike} 
+                logRequest={logRequest} 
+                refreshRankings={refreshRankings} 
+                searchTerm={searchTerm} 
+                setSearchTerm={setSearchTerm} 
+                onAdminLogin={handleAdminLogin} 
+                uiConfig={uiConfig} 
+                songRankingList={[]} 
+                setMode={setMode} 
+                openSuggestModal={() => setIsSuggestModalOpen(true)} 
+                openSupportModal={() => setIsSupportModalOpen(true)} 
+            />;
         }
     };
 
-    const navButtons = useMemo(() => {
-        if (!uiConfig.navButtons) return [];
-        const buttonConfigs = {
-            search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search || { label: '曲を検索', enabled: true } },
-            profile: { mode: 'profile', icon: UserIcon, config: uiConfig.navButtons.profile || { label: 'プロフィール', enabled: true } },
-            list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list || { label: '曲リスト', enabled: true } },
-            suggest: { mode: 'suggest', icon: DiceIcon, config: uiConfig.navButtons.suggest || { label: 'おまかせ選曲', enabled: true } },
-            news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news || { label: 'お知らせ', enabled: true } },
-            ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking || { label: 'ランキング', enabled: true } },
-            requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests || { label: 'リクエスト', enabled: true } },
-            setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist || { label: 'セトリ提案', enabled: true } },
-            tutorial: { mode: 'tutorial', icon: InformationCircleIcon, config: uiConfig.navButtons.tutorial || { label: 'ガイド', enabled: true } },
-            printGakufu: { 
-                href: uiConfig.printGakufuUrl || '#', 
-                icon: DocumentTextIcon, 
-                config: uiConfig.navButtons.printGakufu || { label: 'ぷりんと楽譜', enabled: true }
-            },
-        };
-        const buttonOrder: (keyof typeof buttonConfigs)[] = ['search', 'profile', 'list', 'suggest', 'news', 'ranking', 'requests', 'setlist', 'tutorial', 'printGakufu'];
-        return buttonOrder.map(key => buttonConfigs[key]).filter(btn => btn && btn.config?.enabled);
-    }, [uiConfig.navButtons, uiConfig.printGakufuUrl]);
-
-    const backgroundStyle: React.CSSProperties =
-        uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl
-            ? { backgroundImage: `url(${uiConfig.backgroundImageUrl})` }
-            : {};
-    
-    const SidebarContent = () => (
-        <div className="flex flex-col h-full bg-card-background-light dark:bg-card-background-dark">
-            <div className="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
-                <h2 className="font-bold text-lg whitespace-nowrap overflow-hidden" style={{ color: 'var(--text-primary-dynamic)' }}>メニュー</h2>
-                <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-primary-dynamic)' }}>
-                    <XIcon className="w-6 h-6" />
-                </button>
-            </div>
-            <nav className="flex-grow p-2 space-y-1 overflow-y-auto custom-scrollbar">
-                {navButtons.map((button) => {
-                    if ('href' in button && button.href) {
-                        return <NavButton key={button.href as string} onClick={() => setIsMenuOpen(false)} href={button.href as string} IconComponent={button.icon} label={button.config.label} />;
-                    }
-                    if ('mode' in button) {
-                        if (button.mode === 'suggest') {
-                            return <NavButton key={button.mode} onClick={() => { setIsSuggestModalOpen(true); setIsMenuOpen(false); }} isActive={false} IconComponent={button.icon} label={button.config.label} />;
-                        }
-                        if (button.mode === 'tutorial') {
-                            return <NavButton key={button.mode} onClick={() => { setIsTutorialOpen(true); setIsMenuOpen(false); }} isActive={false} IconComponent={button.icon} label={button.config.label} />;
-                        }
-                        return <NavButton key={button.mode} onClick={() => { setMode(button.mode as Mode); setIsMenuOpen(false); }} isActive={mode === button.mode} IconComponent={button.icon} label={button.config.label} />;
-                    }
-                    return null;
-                })}
-            </nav>
-        </div>
-    );
-
-    // ヘッダーに配置された要素があるかチェック
-    const hasHeaderDecorations = useMemo(() => {
-        if (!uiConfig.visualElements) return false;
-        return uiConfig.visualElements.some(el => (el.page === mode || el.page === 'all') && el.placement === 'header');
-    }, [uiConfig.visualElements, mode]);
-
-    // ビジュアル要素のレンダリング
-    const renderVisualElements = () => {
-        if (!uiConfig.visualElements) return null;
-        return uiConfig.visualElements
-            .filter(el => el.page === mode || el.page === 'all')
-            .map(el => {
-                const style: React.CSSProperties = {
-                    position: 'absolute',
-                    left: `${el.x}%`,
-                    width: `${el.width}%`,
-                    opacity: el.opacity,
-                    transform: `translate(-50%, 0) rotate(${el.rotation}deg)`,
-                    zIndex: el.zIndex ?? 0,
-                    pointerEvents: 'none',
-                    transition: 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
-                };
-
-                if (el.placement === 'header') {
-                    style.top = '0px';
-                    if (el.type === 'image') {
-                        style.maskImage = 'linear-gradient(to bottom, black 70%, transparent 100%)';
-                        style.WebkitMaskImage = 'linear-gradient(to bottom, black 70%, transparent 100%)';
-                    }
-                } else {
-                    style.bottom = '0px';
-                    if (el.type === 'image') {
-                        style.maskImage = 'linear-gradient(to top, black 70%, transparent 100%)';
-                        style.WebkitMaskImage = 'linear-gradient(to top, black 70%, transparent 100%)';
-                    }
-                }
-
-                return (
-                    <div key={el.id} style={style}>
-                        {el.type === 'image' && el.url && (
-                            <img src={el.url} alt="" className="w-full h-auto drop-shadow-xl" />
-                        )}
-                        {el.type === 'text' && el.content && (
-                            <p style={{ fontSize: `${el.fontSize}px`, color: el.color }} className="whitespace-pre-wrap font-bold drop-shadow-lg text-center p-4">
-                                {el.content}
-                            </p>
-                        )}
-                    </div>
-                );
-            });
-    };
-
-    if (isLoading && songs.length === 0) {
-        return (
-            <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 z-[9999]">
-                <LoadingSpinner className="w-16 h-16 text-pink-500" />
-                <p className="mt-6 font-bold text-slate-500 dark:text-slate-400 text-lg animate-pulse">データを読み込み中...</p>
-            </div>
-        );
-    }
+    if (isLoading && songs.length === 0) return <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-slate-950"><LoadingSpinner className="w-12 h-12 text-pink-500" /></div>;
 
     return (
-        <>
-            <div 
-                className="flex h-[100dvh] overflow-hidden transition-colors duration-300" 
-                style={{ 
-                    backgroundColor: isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor,
-                    color: 'var(--text-primary-dynamic)'
-                }}
-            >
-                <div className={`fixed inset-0 bg-black/95 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
-
-                <aside className={`fixed z-40 h-full border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                    <SidebarContent />
-                </aside>
-                
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg h-14 sm:h-16 border-b-2 z-20" style={{ borderColor: 'var(--primary-color)' }}>
-                        <div className="h-full flex items-center justify-between px-4 sm:px-6">
-                            {/* Left: Menu Toggle */}
-                            <div className="flex-1 flex justify-start">
-                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors" style={{ color: 'var(--text-primary-dynamic)' }}>
-                                    <MenuIcon className="w-6 h-6 sm:w-7 sm:h-7" />
-                                    <span className="font-semibold hidden sm:inline">メニュー</span>
-                                </button>
-                            </div>
-
-                            {/* Center: Title */}
-                            <div className="flex-[4] sm:flex-[3] text-center px-2 flex items-center justify-center h-full">
-                                 <h1 
-                                    className={`font-bold truncate leading-tight w-full ${uiConfig.mainTitleColor ? '' : 'text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)]'}`} 
-                                    style={{ 
-                                        fontSize: `${Math.min(uiConfig.mainTitleFontSize || 24, 32)}px`,
-                                        color: uiConfig.mainTitleColor || undefined
-                                    }}
-                                    title={uiConfig.mainTitle}
-                                 >
-                                     {uiConfig.mainTitle}
-                                 </h1>
-                            </div>
-
-                            {/* Right: Theme Toggle */}
-                            <div className="flex-1 flex justify-end items-center gap-2">
-                                <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
-                                    <UserGroupIcon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: 'var(--text-secondary-dynamic)' }} />
-                                    <span className="text-xs sm:text-sm font-semibold" style={{ color: 'var(--text-primary-dynamic)' }}>{activeUserCount}</span>
-                                </div>
-                                <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="Toggle dark mode">
-                                    {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
-                                </button>
-                            </div>
-                        </div>
-                    </header>
-                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar relative">
-                         {error && (
-                            <div className="mb-4 bg-yellow-100 dark:bg-yellow-900/80 border border-yellow-500 text-yellow-800 dark:text-yellow-200 p-2 text-center text-sm z-20 shadow-md rounded-lg">
-                                <strong>開発用情報:</strong> {error}
-                            </div>
-                        )}
-                        
-                        <div className={`transition-all duration-700 ease-in-out overflow-hidden relative z-20 ${isInfoBannerVisible ? 'max-h-40 opacity-100 mb-6' : 'max-h-0 opacity-0'}`}>
-                            <div className="bg-blue-100 dark:bg-blue-900/50 border border-blue-500/50 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-start gap-3 text-sm shadow-md">
-                                <InformationCircleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                                <span>URLをコピペするか、ツイキャスアプリの右上にある共有ボタンから、ブラウザでサイトを読み込むと大きな画面で閲覧できます。</span>
-                            </div>
-                        </div>
-                        
-                        {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
-                            <div className="fixed inset-0 bg-cover bg-center bg-fixed z-[-1]" style={{ ...backgroundStyle, opacity: uiConfig.backgroundOpacity }} />
-                        )}
-
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-                            {renderVisualElements()}
-                        </div>
-
-                        {/* 
-                            ヘッダー装飾がある場合、以前よりさらに詰めた余白を動的に付与 (pt-24 sm:pt-28)
-                        */}
-                        <div className={`relative z-10 transition-all duration-500 ${hasHeaderDecorations ? 'pt-24 sm:pt-28' : 'pt-2'}`}>
-                            {mode !== 'search' && (
-                                <button
-                                    onClick={() => setMode('search')}
-                                    className="flex items-center gap-2 mb-6 text-sm font-semibold transition-opacity hover:opacity-75 relative z-10"
-                                    style={{ color: 'var(--primary-color)' }}
-                                    aria-label="検索画面に戻る"
-                                >
-                                    <ChevronLeftIcon className="w-5 h-5" />
-                                    <span>検索画面に戻る</span>
-                                </button>
-                            )}
-                            <div className={`${uiConfig.backgroundType === 'image' ? 'content-glass' : ''}`}>
-                                {renderView()}
-                            </div>
-                        </div>
-                    </main>
-                    <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-[0_-4px_10px_rgba(0,0,0,0.1)] border-t border-border-light dark:border-border-dark p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-20">
-                         <button onClick={() => setMode('search')} className={`p-3 rounded-full transition-colors ${mode === 'search' ? 'text-white shadow-md' : ''}`} style={{backgroundColor: mode === 'search' ? 'var(--primary-color)' : '', color: mode === 'search' ? 'var(--text-on-primary)' : 'var(--text-secondary-dynamic)'}} aria-label="検索">
-                            <SearchIcon className="w-6 h-6" />
-                        </button>
-                        
-                        <button onClick={() => setMode('list')} className={`p-3 rounded-full transition-colors ${mode === 'list' ? 'text-white shadow-md' : ''}`} style={{backgroundColor: mode === 'list' ? 'var(--primary-color)' : '', color: mode === 'list' ? 'var(--text-on-primary)' : 'var(--text-secondary-dynamic)'}} aria-label="曲リスト">
-                            <MusicNoteIcon className="w-6 h-6" />
-                        </button>
-
-                        <button onClick={toggleDarkMode} className="p-3 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="ダークモード切替">
-                            {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
-                        </button>
-                    </footer>
+        <div className="flex h-[100dvh] overflow-hidden transition-colors duration-300" style={{ backgroundColor: isDarkMode ? 'var(--background-dark)' : 'var(--background-light)', color: 'var(--text-primary-dynamic)' }}>
+            <div className={`fixed inset-0 bg-black/50 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
+            
+            <aside className={`fixed z-40 h-full border-r border-border-light dark:border-border-dark bg-card-background-light dark:bg-card-background-dark w-64 transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="p-4 border-b flex justify-between items-center">
+                    <h2 className="font-bold">メニュー</h2>
+                    <button onClick={() => setIsMenuOpen(false)}><XIcon className="w-6 h-6"/></button>
                 </div>
+                <nav className="p-2 space-y-1">
+                    <NavButton onClick={() => { setMode('search'); setIsMenuOpen(false); }} isActive={mode === 'search'} IconComponent={SearchIcon} label="曲を検索" />
+                    <NavButton onClick={() => { setMode('list'); setIsMenuOpen(false); }} isActive={mode === 'list'} IconComponent={MusicNoteIcon} label="曲リスト" />
+                    <NavButton onClick={() => { setMode('news'); setIsMenuOpen(false); }} isActive={mode === 'news'} IconComponent={NewspaperIcon} label="お知らせ" />
+                    <NavButton onClick={() => { setMode('profile'); setIsMenuOpen(false); }} isActive={mode === 'profile'} IconComponent={UserIcon} label="プロフィール" />
+                    <NavButton onClick={() => { setIsTutorialOpen(true); setIsMenuOpen(false); }} isActive={false} IconComponent={InformationCircleIcon} label="ガイド" />
+                </nav>
+            </aside>
+
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <header className="h-14 sm:h-16 border-b-2 flex items-center justify-between px-4 sm:px-6 bg-card-background-light dark:bg-card-background-dark z-20" style={{ borderColor: 'var(--primary-color)' }}>
+                    <button onClick={() => setIsMenuOpen(true)} className="p-2"><MenuIcon className="w-6 h-6" /></button>
+                    <h1 className="font-bold truncate text-xl" style={{ color: uiConfig.mainTitleColor || 'var(--primary-color)' }}>{uiConfig.mainTitle}</h1>
+                    <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2">{isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}</button>
+                </header>
+
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar relative">
+                    {isInfoBannerVisible && (
+                        <div className="mb-6 bg-blue-100 dark:bg-blue-900/50 p-4 rounded-lg flex gap-3 text-sm animate-fade-in">
+                            <InformationCircleIcon className="w-5 h-5" />
+                            <span>ブラウザで閲覧すると大画面で操作可能です。</span>
+                        </div>
+                    )}
+                    <div className="relative z-10">{renderView()}</div>
+                </main>
             </div>
 
             {isAdminAuthenticated && (
                 <AdminModal 
-                    isOpen={isAdminModalOpen}
-                    onClose={() => setIsAdminModalOpen(false)}
-                    songs={songs}
-                    posts={adminPosts}
-                    uiConfig={uiConfig}
-                    setlistSuggestions={setlistSuggestions}
-                    recentRequests={recentRequests}
-                    onSaveSongs={onSaveSongs}
-                    onDeletePost={onDeletePost}
-                    onSavePost={onSavePost}
-                    onSaveUiConfig={onSaveUiConfig}
-                    currentMode={mode}
-                    setMode={setMode}
+                    isOpen={isAdminModalOpen} 
+                    onClose={() => setIsAdminModalOpen(false)} 
+                    songs={songs} 
+                    posts={adminPosts} 
+                    uiConfig={uiConfig} 
+                    setlistSuggestions={[]} 
+                    recentRequests={[]} 
+                    onSaveSongs={onSaveSongs} 
+                    onDeletePost={onDeletePost} 
+                    onSavePost={onSavePost} 
+                    onSaveUiConfig={onSaveUiConfig} 
+                    currentMode={mode} 
+                    setMode={setMode} 
                 />
             )}
             
-            <SuggestSongModal 
-                isOpen={isSuggestModalOpen}
-                onClose={() => setIsSuggestModalOpen(false)}
-                songs={songs}
-                onSelect={handleSuggestSelect}
-            />
-            
-            <SupportModal 
-                isOpen={isSupportModalOpen}
-                onClose={() => setIsSupportModalOpen(false)}
-                uiConfig={uiConfig}
-            />
-            
+            <SuggestSongModal isOpen={isSuggestModalOpen} onClose={() => setIsSuggestModalOpen(false)} songs={songs} onSelect={(t) => { setSearchTerm(t); setMode('search'); setIsSuggestModalOpen(false); }} />
+            <SupportModal isOpen={isSupportModalOpen} onClose={() => setIsSupportModalOpen(false)} uiConfig={uiConfig} />
             <TutorialModal isOpen={isTutorialOpen} onClose={() => setIsTutorialOpen(false)} />
-        </>
+        </div>
     );
 };
 

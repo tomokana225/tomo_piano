@@ -1,3 +1,4 @@
+
 // This serverless function runs on Cloudflare.
 // It securely calls the Gemini API to generate kana readings for song titles and artist names.
 import { GoogleGenAI, Type } from '@google/genai';
@@ -24,11 +25,6 @@ export async function onRequest(context) {
         return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
 
-    // Fixed: Exclusively obtain the API key from process.env.API_KEY as per guidelines.
-    if (!process.env.API_KEY) {
-        return jsonResponse({ error: 'API_KEY is not configured in process.env.' }, 500);
-    }
-    
     try {
         const { songs } = await request.json();
 
@@ -36,7 +32,7 @@ export async function onRequest(context) {
             return jsonResponse({ error: 'Invalid input: songs array is required.' }, 400);
         }
         
-        // Fixed: Initializing exclusively with process.env.API_KEY.
+        // Initializing exclusively with process.env.API_KEY as per guidelines.
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
         const prompt = `以下の日本の曲名とアーティスト名のJSONリストについて、一般的なカタカナの読み仮名を括弧付きで追記した結果を返してください。
@@ -47,7 +43,7 @@ export async function onRequest(context) {
 ${JSON.stringify(songs)}
 `;
         
-        // Fixed: Use 'gemini-3-flash-preview' for basic text tasks.
+        // Use 'gemini-3-flash-preview' for basic text tasks.
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
@@ -81,7 +77,7 @@ ${JSON.stringify(songs)}
             },
         });
         
-        // Fixed: Accessing text property directly (not as a method).
+        // Accessing text property directly (not as a method).
         const kanaResults = JSON.parse(response.text);
         
         return jsonResponse(kanaResults);
