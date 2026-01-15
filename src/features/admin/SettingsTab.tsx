@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { UiConfig, NavButtonConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
+import { useApi } from '../../hooks/useApi';
+import { CheckCircleIcon, XCircleIcon } from '../../components/ui/Icons';
 
 interface SettingsTabProps {
     uiConfig: UiConfig;
@@ -104,9 +106,11 @@ const headingFontOptions = [
 ];
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConfig }) => {
+    const { sendTestNotification } = useApi();
     const [config, setConfig] = useState<UiConfig>(uiConfig);
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [testStatus, setTestStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
     useEffect(() => {
         setConfig(uiConfig);
@@ -141,6 +145,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         setSaveStatus(success ? 'success' : 'error');
         setIsSaving(false);
         setTimeout(() => setSaveStatus('idle'), 4000);
+    };
+
+    const handleTestNotification = async () => {
+        if (!config.discordWebhookUrl) {
+            alert('Webhook URLを入力してください。');
+            return;
+        }
+        setTestStatus('sending');
+        const success = await sendTestNotification(config.discordWebhookUrl);
+        setTestStatus(success ? 'success' : 'error');
+        setTimeout(() => setTestStatus('idle'), 4000);
     };
 
     const handleNavChange = (key: keyof UiConfig['navButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
@@ -180,13 +195,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                             </div>
                             <div className="h-4 w-full rounded-full mb-1" style={{ backgroundColor: preset.config.primaryColor }}></div>
                             <p className="text-xs font-bold text-center text-gray-700 dark:text-gray-300 truncate">{preset.name}</p>
-                            {config.primaryColor === preset.config.primaryColor && (
-                                <div className="absolute top-1 right-1 bg-cyan-500 text-white p-0.5 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                            )}
                         </button>
                     ))}
                 </div>
@@ -209,24 +217,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                             <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="w-full bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                     </div>
-                    <div className="space-y-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">タイトルの文字サイズ: {config.mainTitleFontSize || 24}px</label>
-                            <input type="range" name="mainTitleFontSize" min="12" max="60" step="1" value={config.mainTitleFontSize || 24} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">タイトルの色</label>
-                            <div className="flex gap-4 items-center">
-                                <input type="color" name="mainTitleColor" value={config.mainTitleColor || '#000000'} onChange={handleInputChange} className="h-10 w-20 block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
-                                <button 
-                                    onClick={() => setConfig(prev => ({ ...prev, mainTitleColor: '' }))}
-                                    className="text-[10px] bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:opacity-80"
-                                >
-                                    色をリセット (グラデに戻す)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -234,7 +224,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
             <section className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-light dark:border-border-dark">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                     <span className="w-2 h-6 bg-purple-500 rounded-full"></span>
-                    通知設定
+                    通知設定 (スマホ・PCへのリクエスト通知)
                 </h3>
                 <div className="space-y-6">
                     <label className="flex items-center gap-3 cursor-pointer">
@@ -248,18 +238,45 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                         <span className="text-sm font-bold">リクエスト受信時に通知する</span>
                     </label>
                     <div className="space-y-4 border-l-4 border-purple-100 dark:border-purple-900 pl-4 py-2">
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Discord Webhook URL</label>
-                            <input
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    name="discordWebhookUrl"
+                                    value={config.discordWebhookUrl || ''}
+                                    onChange={handleInputChange}
+                                    placeholder="https://discord.com/api/webhooks/..."
+                                    className="flex-grow bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-xl shadow-sm p-3 text-sm focus:ring-purple-500 focus:border-purple-500 outline-none"
+                                />
+                                <button
+                                    onClick={handleTestNotification}
+                                    disabled={testStatus === 'sending' || !config.discordWebhookUrl}
+                                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50 whitespace-nowrap flex items-center gap-2"
+                                >
+                                    {testStatus === 'sending' ? <LoadingSpinner className="w-4 h-4" /> : null}
+                                    {testStatus === 'success' ? <CheckCircleIcon className="w-4 h-4" /> : null}
+                                    {testStatus === 'error' ? <XCircleIcon className="w-4 h-4" /> : null}
+                                    テスト送信
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-gray-500 leading-relaxed">
+                                Discordの「チャンネル設定 &gt; 連携サービス &gt; ウェブフック」からURLを取得できます。<br/>
+                                <strong>※メールで受け取りたい場合:</strong> Discordのチャンネル通知設定を「すべて」にし、Discordの設定で「未読通知をメールで受け取る」をオンにすることで擬似的にメール通知が可能です。または、IFTTT等のWebhook連携サービスを利用してください。
+                            </p>
+                        </div>
+                        <div>
+                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">通知時のメンション用ID (任意)</label>
+                             <input
                                 type="text"
-                                name="discordWebhookUrl"
-                                value={config.discordWebhookUrl || ''}
+                                name="discordUserId"
+                                value={config.discordUserId || ''}
                                 onChange={handleInputChange}
-                                placeholder="https://discord.com/api/webhooks/..."
-                                className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm focus:ring-purple-500 focus:border-purple-500"
+                                placeholder="例: 123456789012345678"
+                                className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm"
                             />
-                            <p className="text-[10px] text-gray-400">
-                                ※Discordのチャンネル設定 &gt; 連携サービス &gt; ウェブフック から取得したURLを貼り付けてください。
+                            <p className="text-[10px] text-gray-400 mt-1">
+                                自分のDiscordユーザーID（数字）を入力すると、通知時にメンションが付き、より気づきやすくなります。
                             </p>
                         </div>
                     </div>
@@ -285,20 +302,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                                 ))}
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">カードの見た目</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {(['flat', 'elevated', 'glass'] as const).map(style => (
-                                    <button
-                                        key={style}
-                                        onClick={() => setConfig(prev => ({ ...prev, cardStyle: style }))}
-                                        className={`py-2 text-xs font-bold border-2 rounded-md transition ${config.cardStyle === style ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}
-                                    >
-                                        {style.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                     <div className="space-y-6">
                         <div>
@@ -312,97 +315,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                                 <span className="text-xs font-mono text-gray-500">{config.primaryColor.toUpperCase()}</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-             {/* フォント設定セクション */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-bold">フォント</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">見出しフォント</label>
-                        <select name="headingFontFamily" value={config.headingFontFamily} onChange={handleInputChange} className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-2">
-                            {headingFontOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.name}</option>)}
-                        </select>
-                    </div>
-                    <div>
-                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">フォントサイズ (見出し全体): {Math.round(config.headingFontScale * 100)}%</label>
-                         <input type="range" name="headingFontScale" min="0.8" max="1.5" step="0.05" value={config.headingFontScale} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
-                    </div>
-                </div>
-            </section>
-
-            {/* 背景設定セクション */}
-            <section className="space-y-4">
-                <h3 className="text-lg font-bold">背景設定</h3>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl space-y-6">
-                    <div className="flex gap-6">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="backgroundType" value="color" checked={config.backgroundType === 'color'} onChange={handleInputChange} className="text-cyan-600" />
-                            単色背景
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="backgroundType" value="image" checked={config.backgroundType === 'image'} onChange={handleInputChange} className="text-cyan-600" />
-                            画像背景
-                        </label>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">ライトモード時の背景色</label>
-                                <input type="color" name="backgroundColor" value={config.backgroundColor} onChange={handleInputChange} className="h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">ダークモード時の背景色</label>
-                                <input type="color" name="darkBackgroundColor" value={config.darkBackgroundColor} onChange={handleInputChange} className="h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
-                            </div>
-                        </div>
-
-                        {config.backgroundType === 'image' && (
-                            <div className="space-y-4">
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">背景画像URL</label>
-                                <div className="grid grid-cols-5 gap-2 mb-2">
-                                    {backgroundPresets.map(preset => (
-                                        <button key={preset.name} onClick={() => setConfig(prev => ({ ...prev, backgroundImageUrl: preset.url }))} className={`h-12 border-2 rounded-md overflow-hidden ${config.backgroundImageUrl === preset.url ? 'border-cyan-500' : 'border-transparent'}`}>
-                                            <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
-                                        </button>
-                                    ))}
-                                </div>
-                                <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="カスタム画像URL" className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-2 text-xs" />
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">画像不透明度: {Math.round(config.backgroundOpacity * 100)}%</label>
-                                    <input type="range" name="backgroundOpacity" min="0" max="1" step="0.01" value={config.backgroundOpacity} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </section>
-
-            {/* 特別ボタン・ナビゲーション */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <h3 className="text-lg font-bold mb-4">特別ボタン</h3>
-                    <div className="space-y-2">
-                        {(['twitcas', 'x', 'youtube', 'support'] as const).map(key => (
-                            <div key={key} className="bg-white dark:bg-gray-800 p-3 rounded-lg flex items-center gap-3">
-                                <input type="checkbox" checked={config.specialButtons[key].enabled} onChange={(e) => handleSpecialNavChange(key, 'enabled', e.target.checked)} className="text-cyan-600" />
-                                <input type="text" value={config.specialButtons[key].label} onChange={(e) => handleSpecialNavChange(key, 'label', e.target.value)} className="flex-grow bg-gray-100 dark:bg-gray-700 text-sm p-1.5 rounded" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <div>
-                    <h3 className="text-lg font-bold mb-4">ナビゲーション</h3>
-                    <div className="space-y-2 max-h-60 overflow-y-auto p-1 custom-scrollbar">
-                        {navButtonKeys.map(key => (
-                            <div key={key} className="bg-white dark:bg-gray-800 p-2 rounded-lg flex items-center gap-3">
-                                <input type="checkbox" checked={config.navButtons[key].enabled} onChange={(e) => handleNavChange(key, 'enabled', e.target.checked)} className="text-cyan-600" />
-                                <span className="text-sm font-medium flex-grow">{config.navButtons[key].label}</span>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>

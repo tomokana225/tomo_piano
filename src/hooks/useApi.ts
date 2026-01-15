@@ -285,8 +285,22 @@ export const useApi = () => {
         fetch('/api/songs?action=getRecentRequests').then(res => res.ok ? res.json() : []).then(data => setRecentRequests(data)).catch(() => {});
     }, [rankingPeriod, fetchRankings, fetchLikeRankings]);
 
+    const sendTestNotification = useCallback(async (webhookUrl: string) => {
+        try {
+            const res = await fetch('/api/songs?action=sendTestNotification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ webhookUrl }),
+            });
+            return res.ok;
+        } catch (err) {
+            console.error("Test notification failed", err);
+            return false;
+        }
+    }, []);
+
     return {
         rawSongList, songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests, isLoading, error, activeUserCount,
-        rankingPeriod, setRankingPeriod, onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost, logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings, verifyAdminPassword
+        rankingPeriod, setRankingPeriod, onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost, logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings, verifyAdminPassword, sendTestNotification
     };
 };

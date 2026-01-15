@@ -106,18 +106,19 @@ export async function onRequest(context) {
                     const mention = config.discordUserId ? `<@${config.discordUserId}> ` : '';
                     
                     const message = {
-                        content: mention ? `${mention}新しいリクエストが届きました！` : null,
+                        content: mention ? `${mention} 新しいリクエストが届きました！` : "🔔 新しいリクエストが届きました！",
                         embeds: [
                             {
-                                title: "🎵 新しいリクエストが届きました！",
+                                title: "🎵 楽曲リクエスト受理",
                                 color: 15419305, // #EB4899 (Pink)
                                 fields: [
-                                    { name: "曲名", value: songTitle, inline: true },
+                                    { name: "曲名", value: `**${songTitle}**`, inline: false },
                                     { name: "アーティスト", value: artist || "不明", inline: true },
-                                    { name: "リクエスト者", value: isAnonymousRequest ? "匿名" : requester.trim(), inline: false },
+                                    { name: "リクエスト者", value: isAnonymousRequest ? "匿名" : `**${requester.trim()}**`, inline: true },
                                     { name: "時刻", value: now.toLocaleString('ja-JP'), inline: false }
                                 ],
-                                footer: { text: "Piano Request Checker" }
+                                footer: { text: "Piano Request Checker | Cloudflare Workers" },
+                                timestamp: new Date().toISOString()
                             }
                         ]
                     };

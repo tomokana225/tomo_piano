@@ -271,6 +271,32 @@ export async function onRequest(context) {
                 return jsonResponse({ success: true });
             }
 
+            if (action === 'sendTestNotification') {
+                const { webhookUrl } = data;
+                if (!webhookUrl) return errorResponse('Webhook URL is required.', 400);
+                
+                const message = {
+                    embeds: [{
+                        title: "✅ 通知テスト成功",
+                        description: "Webhookの設定は正しく行われています。今後リクエストがあった際はこちらに通知が届きます。",
+                        color: 3066993, // Green
+                        fields: [
+                            { name: "時刻", value: new Date().toLocaleString('ja-JP'), inline: false }
+                        ],
+                        footer: { text: "Piano Request Checker" }
+                    }]
+                };
+
+                const res = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(message)
+                });
+
+                if (res.ok) return jsonResponse({ success: true });
+                return errorResponse('Webhook submission failed.');
+            }
+
             return errorResponse('Invalid POST action.', 400);
 
         } catch (error) {
