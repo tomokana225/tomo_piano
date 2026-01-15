@@ -31,15 +31,15 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, title, onClick }) => (
   <button
     onClick={onClick}
-    className="group relative w-full flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-lg hover:border-[var(--primary-color)]/50 transition-all duration-300 transform active:scale-[0.97] min-h-[90px] sm:min-h-[120px]"
+    className="group relative w-full flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-lg hover:border-[var(--primary-color)]/50 transition-all duration-300 transform active:scale-[0.97] min-h-[100px] sm:min-h-[140px]"
     aria-label={title}
   >
-    <div className="flex flex-col items-center justify-center gap-1.5 sm:gap-3 w-full h-full">
-        <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-all duration-500 bg-[var(--primary-color)]/5 group-hover:bg-[var(--primary-color)]/10">
-            <Icon className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-110" style={{ color: 'var(--primary-color)' }} />
+    <div className="flex flex-col items-center justify-center gap-1.5 sm:gap-2.5 w-full h-full">
+        <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-500 bg-[var(--primary-color)]/5 group-hover:bg-[var(--primary-color)]/10">
+            <Icon className="w-6 h-6 sm:w-8 sm:h-8 transition-transform duration-300 group-hover:scale-110" style={{ color: 'var(--primary-color)' }} />
         </div>
         <div className="w-full text-center px-1">
-            <h3 className="font-bold text-[10px] sm:text-xs md:text-sm tracking-tight whitespace-nowrap overflow-hidden text-ellipsis w-full" style={{ color: 'var(--text-primary-dynamic)' }}>
+            <h3 className="font-bold text-[15px] sm:text-lg md:text-xl tracking-tight whitespace-nowrap overflow-hidden text-ellipsis w-full" style={{ color: 'var(--text-primary-dynamic)' }}>
                 {title}
             </h3>
         </div>
@@ -247,13 +247,13 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in px-4">
-            <div className="text-center mb-8">
-                <p className="text-sm font-medium tracking-wide" style={{ color: 'var(--text-secondary-dynamic)' }}>
+            <div className="text-center mb-1 min-h-[50px] flex items-center justify-center">
+                <p className="text-sm font-medium tracking-wide leading-relaxed" style={{ color: 'var(--text-secondary-dynamic)' }}>
                     {uiConfig.subtitle}
                 </p>
             </div>
             
-            <form onSubmit={handleSearchSubmit} className="mb-10 relative" ref={searchContainerRef}>
+            <form onSubmit={handleSearchSubmit} className="mb-6 relative" ref={searchContainerRef}>
                 <div className="relative group">
                     <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 opacity-50" style={{ color: 'var(--text-primary-dynamic)' }} />
                     <input

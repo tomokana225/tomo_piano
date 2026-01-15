@@ -494,7 +494,10 @@ const App: React.FC = () => {
                             {renderVisualElements()}
                         </div>
 
-                        <div className={`relative z-10 transition-all duration-500 ${hasHeaderDecorations ? 'pt-40 sm:pt-64' : 'pt-4'}`}>
+                        {/* 
+                            ヘッダー装飾がある場合、以前より少し詰めた余白を動的に付与 (pt-28 sm:pt-40)
+                        */}
+                        <div className={`relative z-10 transition-all duration-500 ${hasHeaderDecorations ? 'pt-28 sm:pt-40' : 'pt-4'}`}>
                             {mode !== 'search' && (
                                 <button
                                     onClick={() => setMode('search')}
