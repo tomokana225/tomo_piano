@@ -1,3 +1,4 @@
+
 // --- TYPE DEFINITIONS ---
 export interface Song {
   title: string;
@@ -97,6 +98,9 @@ export interface UiConfig {
     bodyFontFamily: string;
     headingFontScale: number;
     bodyFontScale: number;
+    // --- 通知設定 ---
+    notificationEnabled?: boolean;
+    discordWebhookUrl?: string;
     // --- プロフィール設定 ---
     profileName?: string;
     profileTitle?: string;

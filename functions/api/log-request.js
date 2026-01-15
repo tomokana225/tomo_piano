@@ -1,5 +1,6 @@
+
 // This serverless function runs on Cloudflare, not in the user's browser.
-// It logs song requests to Firestore.
+// It logs song requests to Firestore and optionally sends a notification.
 
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, doc, getDoc, writeBatch, increment } from 'firebase/firestore';
@@ -31,6 +32,11 @@ async function getFirebaseApp(env) {
     return initializeApp(firebaseConfig);
 }
 
+const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+});
+
 export async function onRequest(context) {
     const { request, env } = context;
     
@@ -41,11 +47,6 @@ export async function onRequest(context) {
     if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
-
-    const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
-        status,
-        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-    });
     
     let app;
     try {
@@ -93,6 +94,43 @@ export async function onRequest(context) {
         batch.set(yearlyRef, { [safeKey]: { count: increment(1), artist: artist || '' } }, { merge: true });
 
         await batch.commit();
+
+        // --- Notification Logic ---
+        try {
+            const configRef = doc(db, 'config/ui');
+            const configSnap = await getDoc(configRef);
+            if (configSnap.exists()) {
+                const config = configSnap.data();
+                if (config.notificationEnabled && config.discordWebhookUrl) {
+                    const message = {
+                        content: null,
+                        embeds: [
+                            {
+                                title: "🎵 新しいリクエストが届きました！",
+                                color: 15419305, // #EB4899 (Pink)
+                                fields: [
+                                    { name: "曲名", value: songTitle, inline: true },
+                                    { name: "アーティスト", value: artist || "不明", inline: true },
+                                    { name: "リクエスト者", value: isAnonymousRequest ? "匿名" : requester.trim(), inline: false },
+                                    { name: "時刻", value: now.toLocaleString('ja-JP'), inline: false }
+                                ],
+                                footer: { text: "Piano Request Checker" }
+                            }
+                        ]
+                    };
+
+                    // Send to Discord
+                    await fetch(config.discordWebhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(message)
+                    });
+                }
+            }
+        } catch (notifError) {
+            console.warn('Failed to send notification:', notifError);
+            // Don't fail the whole request if notification fails
+        }
 
         return jsonResponse({ success: true });
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { UiConfig, NavButtonConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -116,6 +117,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         setConfig(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = e.target;
+        setConfig(prev => ({ ...prev, [name]: checked }));
+    };
+
     const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setConfig(prev => ({ ...prev, [name]: Number(value) }));
@@ -183,6 +189,40 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                             )}
                         </button>
                     ))}
+                </div>
+            </section>
+
+            {/* 通知設定セクション */}
+            <section className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-light dark:border-border-dark">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span className="w-2 h-6 bg-purple-500 rounded-full"></span>
+                    通知設定
+                </h3>
+                <div className="space-y-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="notificationEnabled"
+                            checked={config.notificationEnabled || false}
+                            onChange={handleCheckboxChange}
+                            className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                        />
+                        <span className="text-sm font-bold">リクエスト受信時に通知する</span>
+                    </label>
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Discord Webhook URL</label>
+                        <input
+                            type="text"
+                            name="discordWebhookUrl"
+                            value={config.discordWebhookUrl || ''}
+                            onChange={handleInputChange}
+                            placeholder="https://discord.com/api/webhooks/..."
+                            className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm focus:ring-purple-500 focus:border-purple-500"
+                        />
+                        <p className="text-[10px] text-gray-400">
+                            ※Discordのチャンネル設定 > 連携サービス > ウェブフック から取得したURLを貼り付けてください。SlackのWebhookも動作します。
+                        </p>
+                    </div>
                 </div>
             </section>
 

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig, SetlistSuggestion, RankingPeriod } from '../types';
 import { parseSongs } from '../utils/parser';
@@ -31,6 +32,9 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     borderRadius: 'medium',
     cardStyle: 'elevated',
     shadowIntensity: 0.1,
+    // 通知設定
+    notificationEnabled: false,
+    discordWebhookUrl: '',
     // プロフィール初期値
     profileName: 'ともかな',
     profileTitle: 'Pianist / Streamer',
