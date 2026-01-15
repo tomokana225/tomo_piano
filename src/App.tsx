@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
-import { Mode, VisualElement } from './types';
+import { Mode } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
