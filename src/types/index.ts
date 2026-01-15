@@ -8,7 +8,32 @@ export interface Song {
   genre: string;
   isNew: boolean;
   status: 'playable' | 'practicing';
-  season?: string;
+  season?: string; // 追加: 季節（春, 夏, 秋, 冬）
+}
+
+export interface SearchResult {
+  status: 'found' | 'related' | 'notFound';
+  songs: Song[];
+  searchTerm: string;
+}
+
+export interface RankingItem {
+  id: string; // song title
+  count: number;
+  artist: string;
+}
+
+export interface ArtistRankingItem {
+  id: string; // artist name
+  count: number;
+}
+
+export interface RequestRankingItem {
+    id: string; // requested song title
+    count: number;
+    artist?: string;
+    lastRequester?: string;
+    lastRequestedAt?: number;
 }
 
 export interface BlogPost {
@@ -20,26 +45,29 @@ export interface BlogPost {
   imageUrl?: string;
 }
 
+export interface SetlistSuggestion {
+  id: string;
+  requester: string;
+  songs: string[];
+  createdAt: number;
+}
+
 export interface NavButtonConfig {
     label: string;
     enabled: boolean;
 }
 
-export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'news' | 'setlist' | 'profile';
-export type RankingPeriod = 'all' | 'month' | 'year';
-
-// Added VisualElement interface to fix missing type errors
 export interface VisualElement {
     id: string;
     page: Mode | 'all';
     type: 'image' | 'text';
     url?: string;
     content?: string;
-    x: number;
+    x: number; // percentage 0-100
     placement: 'header' | 'footer';
-    width: number;
-    opacity: number;
-    rotation: number;
+    width: number; // percentage 0-100
+    opacity: number; // 0-1
+    rotation: number; // degrees
     zIndex: number;
     fontSize?: number;
     color?: string;
@@ -51,41 +79,43 @@ export interface UiConfig {
     mainTitleColor?: string; 
     subtitle: string;
     primaryColor: string;
-    twitcastingUrl: string;
-    xUrl: string;
-    youtubeUrl: string;
-    printGakufuUrl: string;
+    adminPassword?: string;
+    twitcastingUrl?: string;
+    xUrl?: string;
+    youtubeUrl?: string;
+    printGakufuUrl?: string;
+    ofuseUrl?: string;
+    doneruUrl?: string;
+    amazonWishlistUrl?: string;
+    backgroundType: 'color' | 'image';
     backgroundColor: string;
     darkBackgroundColor: string;
     backgroundImageUrl: string;
     backgroundOpacity: number;
-    // Added missing background and icon properties
-    backgroundType: 'color' | 'image';
     twitcastingIconUrl?: string;
     xIconUrl?: string;
     youtubeIconUrl?: string;
     supportIconUrl?: string;
-    // Added missing notification and support link properties
-    notificationEnabled?: boolean;
-    discordWebhookUrl?: string;
-    discordUserId?: string;
-    ofuseUrl?: string;
-    doneruUrl?: string;
-    amazonWishlistUrl?: string;
-    // Added missing profile and visual elements properties
-    visualElements?: VisualElement[];
-    profileName?: string;
-    profileTitle?: string;
-    profileBio?: string;
-    profileImageUrl?: string;
-    profileHeaderImageUrl?: string;
     headingFontFamily: string;
     bodyFontFamily: string;
     headingFontScale: number;
     bodyFontScale: number;
+    // --- 通知設定 ---
+    notificationEnabled?: boolean;
+    discordWebhookUrl?: string;
+    discordUserId?: string;
+    // --- プロフィール設定 ---
+    profileName?: string;
+    profileTitle?: string;
+    profileBio?: string;
+    profileImageUrl?: string;
+    profileHeaderImageUrl?: string; // 追加: ヘッダー画像
+    // --- 新しいデザイン設定 ---
     borderRadius?: 'none' | 'small' | 'medium' | 'large' | 'full';
     cardStyle?: 'flat' | 'elevated' | 'glass';
-    shadowIntensity?: number;
+    shadowIntensity?: number; // 0 to 1
+    // ------------------------
+    visualElements?: VisualElement[];
     specialButtons: {
         twitcas: NavButtonConfig;
         support: NavButtonConfig;
@@ -106,34 +136,6 @@ export interface UiConfig {
     }
 }
 
-export interface SearchResult {
-  status: 'found' | 'related' | 'notFound';
-  songs: Song[];
-  searchTerm: string;
-}
+export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'news' | 'setlist' | 'profile';
 
-export interface RankingItem {
-  id: string;
-  count: number;
-  artist: string;
-}
-
-export interface ArtistRankingItem {
-  id: string;
-  count: number;
-}
-
-export interface RequestRankingItem {
-    id: string;
-    count: number;
-    artist?: string;
-    lastRequester?: string;
-    lastRequestedAt?: number;
-}
-
-export interface SetlistSuggestion {
-  id: string;
-  requester: string;
-  songs: string[];
-  createdAt: number;
-}
+export type RankingPeriod = 'all' | 'month' | 'year';
