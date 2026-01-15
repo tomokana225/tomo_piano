@@ -234,14 +234,22 @@ const App: React.FC = () => {
         root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
         root.style.setProperty('--body-font-scale', String(uiConfig.bodyFontScale || 1));
 
-        // 背景色の設定
+        // 背景色の設定 (ライト・ダークそれぞれ)
         root.style.setProperty('--background-light', uiConfig.backgroundColor);
         root.style.setProperty('--background-dark', uiConfig.darkBackgroundColor);
 
-        // 背景色に対するテキストの色の自動調整
-        const currentBg = isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
-        const bgContrast = getContrastColor(currentBg);
-        root.style.setProperty('--text-primary-dynamic', bgContrast);
+        // 現在の背景色に応じた動的な文字色の計算
+        const currentBgColor = isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
+        const dynamicTextColor = getContrastColor(currentBgColor);
+        root.style.setProperty('--text-primary-dynamic', dynamicTextColor);
+        
+        // サブテキスト用の色 (少し透明度を持たせる)
+        const secondaryDynamic = dynamicTextColor === '#000000' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)';
+        root.style.setProperty('--text-secondary-dynamic', secondaryDynamic);
+
+        // 境界線用の色
+        const borderDynamic = dynamicTextColor === '#000000' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        root.style.setProperty('--border-dynamic', borderDynamic);
         
     }, [uiConfig, isDarkMode]);
 
@@ -324,10 +332,10 @@ const App: React.FC = () => {
             : {};
     
     const SidebarContent = () => (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-card-background-light dark:bg-card-background-dark">
             <div className="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
-                <h2 className="font-bold text-lg whitespace-nowrap overflow-hidden text-text-primary-light dark:text-text-primary-dark">メニュー</h2>
-                <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-text-primary-light dark:text-text-primary-dark">
+                <h2 className="font-bold text-lg whitespace-nowrap overflow-hidden" style={{ color: 'var(--text-primary-dynamic)' }}>メニュー</h2>
+                <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-primary-dynamic)' }}>
                     <XIcon className="w-6 h-6" />
                 </button>
             </div>
@@ -351,7 +359,7 @@ const App: React.FC = () => {
         </div>
     );
 
-    // ヘッダーに配置された要素があるかチェック（コンテンツのオフセット計算用）
+    // ヘッダーに配置された要素があるかチェック
     const hasHeaderDecorations = useMemo(() => {
         if (!uiConfig.visualElements) return false;
         return uiConfig.visualElements.some(el => (el.page === mode || el.page === 'all') && el.placement === 'header');
@@ -414,10 +422,16 @@ const App: React.FC = () => {
 
     return (
         <>
-            <div className="flex h-[100dvh] bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark overflow-hidden transition-colors duration-300" style={{ backgroundColor: isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor }}>
+            <div 
+                className="flex h-[100dvh] overflow-hidden transition-colors duration-300" 
+                style={{ 
+                    backgroundColor: isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor,
+                    color: 'var(--text-primary-dynamic)'
+                }}
+            >
                 <div className={`fixed inset-0 bg-black/95 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
 
-                <aside className={`fixed z-40 h-full bg-card-background-light dark:bg-card-background-dark border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <aside className={`fixed z-40 h-full border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <SidebarContent />
                 </aside>
                 
@@ -426,7 +440,7 @@ const App: React.FC = () => {
                         <div className="h-full flex items-center justify-between px-4 sm:px-6">
                             {/* Left: Menu Toggle */}
                             <div className="flex-1 flex justify-start">
-                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-text-primary-light dark:text-text-primary-dark">
+                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors" style={{ color: 'var(--text-primary-dynamic)' }}>
                                     <MenuIcon className="w-6 h-6 sm:w-7 sm:h-7" />
                                     <span className="font-semibold hidden sm:inline">メニュー</span>
                                 </button>
@@ -446,18 +460,13 @@ const App: React.FC = () => {
                                  </h1>
                             </div>
 
-                            {/* Right: Visitor & Theme */}
+                            {/* Right: Theme Toggle */}
                             <div className="flex-1 flex justify-end items-center gap-2">
-                                <div className="hidden sm:flex items-center gap-2">
-                                    <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
-                                        <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                                        <span className="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">{activeUserCount}</span>
-                                    </div>
-                                    <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
-                                        {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
-                                    </button>
+                                <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
+                                    <UserGroupIcon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: 'var(--text-secondary-dynamic)' }} />
+                                    <span className="text-xs sm:text-sm font-semibold" style={{ color: 'var(--text-primary-dynamic)' }}>{activeUserCount}</span>
                                 </div>
-                                <button onClick={toggleDarkMode} className="sm:hidden p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+                                <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="Toggle dark mode">
                                     {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
                                 </button>
                             </div>
@@ -496,28 +505,24 @@ const App: React.FC = () => {
                                 <span>検索画面に戻る</span>
                             </button>
                         )}
+                        
                         {/* 
-                            ヘッダー装飾がある場合、被らないように pt-32 (または状況に応じた余白) を追加
+                            ヘッダー装飾がある場合、より余裕のある余白を動的に付与 (pt-32 sm:pt-52)
                         */}
-                        <div className={`relative z-10 min-h-full ${uiConfig.backgroundType === 'image' ? 'content-glass' : ''} ${hasHeaderDecorations ? 'pt-24 sm:pt-40' : ''}`}>
+                        <div className={`relative z-10 min-h-full ${uiConfig.backgroundType === 'image' ? 'content-glass' : ''} ${hasHeaderDecorations ? 'pt-32 sm:pt-52' : ''}`}>
                             {renderView()}
                         </div>
                     </main>
                     <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-[0_-4px_10px_rgba(0,0,0,0.1)] border-t border-border-light dark:border-border-dark p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-20">
-                        <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
-                            <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                            <span className="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">{activeUserCount}</span>
-                        </div>
-                        
-                        <button onClick={() => setMode('search')} className={`p-3 rounded-full transition-colors ${mode === 'search' ? 'text-white shadow-md' : 'text-text-secondary-light dark:text-text-secondary-dark'}`} style={{backgroundColor: mode === 'search' ? 'var(--primary-color)' : '', color: mode === 'search' ? 'var(--text-on-primary)' : ''}} aria-label="検索">
+                         <button onClick={() => setMode('search')} className={`p-3 rounded-full transition-colors ${mode === 'search' ? 'text-white shadow-md' : ''}`} style={{backgroundColor: mode === 'search' ? 'var(--primary-color)' : '', color: mode === 'search' ? 'var(--text-on-primary)' : 'var(--text-secondary-dynamic)'}} aria-label="検索">
                             <SearchIcon className="w-6 h-6" />
                         </button>
                         
-                        <button onClick={() => setMode('list')} className={`p-3 rounded-full transition-colors ${mode === 'list' ? 'text-white shadow-md' : 'text-text-secondary-light dark:text-text-secondary-dark'}`} style={{backgroundColor: mode === 'list' ? 'var(--primary-color)' : '', color: mode === 'list' ? 'var(--text-on-primary)' : ''}} aria-label="曲リスト">
+                        <button onClick={() => setMode('list')} className={`p-3 rounded-full transition-colors ${mode === 'list' ? 'text-white shadow-md' : ''}`} style={{backgroundColor: mode === 'list' ? 'var(--primary-color)' : '', color: mode === 'list' ? 'var(--text-on-primary)' : 'var(--text-secondary-dynamic)'}} aria-label="曲リスト">
                             <MusicNoteIcon className="w-6 h-6" />
                         </button>
 
-                        <button onClick={toggleDarkMode} className="p-3 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="ダークモード切替">
+                        <button onClick={toggleDarkMode} className="p-3 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="ダークモード切替">
                             {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
                         </button>
                     </footer>
@@ -534,8 +539,8 @@ const App: React.FC = () => {
                     setlistSuggestions={setlistSuggestions}
                     recentRequests={recentRequests}
                     onSaveSongs={onSaveSongs}
-                    onSavePost={onSavePost}
                     onDeletePost={onDeletePost}
+                    onSavePost={onSavePost}
                     onSaveUiConfig={onSaveUiConfig}
                     currentMode={mode}
                     setMode={setMode}

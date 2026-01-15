@@ -27,8 +27,10 @@
   --border-dark: #334155;
   --input-bg-dark: #334155;
 
-  /* Dynamic Contrast Text (Automatic based on background) */
+  /* Dynamic Contrast Colors (Automatic based on current background) */
   --text-primary-dynamic: #000000;
+  --text-secondary-dynamic: rgba(0,0,0,0.6);
+  --border-dynamic: rgba(0,0,0,0.1);
 
   --heading-font: 'Kiwi Maru', serif;
   --body-font: 'Noto Sans JP', sans-serif;
@@ -74,6 +76,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
 
+/* 背景色設定時に文字色を保証するカードスタイル */
 .fancy-card {
     border-radius: var(--app-radius);
     box-shadow: var(--card-shadow);
@@ -81,6 +84,9 @@ h1, h2, h3, h4, h5, h6 {
     backdrop-filter: blur(var(--card-blur));
     @apply transition-all duration-300 border-l-4 hover:shadow-xl;
     border-left-color: var(--primary-color);
+    border-top: 1px solid var(--border-dynamic);
+    border-right: 1px solid var(--border-dynamic);
+    border-bottom: 1px solid var(--border-dynamic);
 }
 .dark .fancy-card {
     background-color: rgba(30, 41, 59, var(--card-bg-opacity));

@@ -75,8 +75,8 @@ export interface VisualElement {
 
 export interface UiConfig {
     mainTitle: string;
-    mainTitleFontSize?: number; // 追加
-    mainTitleColor?: string; // 追加
+    mainTitleFontSize?: number; 
+    mainTitleColor?: string; 
     subtitle: string;
     primaryColor: string;
     adminPassword?: string;

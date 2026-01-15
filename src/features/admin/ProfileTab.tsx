@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { UiConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
-import { ImageIcon, PlusIcon } from '../../components/ui/Icons';
+import { ImageIcon } from '../../components/ui/Icons';
 
 interface ProfileTabProps {
     uiConfig: UiConfig;

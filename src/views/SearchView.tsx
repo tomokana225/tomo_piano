@@ -31,7 +31,7 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, title, onClick }) => (
   <button
     onClick={onClick}
-    className="group relative w-full flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg hover:border-[var(--primary-color)]/50 transition-all duration-300 transform hover:-translate-y-1 active:scale-[0.97] min-h-[90px] sm:min-h-[120px]"
+    className="group relative w-full flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-lg hover:border-[var(--primary-color)]/50 transition-all duration-300 transform active:scale-[0.97] min-h-[90px] sm:min-h-[120px]"
     aria-label={title}
   >
     <div className="flex flex-col items-center justify-center gap-1.5 sm:gap-3 w-full h-full">
@@ -39,7 +39,7 @@ const NavCard: React.FC<{
             <Icon className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-110" style={{ color: 'var(--primary-color)' }} />
         </div>
         <div className="w-full text-center px-1">
-            <h3 className="font-bold text-[10px] sm:text-xs md:text-sm tracking-tight text-text-primary-light dark:text-text-primary-dark whitespace-nowrap overflow-hidden text-ellipsis w-full">
+            <h3 className="font-bold text-[10px] sm:text-xs md:text-sm tracking-tight whitespace-nowrap overflow-hidden text-ellipsis w-full" style={{ color: 'var(--text-primary-dynamic)' }}>
                 {title}
             </h3>
         </div>
@@ -248,12 +248,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in px-4">
             <div className="text-center mb-8">
-                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium tracking-wide">{uiConfig.subtitle}</p>
+                <p className="text-sm font-medium tracking-wide" style={{ color: 'var(--text-secondary-dynamic)' }}>
+                    {uiConfig.subtitle}
+                </p>
             </div>
             
             <form onSubmit={handleSearchSubmit} className="mb-10 relative" ref={searchContainerRef}>
                 <div className="relative group">
-                    <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary-light/60 dark:text-text-secondary-dark/60" />
+                    <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 opacity-50" style={{ color: 'var(--text-primary-dynamic)' }} />
                     <input
                         type="search"
                         placeholder="曲名やアーティスト名で検索"
@@ -261,10 +263,11 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                         onChange={handleSearchChange}
                         onKeyDown={onAdminTrigger}
                         className="w-full bg-input-bg-light dark:bg-input-bg-dark border-2 border-border-light dark:border-border-dark rounded-2xl py-3.5 pl-14 pr-12 text-base font-medium transition-all focus:outline-none focus:border-[var(--primary-color)]"
+                        style={{ color: 'var(--text-primary-dynamic)' }}
                         aria-label="検索"
                     />
                     {searchTerm && (
-                        <button type="button" onClick={() => { setSearchTerm(''); setSearchResult(null); setMatchedArtists([]); setSuggestions([]); }} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-text-secondary-light/60 dark:text-text-secondary-dark/60 hover:text-text-primary-light dark:hover:text-text-primary-dark">
+                        <button type="button" onClick={() => { setSearchTerm(''); setSearchResult(null); setMatchedArtists([]); setSuggestions([]); }} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 opacity-50 hover:opacity-100" style={{ color: 'var(--text-primary-dynamic)' }}>
                             <XIcon className="w-5 h-5" />
                         </button>
                     )}
@@ -275,8 +278,8 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                             <li key={index} onClick={() => handleSuggestionClick(song)} className="px-5 py-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 border-b border-border-light/50 dark:border-border-dark/50 last:border-b-0">
                                 <div className="flex items-center gap-3">
                                     <MusicNoteIcon className="w-4 h-4 opacity-40" />
-                                    <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis">{song.title}</span>
-                                    <span className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark font-medium ml-auto whitespace-nowrap overflow-hidden text-ellipsis">/ {song.artist}</span>
+                                    <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--text-primary-dynamic)' }}>{song.title}</span>
+                                    <span className="text-[10px] font-medium ml-auto whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: 'var(--text-secondary-dynamic)' }}>/ {song.artist}</span>
                                 </div>
                             </li>
                         ))}
@@ -300,7 +303,8 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                                 <button
                                     key={idx}
                                     onClick={() => handleArtistFilterClick(artist.name)}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] transition-all shadow-sm group"
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] transition-all shadow-sm group"
+                                    style={{ color: 'var(--text-primary-dynamic)' }}
                                 >
                                     <UserGroupIcon className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100" />
                                     <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-[100px]">{artist.name}</span>
@@ -312,20 +316,20 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
 
                     {searchResult.status === 'found' && (
                          <div className="space-y-3">
-                            <h2 className="text-base font-bold text-center mb-2 tracking-tight">レパートリーにあります！</h2>
+                            <h2 className="text-base font-bold text-center mb-2 tracking-tight" style={{ color: 'var(--text-primary-dynamic)' }}>レパートリーにあります！</h2>
                             {searchResult.songs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
                         </div>
                     )}
                     {searchResult.status === 'related' && (
                         <div className="space-y-3">
-                            <h2 className="text-base font-bold text-center mb-2 tracking-tight">関連する曲が見つかりました</h2>
+                            <h2 className="text-base font-bold text-center mb-2 tracking-tight" style={{ color: 'var(--text-primary-dynamic)' }}>関連する曲が見つかりました</h2>
                             {searchResult.songs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
                         </div>
                     )}
                     {searchResult.status === 'notFound' && (
-                        <div className="text-center p-10 bg-white/50 dark:bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-dashed border-border-light dark:border-border-dark">
-                            <h2 className="text-lg font-bold mb-3 tracking-tight">曲が見つかりませんでした</h2>
-                            <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-8">リクエストを送るか、楽譜を探してみてください。</p>
+                        <div className="text-center p-10 bg-card-background-light/50 dark:bg-card-background-dark/30 backdrop-blur-sm rounded-2xl border border-dashed border-border-light dark:border-border-dark">
+                            <h2 className="text-lg font-bold mb-3 tracking-tight" style={{ color: 'var(--text-primary-dynamic)' }}>曲が見つかりませんでした</h2>
+                            <p className="text-xs mb-8" style={{ color: 'var(--text-secondary-dynamic)' }}>リクエストを送るか、楽譜を探してみてください。</p>
                             <div className="flex flex-col sm:flex-row gap-3 justify-center">
                                 <button onClick={() => setIsRequestModalOpen(true)} className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--primary-color)] hover:bg-[var(--primary-color)]/90 text-white text-sm font-bold rounded-xl transition-all shadow-md">
                                     <PlusIcon className="w-4 h-4" />
@@ -373,7 +377,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                          <div className="mt-10">
                             <div className="flex items-center gap-3 justify-center mb-6">
                                 <div className="h-px w-6 bg-border-light dark:bg-border-dark"></div>
-                                <h2 className="text-[10px] font-bold uppercase tracking-widest text-text-secondary-light/50">Popular</h2>
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-50" style={{ color: 'var(--text-secondary-dynamic)' }}>Popular</h2>
                                 <div className="h-px w-6 bg-border-light dark:bg-border-dark"></div>
                             </div>
                             <div className="space-y-3">
