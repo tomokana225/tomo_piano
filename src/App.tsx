@@ -232,14 +232,18 @@ const App: React.FC = () => {
         root.style.setProperty('--heading-font', uiConfig.headingFontFamily || "'Kiwi Maru', serif");
         root.style.setProperty('--body-font', uiConfig.bodyFontFamily || "'Noto Sans JP', sans-serif");
         root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
-        // FIXED: Corrected 'uiApi' typo to 'uiConfig'
         root.style.setProperty('--body-font-scale', String(uiConfig.bodyFontScale || 1));
 
-        // 背景色の設定 (画像モードでも色は維持する)
+        // 背景色の設定
         root.style.setProperty('--background-light', uiConfig.backgroundColor);
         root.style.setProperty('--background-dark', uiConfig.darkBackgroundColor);
+
+        // 背景色に対するテキストの色の自動調整
+        const currentBg = isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
+        const bgContrast = getContrastColor(currentBg);
+        root.style.setProperty('--text-primary-dynamic', bgContrast);
         
-    }, [uiConfig]);
+    }, [uiConfig, isDarkMode]);
 
     const handleSuggestSelect = useCallback((text: string) => {
         setSearchTerm(text);
@@ -410,7 +414,7 @@ const App: React.FC = () => {
 
     return (
         <>
-            <div className="flex h-[100dvh] bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark overflow-hidden transition-colors duration-300">
+            <div className="flex h-[100dvh] bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark overflow-hidden transition-colors duration-300" style={{ backgroundColor: isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor }}>
                 <div className={`fixed inset-0 bg-black/95 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
 
                 <aside className={`fixed z-40 h-full bg-card-background-light dark:bg-card-background-dark border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
@@ -430,7 +434,14 @@ const App: React.FC = () => {
 
                             {/* Center: Title */}
                             <div className="flex-[4] sm:flex-[3] text-center px-2 flex items-center justify-center h-full">
-                                 <h1 className="text-sm sm:text-2xl lg:text-3xl font-bold truncate leading-tight w-full" title={uiConfig.mainTitle}>
+                                 <h1 
+                                    className={`font-bold truncate leading-tight w-full ${uiConfig.mainTitleColor ? '' : 'text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)]'}`} 
+                                    style={{ 
+                                        fontSize: `${uiConfig.mainTitleFontSize || 24}px`,
+                                        color: uiConfig.mainTitleColor || undefined
+                                    }}
+                                    title={uiConfig.mainTitle}
+                                 >
                                      {uiConfig.mainTitle}
                                  </h1>
                             </div>
@@ -487,7 +498,6 @@ const App: React.FC = () => {
                         )}
                         {/* 
                             ヘッダー装飾がある場合、被らないように pt-32 (または状況に応じた余白) を追加
-                            ここでは hasHeaderDecorations に基づいて動的にクラスを付与
                         */}
                         <div className={`relative z-10 min-h-full ${uiConfig.backgroundType === 'image' ? 'content-glass' : ''} ${hasHeaderDecorations ? 'pt-24 sm:pt-40' : ''}`}>
                             {renderView()}

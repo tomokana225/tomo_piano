@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { UiConfig, NavButtonConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -191,6 +192,44 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                 </div>
             </section>
 
+            {/* 基本設定セクション */}
+            <section className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-light dark:border-border-dark space-y-6">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                    <span className="w-2 h-6 bg-blue-500 rounded-full"></span>
+                    サイト名とタイトルの設定
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">メインタイトル表示内容</label>
+                            <input type="text" name="mainTitle" value={config.mainTitle} onChange={handleInputChange} className="w-full bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">サブタイトル</label>
+                            <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="w-full bg-gray-50 dark:bg-gray-900 border border-border-light dark:border-border-dark rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                    </div>
+                    <div className="space-y-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">タイトルの文字サイズ: {config.mainTitleFontSize || 24}px</label>
+                            <input type="range" name="mainTitleFontSize" min="12" max="60" step="1" value={config.mainTitleFontSize || 24} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">タイトルの色</label>
+                            <div className="flex gap-4 items-center">
+                                <input type="color" name="mainTitleColor" value={config.mainTitleColor || '#000000'} onChange={handleInputChange} className="h-10 w-20 block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
+                                <button 
+                                    onClick={() => setConfig(prev => ({ ...prev, mainTitleColor: '' }))}
+                                    className="text-[10px] bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:opacity-80"
+                                >
+                                    色をリセット (グラデに戻す)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* 通知設定セクション */}
             <section className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-light dark:border-border-dark">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -221,21 +260,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                             />
                             <p className="text-[10px] text-gray-400">
                                 ※Discordのチャンネル設定 &gt; 連携サービス &gt; ウェブフック から取得したURLを貼り付けてください。
-                            </p>
-                        </div>
-                        <div className="space-y-1">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">あなたの Discord ユーザーID (任意)</label>
-                            <input
-                                type="text"
-                                name="discordUserId"
-                                value={config.discordUserId || ''}
-                                onChange={handleInputChange}
-                                placeholder="例: 123456789012345678"
-                                className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm focus:ring-purple-500 focus:border-purple-500"
-                            />
-                            <p className="text-[10px] text-gray-400 leading-relaxed">
-                                ※入力すると、通知時にあなたへメンションを飛ばします（スマホ通知がより確実になります）。<br/>
-                                <strong>IDの取得方法:</strong> Discord設定 &gt; 詳細設定 &gt; 「開発者モード」をONにした後、自分のプロフィールを右クリック（または詳細メニュー）から「ユーザーIDをコピー」を選択してください。
                             </p>
                         </div>
                     </div>
@@ -292,21 +316,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                 </div>
             </section>
 
-            {/* 基本設定セクション */}
-            <section className="space-y-6">
-                <h3 className="text-lg font-bold">基本情報</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">メインタイトル</label>
-                        <input type="text" name="mainTitle" value={config.mainTitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サブタイトル</label>
-                        <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2" />
-                    </div>
-                </div>
-            </section>
-
              {/* フォント設定セクション */}
             <section className="space-y-4">
                 <h3 className="text-lg font-bold">フォント</h3>
@@ -318,7 +327,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                         </select>
                     </div>
                     <div>
-                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">フォントサイズ (見出し): {Math.round(config.headingFontScale * 100)}%</label>
+                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">フォントサイズ (見出し全体): {Math.round(config.headingFontScale * 100)}%</label>
                          <input type="range" name="headingFontScale" min="0.8" max="1.5" step="0.05" value={config.headingFontScale} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
                     </div>
                 </div>
@@ -326,34 +335,49 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
 
             {/* 背景設定セクション */}
             <section className="space-y-4">
-                <h3 className="text-lg font-bold">背景</h3>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl space-y-4">
+                <h3 className="text-lg font-bold">背景設定</h3>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl space-y-6">
                     <div className="flex gap-6">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="backgroundType" value="color" checked={config.backgroundType === 'color'} onChange={handleInputChange} className="text-cyan-600" />
-                            単色
+                            単色背景
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="backgroundType" value="image" checked={config.backgroundType === 'image'} onChange={handleInputChange} className="text-cyan-600" />
-                            画像
+                            画像背景
                         </label>
                     </div>
-                    {config.backgroundType === 'image' && (
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
-                            <div className="grid grid-cols-5 gap-2">
-                                {backgroundPresets.map(preset => (
-                                    <button key={preset.name} onClick={() => setConfig(prev => ({ ...prev, backgroundImageUrl: preset.url }))} className={`h-12 border-2 rounded-md overflow-hidden ${config.backgroundImageUrl === preset.url ? 'border-cyan-500' : 'border-transparent'}`}>
-                                        <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
-                                    </button>
-                                ))}
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">ライトモード時の背景色</label>
+                                <input type="color" name="backgroundColor" value={config.backgroundColor} onChange={handleInputChange} className="h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
                             </div>
-                             <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="カスタム画像URL" className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-2" />
-                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">不透明度: {Math.round(config.backgroundOpacity * 100)}%</label>
-                                <input type="range" name="backgroundOpacity" min="0" max="1" step="0.01" value={config.backgroundOpacity} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">ダークモード時の背景色</label>
+                                <input type="color" name="darkBackgroundColor" value={config.darkBackgroundColor} onChange={handleInputChange} className="h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
                             </div>
                         </div>
-                    )}
+
+                        {config.backgroundType === 'image' && (
+                            <div className="space-y-4">
+                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">背景画像URL</label>
+                                <div className="grid grid-cols-5 gap-2 mb-2">
+                                    {backgroundPresets.map(preset => (
+                                        <button key={preset.name} onClick={() => setConfig(prev => ({ ...prev, backgroundImageUrl: preset.url }))} className={`h-12 border-2 rounded-md overflow-hidden ${config.backgroundImageUrl === preset.url ? 'border-cyan-500' : 'border-transparent'}`}>
+                                            <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                                        </button>
+                                    ))}
+                                </div>
+                                <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="カスタム画像URL" className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-2 text-xs" />
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">画像不透明度: {Math.round(config.backgroundOpacity * 100)}%</label>
+                                    <input type="range" name="backgroundOpacity" min="0" max="1" step="0.01" value={config.backgroundOpacity} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </section>
 
