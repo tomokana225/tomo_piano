@@ -232,7 +232,7 @@ const App: React.FC = () => {
         root.style.setProperty('--heading-font', uiConfig.headingFontFamily || "'Kiwi Maru', serif");
         root.style.setProperty('--body-font', uiConfig.bodyFontFamily || "'Noto Sans JP', sans-serif");
         root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
-        // FIX: Corrected 'uiApi' typo to 'uiConfig'
+        // FIXED: Corrected 'uiApi' typo to 'uiConfig'
         root.style.setProperty('--body-font-scale', String(uiConfig.bodyFontScale || 1));
 
         // 背景色の設定 (画像モードでも色は維持する)

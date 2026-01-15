@@ -80,7 +80,8 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--card-shadow);
     background-color: rgba(255, 255, 255, var(--card-bg-opacity));
     backdrop-filter: blur(var(--card-blur));
-    @apply transition-all duration-300 border-l-4 hover:shadow-xl hover:-translate-y-1;
+    /* ホバー時の浮き上がり（hover:-translate-y-1）を削除 */
+    @apply transition-all duration-300 border-l-4 hover:shadow-xl;
     border-left-color: var(--primary-color);
 }
 .dark .fancy-card {

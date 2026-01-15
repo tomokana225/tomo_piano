@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Song, BlogPost, UiConfig, SetlistSuggestion, RequestRankingItem, Mode } from '../../types';
-import { XIcon, MusicNoteIcon, NewspaperIcon, CogIcon, MenuAltIcon, CloudUploadIcon, HeartIcon, UserIcon } from '../../components/ui/Icons';
+import { XIcon, MusicNoteIcon, NewspaperIcon, CogIcon, MenuAltIcon, CloudUploadIcon, HeartIcon, UserIcon, ChevronLeftIcon } from '../../components/ui/Icons';
 import { SongListTab } from './SongListTab';
 import { BlogTab } from './BlogTab';
 import { SettingsTab } from './SettingsTab';
@@ -42,7 +43,7 @@ const TabIcon = ({ tab, className }: { tab: AdminTab; className?: string }) => {
 export const AdminModal: React.FC<AdminModalProps> = (props) => {
     const { isOpen, onClose, currentMode, setMode } = props;
     const [activeTab, setActiveTab] = useState<AdminTab>('songs');
-    const [isTransparent, setIsTransparent] = useState(false);
+    const [isPreviewMode, setIsPreviewMode] = useState(false);
 
     if (!isOpen) return null;
 
@@ -64,8 +65,23 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
         </button>
     );
 
+    // プレビューモード用のフローティングUI
+    if (isPreviewMode) {
+        return (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-pop">
+                <button 
+                    onClick={() => setIsPreviewMode(false)}
+                    className="flex items-center gap-2 bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-full font-bold shadow-2xl hover:scale-105 transition-transform border border-white/20"
+                >
+                    <ChevronLeftIcon className="w-5 h-5" />
+                    編集画面に戻る
+                </button>
+            </div>
+        );
+    }
+
     return (
-        <div className={`fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-0 sm:p-4 transition-opacity duration-300 ${isTransparent ? 'opacity-20 pointer-events-none' : 'opacity-100'}`} onClick={onClose}>
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-0 sm:p-4" onClick={onClose}>
             <div className="bg-card-background-light dark:bg-card-background-dark rounded-none sm:rounded-2xl shadow-2xl w-full max-w-5xl h-full sm:h-[90vh] flex flex-col overflow-hidden pointer-events-auto" onClick={e => e.stopPropagation()}>
                 <header className="flex items-center justify-between p-4 sm:p-6 border-b border-border-light dark:border-border-dark flex-shrink-0 bg-white dark:bg-gray-800">
                     <div className="flex items-center gap-4">
@@ -73,18 +89,12 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                             <h2 className="text-xl sm:text-2xl font-bold">管理パネル</h2>
                             <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark hidden sm:block">配信の設定や曲リストを編集できます</p>
                         </div>
-                        {(activeTab === 'visual' || activeTab === 'profile') && (
-                             <button 
-                                onMouseDown={() => setIsTransparent(true)}
-                                onMouseUp={() => setIsTransparent(false)}
-                                onMouseLeave={() => setIsTransparent(false)}
-                                onTouchStart={() => setIsTransparent(true)}
-                                onTouchEnd={() => setIsTransparent(false)}
-                                className="bg-black/5 dark:bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold border border-border-light dark:border-border-dark hover:bg-black/10 text-text-primary-light dark:text-text-primary-dark"
-                             >
-                                プレビューを確認 (長押し)
-                             </button>
-                        )}
+                        <button 
+                            onClick={() => setIsPreviewMode(true)}
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm transition-all transform active:scale-95"
+                        >
+                            プレビューを確認
+                        </button>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-text-secondary-light dark:text-text-secondary-dark">
                         <XIcon className="w-8 h-8 sm:w-6 sm:h-6" />

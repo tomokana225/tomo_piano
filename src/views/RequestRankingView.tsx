@@ -110,7 +110,8 @@ const RecentRequestsList: React.FC<{ requests: RequestRankingItem[] }> = ({ requ
             {requests && requests.length > 0 ? (
                 <div className="space-y-3">
                     {requests.map((req) => (
-                        <div key={`${req.id}-${req.lastRequestedAt}`} className="bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-xl flex justify-between items-center text-sm shadow-sm transition-transform hover:translate-x-1">
+                        /* hover:translate-x-1 を削除し、transition-all に変更 */
+                        <div key={`${req.id}-${req.lastRequestedAt}`} className="bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-xl flex justify-between items-center text-sm shadow-sm transition-all">
                             <div className="min-w-0">
                                 <p className="font-bold truncate text-text-primary-light dark:text-text-primary-dark">{req.id}</p>
                                 {req.artist && <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate mt-0.5">{req.artist}</p>}

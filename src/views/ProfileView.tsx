@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UiConfig } from '../types';
 import { SimpleMarkdownRenderer } from '../components/ui/SimpleMarkdownRenderer';
@@ -23,7 +24,7 @@ const SocialButton: React.FC<{ href: string; icon: React.ReactNode; label: strin
 
 export const ProfileView: React.FC<ProfileViewProps> = ({ uiConfig, openSupportModal }) => {
     const { 
-        profileName, profileTitle, profileBio, profileImageUrl,
+        profileName, profileTitle, profileBio, profileImageUrl, profileHeaderImageUrl,
         twitcastingUrl, youtubeUrl, xUrl,
         specialButtons
     } = uiConfig;
@@ -34,7 +35,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ uiConfig, openSupportM
         <div className="w-full max-w-2xl mx-auto animate-fade-in pb-12">
             <div className="bg-card-background-light dark:bg-card-background-dark rounded-3xl shadow-xl overflow-hidden fancy-card border border-border-light dark:border-border-dark">
                 {/* Header Decoration */}
-                <div className="h-32 bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)] opacity-80" />
+                <div className="h-40 relative bg-gray-200 dark:bg-gray-800">
+                    {profileHeaderImageUrl ? (
+                        <img src={profileHeaderImageUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)] opacity-80" />
+                    )}
+                </div>
                 
                 <div className="px-6 pb-8 -mt-16 text-center">
                     <div className="relative inline-block">
@@ -58,7 +65,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ uiConfig, openSupportM
 
                     <div className="mt-8 text-left bg-black/5 dark:bg-white/5 p-6 rounded-2xl border border-border-light dark:border-border-dark">
                         {profileBio ? (
-                            <SimpleMarkdownRenderer content={profileBio} />
+                            <div className="prose dark:prose-invert max-w-none prose-img:rounded-xl prose-img:shadow-lg prose-img:mx-auto prose-img:max-h-80">
+                                <SimpleMarkdownRenderer content={profileBio} />
+                            </div>
                         ) : (
                             <p className="text-text-secondary-light dark:text-text-secondary-dark text-center italic py-4">
                                 自己紹介文がまだ設定されていません。

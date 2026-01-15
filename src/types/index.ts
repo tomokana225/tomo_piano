@@ -101,12 +101,13 @@ export interface UiConfig {
     // --- 通知設定 ---
     notificationEnabled?: boolean;
     discordWebhookUrl?: string;
-    discordUserId?: string; // 追加: メンション用のユーザーID
+    discordUserId?: string;
     // --- プロフィール設定 ---
     profileName?: string;
     profileTitle?: string;
     profileBio?: string;
     profileImageUrl?: string;
+    profileHeaderImageUrl?: string; // 追加: ヘッダー画像
     // --- 新しいデザイン設定 ---
     borderRadius?: 'none' | 'small' | 'medium' | 'large' | 'full';
     cardStyle?: 'flat' | 'elevated' | 'glass';
