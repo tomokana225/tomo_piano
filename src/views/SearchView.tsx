@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, UiConfig, RankingItem, Mode } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, LightBulbIcon, CloudUploadIcon, HeartIcon, TwitcasIcon, XSocialIcon, DocumentTextIcon, YouTubeIcon, UserGroupIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, DiceIcon, CloudUploadIcon, HeartIcon, TwitcasIcon, XSocialIcon, DocumentTextIcon, YouTubeIcon, UserGroupIcon, UserIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -247,7 +247,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in px-4">
-            <div className="text-center mb-1 min-h-[50px] flex items-center justify-center">
+            <div className="text-center mb-1 min-h-[30px] flex items-center justify-center">
                 <p className="text-sm font-medium tracking-wide leading-relaxed" style={{ color: 'var(--text-secondary-dynamic)' }}>
                     {uiConfig.subtitle}
                 </p>
@@ -353,8 +353,8 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                     <div className="mb-8 grid grid-cols-2 gap-4 sm:gap-6">
                         {uiConfig.navButtons?.list?.enabled && <NavCard icon={MusicNoteIcon} title={uiConfig.navButtons.list.label} onClick={() => setMode('list')} />}
                         {uiConfig.navButtons?.news?.enabled && <NavCard icon={NewspaperIcon} title={uiConfig.navButtons.news.label} onClick={() => setMode('news')} />}
-                        {uiConfig.navButtons?.suggest?.enabled && <NavCard icon={LightBulbIcon} title={uiConfig.navButtons.suggest.label} onClick={openSuggestModal} />}
-                        {uiConfig.navButtons?.requests?.enabled && <NavCard icon={CloudUploadIcon} title={uiConfig.navButtons.requests.label} onClick={() => setMode('requests')} />}
+                        {uiConfig.navButtons?.suggest?.enabled && <NavCard icon={DiceIcon} title={uiConfig.navButtons.suggest.label} onClick={openSuggestModal} />}
+                        {uiConfig.navButtons?.profile?.enabled && <NavCard icon={UserIcon} title={uiConfig.navButtons.profile.label} onClick={() => setMode('profile')} />}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-10">

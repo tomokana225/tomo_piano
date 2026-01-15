@@ -16,10 +16,10 @@ import { SuggestSongModal } from './features/suggest/SuggestSongModal';
 import { SupportModal } from './features/support/SupportModal';
 import { 
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
-    LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
+    DiceIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon,
     ChevronLeftIcon, XIcon, InformationCircleIcon,
-    CheckCircleIcon, UserGroupIcon, UserIcon
+    CheckCircleIcon, UserGroupIcon, UserIcon, LightBulbIcon
 } from './components/ui/Icons';
 
 
@@ -310,7 +310,7 @@ const App: React.FC = () => {
             search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
             profile: { mode: 'profile', icon: UserIcon, config: uiConfig.navButtons.profile || { label: 'プロフィール', enabled: true } },
             list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
-            suggest: { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
+            suggest: { mode: 'suggest', icon: DiceIcon, config: uiConfig.navButtons.suggest },
             news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news },
             ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
             requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests },
@@ -436,7 +436,7 @@ const App: React.FC = () => {
                 </aside>
                 
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg h-14 sm:h-20 border-b-2 z-20" style={{ borderColor: 'var(--primary-color)' }}>
+                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg h-14 sm:h-16 border-b-2 z-20" style={{ borderColor: 'var(--primary-color)' }}>
                         <div className="h-full flex items-center justify-between px-4 sm:px-6">
                             {/* Left: Menu Toggle */}
                             <div className="flex-1 flex justify-start">
@@ -451,7 +451,7 @@ const App: React.FC = () => {
                                  <h1 
                                     className={`font-bold truncate leading-tight w-full ${uiConfig.mainTitleColor ? '' : 'text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)]'}`} 
                                     style={{ 
-                                        fontSize: `${uiConfig.mainTitleFontSize || 24}px`,
+                                        fontSize: `${Math.min(uiConfig.mainTitleFontSize || 24, 32)}px`,
                                         color: uiConfig.mainTitleColor || undefined
                                     }}
                                     title={uiConfig.mainTitle}
@@ -495,9 +495,9 @@ const App: React.FC = () => {
                         </div>
 
                         {/* 
-                            ヘッダー装飾がある場合、以前より少し詰めた余白を動的に付与 (pt-28 sm:pt-40)
+                            ヘッダー装飾がある場合、以前よりさらに詰めた余白を動的に付与 (pt-24 sm:pt-28)
                         */}
-                        <div className={`relative z-10 transition-all duration-500 ${hasHeaderDecorations ? 'pt-28 sm:pt-40' : 'pt-4'}`}>
+                        <div className={`relative z-10 transition-all duration-500 ${hasHeaderDecorations ? 'pt-24 sm:pt-28' : 'pt-2'}`}>
                             {mode !== 'search' && (
                                 <button
                                     onClick={() => setMode('search')}
