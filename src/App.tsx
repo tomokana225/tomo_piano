@@ -317,10 +317,6 @@ const App: React.FC = () => {
             ? { backgroundImage: `url(${uiConfig.backgroundImageUrl})` }
             : {};
     
-    const backgroundFallbackColor = useMemo(() => {
-        return isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
-    }, [uiConfig.backgroundColor, uiConfig.darkBackgroundColor, isDarkMode]);
-
     const SidebarContent = () => (
         <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
