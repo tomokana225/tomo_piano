@@ -494,23 +494,21 @@ const App: React.FC = () => {
                             {renderVisualElements()}
                         </div>
 
-                        {mode !== 'search' && (
-                            <button
-                                onClick={() => setMode('search')}
-                                className="flex items-center gap-2 mb-6 text-sm font-semibold transition-opacity hover:opacity-75 relative z-10"
-                                style={{ color: 'var(--primary-color)' }}
-                                aria-label="検索画面に戻る"
-                            >
-                                <ChevronLeftIcon className="w-5 h-5" />
-                                <span>検索画面に戻る</span>
-                            </button>
-                        )}
-                        
-                        {/* 
-                            ヘッダー装飾がある場合、より余裕のある余白を動的に付与 (pt-32 sm:pt-52)
-                        */}
-                        <div className={`relative z-10 min-h-full ${uiConfig.backgroundType === 'image' ? 'content-glass' : ''} ${hasHeaderDecorations ? 'pt-32 sm:pt-52' : ''}`}>
-                            {renderView()}
+                        <div className={`relative z-10 transition-all duration-500 ${hasHeaderDecorations ? 'pt-40 sm:pt-64' : 'pt-4'}`}>
+                            {mode !== 'search' && (
+                                <button
+                                    onClick={() => setMode('search')}
+                                    className="flex items-center gap-2 mb-6 text-sm font-semibold transition-opacity hover:opacity-75 relative z-10"
+                                    style={{ color: 'var(--primary-color)' }}
+                                    aria-label="検索画面に戻る"
+                                >
+                                    <ChevronLeftIcon className="w-5 h-5" />
+                                    <span>検索画面に戻る</span>
+                                </button>
+                            )}
+                            <div className={`${uiConfig.backgroundType === 'image' ? 'content-glass' : ''}`}>
+                                {renderView()}
+                            </div>
                         </div>
                     </main>
                     <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-[0_-4px_10px_rgba(0,0,0,0.1)] border-t border-border-light dark:border-border-dark p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-20">
