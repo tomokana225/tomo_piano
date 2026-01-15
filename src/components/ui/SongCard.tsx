@@ -20,26 +20,11 @@ export const SongCard: React.FC<SongCardProps> = ({ song, onLike, isLiking, isLi
     const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`)}`;
     const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${song.artist} ${song.title} 歌詞`)}`;
 
-    const getSeasonEmoji = (season?: string) => {
-        switch (season) {
-            case '春': return '🌸';
-            case '夏': return '☀️';
-            case '秋': return '🍂';
-            case '冬': return '❄️';
-            default: return null;
-        }
-    };
-
     return (
         <div className="bg-input-bg-light dark:bg-input-bg-dark py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg flex justify-between items-center border border-border-light dark:border-border-dark fancy-card shadow-sm">
             <div className="min-w-0 flex-grow">
                 <div className="flex items-center gap-2 mb-0.5">
                     <h3 className="font-bold text-sm sm:text-base lg:text-lg truncate text-text-primary-light dark:text-text-primary-dark leading-tight">{song.title}</h3>
-                    {song.season && (
-                        <span className="text-xs sm:text-sm" title={`${song.season}の曲`}>
-                            {getSeasonEmoji(song.season)}
-                        </span>
-                    )}
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-[11px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark truncate">{song.artist}</p>

@@ -63,7 +63,7 @@ export interface VisualElement {
     url?: string;
     content?: string;
     x: number; // percentage 0-100
-    y: number; // percentage 0-100
+    placement: 'header' | 'footer';
     width: number; // percentage 0-100
     opacity: number; // 0-1
     rotation: number; // degrees
@@ -97,6 +97,11 @@ export interface UiConfig {
     bodyFontFamily: string;
     headingFontScale: number;
     bodyFontScale: number;
+    // --- プロフィール設定 ---
+    profileName?: string;
+    profileTitle?: string;
+    profileBio?: string;
+    profileImageUrl?: string;
     // --- 新しいデザイン設定 ---
     borderRadius?: 'none' | 'small' | 'medium' | 'large' | 'full';
     cardStyle?: 'flat' | 'elevated' | 'glass';
@@ -119,9 +124,10 @@ export interface UiConfig {
         setlist: NavButtonConfig;
         printGakufu: NavButtonConfig;
         tutorial: NavButtonConfig;
+        profile: NavButtonConfig;
     }
 }
 
-export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'news' | 'setlist';
+export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'news' | 'setlist' | 'profile';
 
 export type RankingPeriod = 'all' | 'month' | 'year';

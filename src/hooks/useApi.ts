@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig, SetlistSuggestion, RankingPeriod } from '../types';
 import { parseSongs } from '../utils/parser';
@@ -32,6 +31,11 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     borderRadius: 'medium',
     cardStyle: 'elevated',
     shadowIntensity: 0.1,
+    // プロフィール初期値
+    profileName: 'ともかな',
+    profileTitle: 'Pianist / Streamer',
+    profileBio: 'ピアノ配信をしています。リクエストお待ちしております！',
+    profileImageUrl: '',
     specialButtons: {
         twitcas: { label: 'ツイキャスはこちら', enabled: true },
         x: { label: 'X (Twitter) はこちら', enabled: true },
@@ -40,6 +44,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     },
     navButtons: {
         search: { label: '曲を検索', enabled: true },
+        profile: { label: 'プロフィール', enabled: true },
         list: { label: '曲リスト', enabled: true },
         ranking: { label: 'ランキング', enabled: true },
         news: { label: 'お知らせ', enabled: true },

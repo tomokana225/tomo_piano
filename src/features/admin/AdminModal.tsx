@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Song, BlogPost, UiConfig, SetlistSuggestion, RequestRankingItem, Mode } from '../../types';
-import { XIcon, MusicNoteIcon, NewspaperIcon, CogIcon, MenuAltIcon, CloudUploadIcon, HeartIcon } from '../../components/ui/Icons';
+import { XIcon, MusicNoteIcon, NewspaperIcon, CogIcon, MenuAltIcon, CloudUploadIcon, HeartIcon, UserIcon } from '../../components/ui/Icons';
 import { SongListTab } from './SongListTab';
 import { BlogTab } from './BlogTab';
 import { SettingsTab } from './SettingsTab';
 import { SetlistSuggestionsTab } from './SetlistSuggestionsTab';
 import { RequestListTab } from './RequestListTab';
 import { VisualEditorTab } from './VisualEditorTab';
+import { ProfileTab } from './ProfileTab';
 
 interface AdminModalProps {
     isOpen: boolean;
@@ -24,12 +25,13 @@ interface AdminModalProps {
     setMode: (mode: Mode) => void;
 }
 
-type AdminTab = 'songs' | 'blog' | 'settings' | 'setlists' | 'requests' | 'visual';
+type AdminTab = 'songs' | 'blog' | 'profile' | 'visual' | 'setlists' | 'requests' | 'settings';
 
 const TabIcon = ({ tab, className }: { tab: AdminTab; className?: string }) => {
     switch (tab) {
         case 'songs': return <MusicNoteIcon className={className} />;
         case 'blog': return <NewspaperIcon className={className} />;
+        case 'profile': return <UserIcon className={className} />;
         case 'setlists': return <MenuAltIcon className={className} />;
         case 'requests': return <CloudUploadIcon className={className} />;
         case 'visual': return <HeartIcon className={className} />;
@@ -67,7 +69,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                             <h2 className="text-xl sm:text-2xl font-bold">管理パネル</h2>
                             <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark hidden sm:block">配信の設定や曲リストを編集できます</p>
                         </div>
-                        {activeTab === 'visual' && (
+                        {(activeTab === 'visual' || activeTab === 'profile') && (
                              <button 
                                 onMouseDown={() => setIsTransparent(true)}
                                 onMouseUp={() => setIsTransparent(false)}
@@ -89,6 +91,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                     <nav className="flex items-center gap-2 sm:gap-3">
                         <TabButton tab="songs" label="曲リスト" />
                         <TabButton tab="blog" label="お知らせ" />
+                        <TabButton tab="profile" label="プロフィール" />
                         <TabButton tab="visual" label="ページ装飾" />
                         <TabButton tab="setlists" label="セトリ提案" />
                         <TabButton tab="requests" label="リクエスト" />
@@ -100,6 +103,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                     <div className="max-w-4xl mx-auto">
                         {activeTab === 'songs' && <SongListTab onSaveSongs={props.onSaveSongs} />}
                         {activeTab === 'blog' && <BlogTab posts={props.posts} onSavePost={props.onSavePost} onDeletePost={props.onDeletePost} />}
+                        {activeTab === 'profile' && <ProfileTab uiConfig={props.uiConfig} onSave={props.onSaveUiConfig} />}
                         {activeTab === 'visual' && (
                             <VisualEditorTab 
                                 uiConfig={props.uiConfig} 

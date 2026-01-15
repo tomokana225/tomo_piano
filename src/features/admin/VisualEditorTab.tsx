@@ -14,7 +14,7 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
     const [elements, setElements] = useState<VisualElement[]>(uiConfig.visualElements || []);
     const [isSaving, setIsSaving] = useState(false);
 
-    const pages: (Mode | 'all')[] = ['all', 'search', 'list', 'ranking', 'requests', 'news', 'setlist'];
+    const pages: (Mode | 'all')[] = ['all', 'search', 'list', 'ranking', 'requests', 'news', 'setlist', 'profile'];
 
     const addElement = (type: 'image' | 'text') => {
         const newElement: VisualElement = {
@@ -24,12 +24,12 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
             url: type === 'image' ? 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=200' : undefined,
             content: type === 'text' ? '新しいテキスト' : undefined,
             x: 50,
-            y: 50,
-            width: 20,
+            placement: 'header',
+            width: 25,
             opacity: 1,
             rotation: 0,
             zIndex: 1,
-            fontSize: type === 'text' ? 24 : undefined,
+            fontSize: type === 'text' ? 18 : undefined,
             color: type === 'text' ? '#000000' : undefined,
         };
         setElements([...elements, newElement]);
@@ -61,7 +61,7 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                         <button
                             key={page}
                             onClick={() => page !== 'all' && setMode(page)}
-                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                            className={`px-4 py-2 rounded-full text-[10px] font-bold transition-all ${
                                 (page === 'all' ? false : currentMode === page)
                                     ? 'bg-[var(--primary-color)] text-white'
                                     : 'bg-black/5 dark:bg-white/5 hover:bg-black/10'
@@ -71,9 +71,9 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                         </button>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                    選択したページの背後に画像やテキストを配置できます。<br/>
-                    追加した要素はスライダーで位置や大きさを調整してください。
+                <p className="mt-4 text-[10px] text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                    選択したページの「ヘッダー付近」または「フッター付近」に画像やテキストを配置できます。<br/>
+                    要素をタップして位置や大きさを調整してください。
                 </p>
             </div>
 
@@ -133,7 +133,7 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                                             type="text" 
                                             value={el.url || ''} 
                                             onChange={(e) => updateElement(el.id, { url: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 outline-none"
+                                            className="w-full bg-gray-50 dark:bg-gray-900 border-border-light border p-2 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 outline-none"
                                         />
                                     </div>
                                 ) : (
@@ -142,19 +142,26 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                                         <textarea 
                                             value={el.content || ''} 
                                             onChange={(e) => updateElement(el.id, { content: e.target.value })}
-                                            className="w-full bg-gray-50 dark:bg-gray-700 p-2 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 outline-none h-20"
+                                            className="w-full bg-gray-50 dark:bg-gray-900 border-border-light border p-2 rounded-lg text-xs focus:ring-1 focus:ring-cyan-500 outline-none h-16"
                                         />
                                     </div>
                                 )}
                                 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">横位置 (X): {el.x}%</label>
-                                        <input type="range" min="0" max="100" value={el.x} onChange={(e) => updateElement(el.id, { x: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">縦位置 (Y): {el.y}%</label>
-                                        <input type="range" min="0" max="100" value={el.y} onChange={(e) => updateElement(el.id, { y: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">配置エリア</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button 
+                                            onClick={() => updateElement(el.id, { placement: 'header' })}
+                                            className={`py-2 text-[10px] font-bold rounded-lg transition-all ${el.placement === 'header' ? 'bg-cyan-600 text-white shadow-inner' : 'bg-gray-100 text-gray-500'}`}
+                                        >
+                                            ヘッダー付近
+                                        </button>
+                                        <button 
+                                            onClick={() => updateElement(el.id, { placement: 'footer' })}
+                                            className={`py-2 text-[10px] font-bold rounded-lg transition-all ${el.placement === 'footer' ? 'bg-cyan-600 text-white shadow-inner' : 'bg-gray-100 text-gray-500'}`}
+                                        >
+                                            フッター付近
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -162,29 +169,29 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">大きさ: {el.width}%</label>
-                                        <input type="range" min="5" max="100" value={el.width} onChange={(e) => updateElement(el.id, { width: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">横位置 (X): {el.x}%</label>
+                                        <input type="range" min="0" max="100" value={el.x} onChange={(e) => updateElement(el.id, { x: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">不透明度: {Math.round(el.opacity * 100)}%</label>
-                                        <input type="range" min="0" max="1" step="0.05" value={el.opacity} onChange={(e) => updateElement(el.id, { opacity: parseFloat(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">大きさ: {el.width}%</label>
+                                        <input type="range" min="5" max="100" value={el.width} onChange={(e) => updateElement(el.id, { width: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">回転: {el.rotation}°</label>
-                                        <input type="range" min="-180" max="180" value={el.rotation} onChange={(e) => updateElement(el.id, { rotation: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">不透明度: {Math.round(el.opacity * 100)}%</label>
+                                        <input type="range" min="0" max="1" step="0.05" value={el.opacity} onChange={(e) => updateElement(el.id, { opacity: parseFloat(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">重なり (Z): {el.zIndex}</label>
-                                        <input type="number" value={el.zIndex} onChange={(e) => updateElement(el.id, { zIndex: parseInt(e.target.value) })} className="w-full bg-gray-50 dark:bg-gray-700 p-1.5 rounded text-xs outline-none" />
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">回転: {el.rotation}°</label>
+                                        <input type="range" min="-180" max="180" value={el.rotation} onChange={(e) => updateElement(el.id, { rotation: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
                                     </div>
                                 </div>
                                 {el.type === 'text' && (
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">文字サイズ: {el.fontSize}px</label>
-                                            <input type="number" value={el.fontSize} onChange={(e) => updateElement(el.id, { fontSize: parseInt(e.target.value) })} className="w-full bg-gray-50 dark:bg-gray-700 p-1.5 rounded text-xs outline-none" />
+                                            <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">サイズ: {el.fontSize}px</label>
+                                            <input type="number" value={el.fontSize} onChange={(e) => updateElement(el.id, { fontSize: parseInt(e.target.value) })} className="w-full bg-gray-50 border border-border-light p-1.5 rounded text-xs outline-none" />
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">色</label>

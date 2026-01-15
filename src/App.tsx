@@ -8,6 +8,7 @@ import { RankingView } from './views/RankingView';
 import { RequestRankingView } from './views/RequestRankingView';
 import { BlogView } from './views/BlogView';
 import { SetlistSuggestionView } from './views/SetlistSuggestionView';
+import { ProfileView } from './views/ProfileView';
 import { NavButton } from './components/ui/NavButton';
 import { AdminModal } from './features/admin/AdminModal';
 import { SuggestSongModal } from './features/suggest/SuggestSongModal';
@@ -17,7 +18,7 @@ import {
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon,
     ChevronLeftIcon, XIcon, InformationCircleIcon,
-    CheckCircleIcon, UserGroupIcon, CogIcon
+    CheckCircleIcon, UserGroupIcon, CogIcon, UserIcon
 } from './components/ui/Icons';
 
 
@@ -270,6 +271,8 @@ const App: React.FC = () => {
                 return <BlogView posts={posts} />;
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccessRedirect}/>;
+            case 'profile':
+                 return <ProfileView uiConfig={uiConfig} openSupportModal={() => setIsSupportModalOpen(true)} />;
             default:
                 return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} openSupportModal={() => setIsSupportModalOpen(true)} />;
         }
@@ -279,6 +282,7 @@ const App: React.FC = () => {
         if (!uiConfig.navButtons) return [];
         const buttonConfigs = {
             search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
+            profile: { mode: 'profile', icon: UserIcon, config: uiConfig.navButtons.profile || { label: 'プロフィール', enabled: true } },
             list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
             suggest: { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
             news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news },
@@ -292,7 +296,7 @@ const App: React.FC = () => {
                 config: uiConfig.navButtons.printGakufu 
             },
         };
-        const buttonOrder: (keyof typeof buttonConfigs)[] = ['search', 'list', 'suggest', 'news', 'ranking', 'requests', 'setlist', 'tutorial', 'printGakufu'];
+        const buttonOrder: (keyof typeof buttonConfigs)[] = ['search', 'profile', 'list', 'suggest', 'news', 'ranking', 'requests', 'setlist', 'tutorial', 'printGakufu'];
         return buttonOrder.map(key => buttonConfigs[key]).filter(btn => btn && btn.config?.enabled);
     }, [uiConfig.navButtons, uiConfig.printGakufuUrl]);
 
@@ -352,31 +356,37 @@ const App: React.FC = () => {
         if (!uiConfig.visualElements) return null;
         return uiConfig.visualElements
             .filter(el => el.page === mode || el.page === 'all')
-            .map(el => (
-                <div
-                    key={el.id}
-                    style={{
-                        position: 'absolute',
-                        left: `${el.x}%`,
-                        top: `${el.y}%`,
-                        width: `${el.width}%`,
-                        opacity: el.opacity,
-                        transform: `translate(-50%, -50%) rotate(${el.rotation}deg)`,
-                        zIndex: el.zIndex,
-                        pointerEvents: 'none', // 背景装飾なのでクリックを邪魔しない
-                        transition: 'all 0.3s ease-out'
-                    }}
-                >
-                    {el.type === 'image' && el.url && (
-                        <img src={el.url} alt="" className="w-full h-auto drop-shadow-lg" />
-                    )}
-                    {el.type === 'text' && el.content && (
-                        <p style={{ fontSize: `${el.fontSize}px`, color: el.color }} className="whitespace-pre-wrap font-bold drop-shadow-md">
-                            {el.content}
-                        </p>
-                    )}
-                </div>
-            ));
+            .map(el => {
+                const style: React.CSSProperties = {
+                    position: 'absolute',
+                    left: `${el.x}%`,
+                    width: `${el.width}%`,
+                    opacity: el.opacity,
+                    transform: `translate(-50%, 0) rotate(${el.rotation}deg)`,
+                    zIndex: el.zIndex,
+                    pointerEvents: 'none',
+                    transition: 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
+                };
+
+                if (el.placement === 'header') {
+                    style.top = '10px';
+                } else {
+                    style.bottom = '10px';
+                }
+
+                return (
+                    <div key={el.id} style={style}>
+                        {el.type === 'image' && el.url && (
+                            <img src={el.url} alt="" className="w-full h-auto drop-shadow-xl" />
+                        )}
+                        {el.type === 'text' && el.content && (
+                            <p style={{ fontSize: `${el.fontSize}px`, color: el.color }} className="whitespace-pre-wrap font-bold drop-shadow-lg text-center">
+                                {el.content}
+                            </p>
+                        )}
+                    </div>
+                );
+            });
     };
 
     // ロード中（かつまだ曲データなどが入っていない状態）は全画面ローディング
