@@ -246,7 +246,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
     }, [uiConfig, openSupportModal]);
 
     return (
-        <div className="w-full max-w-2xl mx-auto animate-fade-in px-4">
+        <div className="w-full max-w-2xl mx-auto animate-fade-in px-4 pt-8 sm:pt-12">
             <div className="text-center mb-1 min-h-[30px] flex items-center justify-center">
                 <p className="text-sm font-medium tracking-wide leading-relaxed" style={{ color: 'var(--text-secondary-dynamic)' }}>
                     {uiConfig.subtitle}
