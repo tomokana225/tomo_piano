@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { UiConfig, NavButtonConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -220,7 +219,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                             className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                         />
                         <p className="text-[10px] text-gray-400">
-                            ※Discordのチャンネル設定 > 連携サービス > ウェブフック から取得したURLを貼り付けてください。SlackのWebhookも動作します。
+                            ※Discordのチャンネル設定 &gt; 連携サービス &gt; ウェブフック から取得したURLを貼り付けてください。SlackのWebhookも動作します。
                         </p>
                     </div>
                 </div>

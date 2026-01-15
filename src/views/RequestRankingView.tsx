@@ -54,7 +54,7 @@ const RequestForm: React.FC<{
                         onChange={(e) => setSongTitle(e.target.value)}
                         placeholder="アイドル / YOASOBI"
                         required
-                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-xl py-2.5 px-4 text-base focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-xl py-2.5 px-4 text-base focus:outline-none focus:ring-2 focus:border-transparent transition-all text-text-primary-light dark:text-text-primary-dark"
                         style={{'--tw-ring-color': 'var(--primary-color)'} as React.CSSProperties}
                     />
                 </div>
@@ -67,12 +67,12 @@ const RequestForm: React.FC<{
                         onChange={(e) => setCasId(e.target.value)}
                         placeholder="IDかアカウント名を入力"
                         required
-                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-xl py-2.5 px-4 text-base focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-xl py-2.5 px-4 text-base focus:outline-none focus:ring-2 focus:border-transparent transition-all text-text-primary-light dark:text-text-primary-dark"
                         style={{'--tw-ring-color': 'var(--primary-color)'} as React.CSSProperties}
                     />
                     <p className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark text-left mt-1.5 font-medium opacity-70">※この項目は配信者のみに公開されます。</p>
                 </div>
-                <div className="text-[11px] text-left text-text-secondary-light dark:text-text-secondary-dark bg-input-bg-light dark:bg-input-bg-dark/50 p-4 rounded-xl space-y-1.5 border border-border-light/50 dark:border-border-dark/50">
+                <div className="text-[11px] text-left text-text-secondary-light dark:text-text-secondary-dark bg-input-bg-light/50 dark:bg-black/20 p-4 rounded-xl space-y-1.5 border border-border-light/50 dark:border-border-dark/30">
                     <p className="flex items-start gap-1"><span>※</span><span>リクエストに必ずお応えできるわけではありません。</span></p>
                     {uiConfig.printGakufuUrl && (
                         <p className="flex items-start gap-1">
