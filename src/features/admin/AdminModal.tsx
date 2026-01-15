@@ -51,9 +51,13 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
             onClick={() => setActiveTab(tab)}
             className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-3 sm:px-4 sm:py-3 text-[10px] sm:text-sm font-bold rounded-xl transition-all whitespace-nowrap flex-shrink-0 min-w-[70px] sm:min-w-0 ${
                 activeTab === tab 
-                ? 'bg-[var(--primary-color)] text-white shadow-lg scale-105' 
+                ? 'shadow-lg scale-105' 
                 : 'bg-black/5 dark:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/10 dark:hover:bg-white/10'
             }`}
+            style={{
+                backgroundColor: activeTab === tab ? 'var(--primary-color)' : '',
+                color: activeTab === tab ? 'var(--text-on-primary)' : ''
+            }}
         >
             <TabIcon tab={tab} className="w-5 h-5 sm:w-5 sm:h-5" />
             <span>{label}</span>
@@ -76,7 +80,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                                 onMouseLeave={() => setIsTransparent(false)}
                                 onTouchStart={() => setIsTransparent(true)}
                                 onTouchEnd={() => setIsTransparent(false)}
-                                className="bg-black/5 dark:bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold border border-border-light dark:border-border-dark hover:bg-black/10"
+                                className="bg-black/5 dark:bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold border border-border-light dark:border-border-dark hover:bg-black/10 text-text-primary-light dark:text-text-primary-dark"
                              >
                                 プレビューを確認 (長押し)
                              </button>

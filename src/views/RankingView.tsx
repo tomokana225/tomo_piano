@@ -148,8 +148,11 @@ const SegmentedControlButton: React.FC<{ onClick: () => void, isActive: boolean,
     return (
         <button
             onClick={onClick}
-            className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-200 focus:outline-none ${isActive ? 'text-white' : 'bg-transparent text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10'}`}
-            style={{backgroundColor: isActive ? 'var(--primary-color)' : ''}}
+            className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-200 focus:outline-none ${isActive ? '' : 'bg-transparent text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10'}`}
+            style={{
+                backgroundColor: isActive ? 'var(--primary-color)' : '',
+                color: isActive ? 'var(--text-on-primary)' : ''
+            }}
         >
             {children}
         </button>

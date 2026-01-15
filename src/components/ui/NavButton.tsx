@@ -12,8 +12,9 @@ interface NavButtonProps {
 export const NavButton: React.FC<NavButtonProps> = ({ onClick, href, isActive, IconComponent, label, className }) => {
     const baseClasses = "w-full flex items-center gap-4 px-4 py-3 rounded-lg text-base font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-background-light dark:focus:ring-offset-card-background-dark";
     
+    // Updated text color for active state to use dynamic contrast variable
     const activeClasses = isActive 
-        ? "text-white" 
+        ? "text-[var(--text-on-primary)]" 
         : "text-text-primary-light dark:text-text-primary-dark hover:bg-black/5 dark:hover:bg-white/10";
     
     const content = (

@@ -7,6 +7,8 @@
   --primary-color: #ec4899;
   --primary-color-hover: #db2777;
   --secondary-color: #38bdf8;
+  --text-on-primary: #ffffff;
+  --text-on-secondary: #ffffff;
 
   /* Light Theme */
   --background-light: #f1f5f9;
@@ -39,10 +41,24 @@
 body {
   font-family: var(--body-font);
   font-size: calc(1rem * var(--body-font-scale));
-  @apply bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-300;
-  @apply bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950;
-  min-height: 100dvh; /* Use dynamic viewport height */
+  background-color: var(--background-light);
+  @apply text-text-primary-light dark:text-text-primary-dark transition-colors duration-300;
+  min-height: 100dvh;
   overflow: hidden;
+}
+
+.dark body {
+  background-color: var(--background-dark);
+}
+
+/* 背景グラデーションを分離し、背景色の上に重ねる */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  @apply bg-gradient-to-br from-slate-50/50 to-slate-200/50 dark:from-slate-900/50 dark:to-slate-950/50;
+  pointer-events: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -50,8 +66,9 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   @apply text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)];
   /* 視認性向上のためのドロップシャドウ（文字本体ではなくクリップ範囲に影響） */
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
 }
+
 .dark h1, .dark h2, .dark h3 {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
@@ -73,7 +90,6 @@ h4 { font-size: calc(1.25rem * var(--heading-font-scale)); }
     background-color: rgba(30, 41, 59, var(--card-bg-opacity));
 }
 
-/* 背景画像時のコンテンツ保護レイヤー */
 .content-glass {
     @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md rounded-3xl p-4 sm:p-8 border border-white/20 dark:border-white/5;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
@@ -98,7 +114,6 @@ input, select, textarea, .rounded-lg {
 .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 10px; }
 .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: var(--text-secondary-dark); }
 
-/* モバイルのセーフエリア対応 */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
