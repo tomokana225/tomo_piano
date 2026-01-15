@@ -38,6 +38,10 @@
   --card-blur: 0px;
 }
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   font-family: var(--body-font);
   font-size: calc(1rem * var(--body-font-scale));
@@ -76,7 +80,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--card-shadow);
     background-color: rgba(255, 255, 255, var(--card-bg-opacity));
     backdrop-filter: blur(var(--card-blur));
-    @apply transition-all duration-300 border-l-4 hover:shadow-xl hover:-translate-y-1 active:scale-[0.99];
+    @apply transition-all duration-300 border-l-4 hover:shadow-xl hover:-translate-y-1;
     border-left-color: var(--primary-color);
 }
 .dark .fancy-card {

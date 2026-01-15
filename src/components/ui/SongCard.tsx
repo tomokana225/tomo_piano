@@ -30,7 +30,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, onLike, isLiking, isLi
         <div className="bg-input-bg-light dark:bg-input-bg-dark py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg flex justify-between items-center border border-border-light dark:border-border-dark fancy-card shadow-sm hover:translate-x-1 group">
             <div className="min-w-0 flex-grow">
                 <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="font-bold text-sm sm:text-base lg:text-lg truncate text-text-primary-light dark:text-text-primary-dark leading-tight group-hover:text-[var(--primary-color)] transition-colors">{song.title}</h3>
+                    <h3 className="font-bold text-sm sm:text-base lg:text-lg truncate text-text-primary-light dark:text-text-primary-dark leading-tight transition-colors">{song.title}</h3>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-[11px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark truncate">{song.artist}</p>
