@@ -307,19 +307,19 @@ const App: React.FC = () => {
     const navButtons = useMemo(() => {
         if (!uiConfig.navButtons) return [];
         const buttonConfigs = {
-            search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
+            search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search || { label: '曲を検索', enabled: true } },
             profile: { mode: 'profile', icon: UserIcon, config: uiConfig.navButtons.profile || { label: 'プロフィール', enabled: true } },
-            list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
-            suggest: { mode: 'suggest', icon: DiceIcon, config: uiConfig.navButtons.suggest },
-            news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news },
-            ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
-            requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests },
-            setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
-            tutorial: { mode: 'tutorial', icon: InformationCircleIcon, config: uiConfig.navButtons.tutorial },
+            list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list || { label: '曲リスト', enabled: true } },
+            suggest: { mode: 'suggest', icon: DiceIcon, config: uiConfig.navButtons.suggest || { label: 'おまかせ選曲', enabled: true } },
+            news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news || { label: 'お知らせ', enabled: true } },
+            ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking || { label: 'ランキング', enabled: true } },
+            requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests || { label: 'リクエスト', enabled: true } },
+            setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist || { label: 'セトリ提案', enabled: true } },
+            tutorial: { mode: 'tutorial', icon: InformationCircleIcon, config: uiConfig.navButtons.tutorial || { label: 'ガイド', enabled: true } },
             printGakufu: { 
                 href: uiConfig.printGakufuUrl || '#', 
                 icon: DocumentTextIcon, 
-                config: uiConfig.navButtons.printGakufu 
+                config: uiConfig.navButtons.printGakufu || { label: 'ぷりんと楽譜', enabled: true }
             },
         };
         const buttonOrder: (keyof typeof buttonConfigs)[] = ['search', 'profile', 'list', 'suggest', 'news', 'ranking', 'requests', 'setlist', 'tutorial', 'printGakufu'];

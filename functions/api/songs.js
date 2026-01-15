@@ -1,3 +1,4 @@
+
 // This serverless function runs on Cloudflare, not in the user's browser.
 // It acts as a secure intermediary to communicate with Firebase.
 // This function has been extended to act as a router for multiple actions.
@@ -48,6 +49,7 @@ const DEFAULT_UI_CONFIG = {
     },
     navButtons: {
         search: { label: '曲を検索', enabled: true },
+        profile: { label: 'プロフィール', enabled: true },
         list: { label: '曲リスト', enabled: true },
         ranking: { label: 'ランキング', enabled: true },
         news: { label: 'お知らせ', enabled: true },
