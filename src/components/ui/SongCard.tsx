@@ -11,7 +11,7 @@ interface SongCardProps {
 }
 
 const ActionButton = ({ href, title, icon }: { href: string, title: string, icon: React.ReactNode }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer" title={title} className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors">
+    <a href={href} target="_blank" rel="noopener noreferrer" title={title} className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors p-1">
         {icon}
     </a>
 );
@@ -31,34 +31,36 @@ export const SongCard: React.FC<SongCardProps> = ({ song, onLike, isLiking, isLi
     };
 
     return (
-        <div className="bg-input-bg-light dark:bg-input-bg-dark p-3 sm:p-4 rounded-lg flex justify-between items-center border border-border-light dark:border-border-dark fancy-card shadow-sm">
+        <div className="bg-input-bg-light dark:bg-input-bg-dark py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg flex justify-between items-center border border-border-light dark:border-border-dark fancy-card shadow-sm">
             <div className="min-w-0 flex-grow">
                 <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="font-bold text-base sm:text-lg truncate text-text-primary-light dark:text-text-primary-dark">{song.title}</h3>
+                    <h3 className="font-bold text-sm sm:text-base lg:text-lg truncate text-text-primary-light dark:text-text-primary-dark leading-tight">{song.title}</h3>
                     {song.season && (
-                        <span className="text-sm" title={`${song.season}の曲`}>
+                        <span className="text-xs sm:text-sm" title={`${song.season}の曲`}>
                             {getSeasonEmoji(song.season)}
                         </span>
                     )}
                 </div>
-                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark truncate">{song.artist}</p>
-                 <div className="flex items-center gap-2 mt-2">
-                    {song.isNew && <span className="text-[10px] font-bold bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full">NEW</span>}
-                    {song.status === 'practicing' && <span className="text-[10px] font-bold bg-blue-500 text-white px-2 py-0.5 rounded-full">練習中</span>}
-                    {song.genre && <span className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark font-medium px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5">{song.genre}</span>}
+                <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-[11px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark truncate">{song.artist}</p>
+                    <div className="flex items-center gap-1.5 ml-1">
+                        {song.isNew && <span className="text-[9px] font-bold bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full leading-none">NEW</span>}
+                        {song.status === 'practicing' && <span className="text-[9px] font-bold bg-blue-500 text-white px-1.5 py-0.5 rounded-full leading-none">練習中</span>}
+                        {song.genre && <span className="text-[9px] text-text-secondary-light dark:text-text-secondary-dark font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 leading-none">{song.genre}</span>}
+                    </div>
                 </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 ml-2 sm:ml-4">
-                <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 hover:text-red-400" />} />
-                <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5" />} />
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-2 sm:ml-4">
+                <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 hover:text-red-400" />} />
+                <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />} />
                  {onLike && (
-                    <button onClick={() => onLike(song)} disabled={isLiking || isLiked} className="p-1 sm:p-2 rounded-full hover:bg-pink-500/10 dark:hover:bg-pink-500/20 disabled:cursor-not-allowed" title={isLiked ? "いいね済み" : "いいね！"}>
+                    <button onClick={() => onLike(song)} disabled={isLiking || isLiked} className="p-1 rounded-full hover:bg-pink-500/10 dark:hover:bg-pink-500/20 disabled:cursor-not-allowed transition-colors" title={isLiked ? "いいね済み" : "いいね！"}>
                         {isLiking ? (
-                            <LoadingSpinner className="w-5 h-5 text-pink-400" />
+                            <LoadingSpinner className="w-4 h-4 text-pink-400" />
                         ) : isLiked ? (
-                            <HeartIconSolid className="w-5 h-5 text-pink-500" />
+                            <HeartIconSolid className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" />
                         ) : (
-                            <HeartIcon className="w-5 h-5 text-pink-400" />
+                            <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-pink-400" />
                         )}
                     </button>
                 )}

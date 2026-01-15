@@ -24,9 +24,9 @@ export async function onRequest(context) {
         return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
 
-    // FIX: Updated to use env.API_KEY as per the coding guidelines for consistency.
-    if (!env.API_KEY) {
-        return jsonResponse({ error: 'API_KEY is not configured on the server.' }, 500);
+    // Fixed: Exclusively obtain the API key from process.env.API_KEY as per guidelines.
+    if (!process.env.API_KEY) {
+        return jsonResponse({ error: 'API_KEY is not configured in process.env.' }, 500);
     }
     
     try {
@@ -36,8 +36,8 @@ export async function onRequest(context) {
             return jsonResponse({ error: 'Invalid input: songs array is required.' }, 400);
         }
         
-        // FIX: Updated to use env.API_KEY as per the coding guidelines.
-        const ai = new GoogleGenAI({ apiKey: env.API_KEY });
+        // Fixed: Initializing exclusively with process.env.API_KEY.
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
         const prompt = `以下の日本の曲名とアーティスト名のJSONリストについて、一般的なカタカナの読み仮名を括弧付きで追記した結果を返してください。
 - 英語名、数字、記号のみ、または既にカタカナ/ひらがなの場合は、読み仮名は不要です。その場合は元の文字列をそのまま updatedTitle/updatedArtist に入れてください。
@@ -47,8 +47,9 @@ export async function onRequest(context) {
 ${JSON.stringify(songs)}
 `;
         
+        // Fixed: Use 'gemini-3-flash-preview' for basic text tasks.
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -80,8 +81,7 @@ ${JSON.stringify(songs)}
             },
         });
         
-        // With responseSchema, the response.text is guaranteed to be a valid JSON string
-        // matching the schema.
+        // Fixed: Accessing text property directly (not as a method).
         const kanaResults = JSON.parse(response.text);
         
         return jsonResponse(kanaResults);

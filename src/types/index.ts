@@ -56,6 +56,22 @@ export interface NavButtonConfig {
     enabled: boolean;
 }
 
+export interface VisualElement {
+    id: string;
+    page: Mode | 'all';
+    type: 'image' | 'text';
+    url?: string;
+    content?: string;
+    x: number; // percentage 0-100
+    y: number; // percentage 0-100
+    width: number; // percentage 0-100
+    opacity: number; // 0-1
+    rotation: number; // degrees
+    zIndex: number;
+    fontSize?: number;
+    color?: string;
+}
+
 export interface UiConfig {
     mainTitle: string;
     subtitle: string;
@@ -86,6 +102,7 @@ export interface UiConfig {
     cardStyle?: 'flat' | 'elevated' | 'glass';
     shadowIntensity?: number; // 0 to 1
     // ------------------------
+    visualElements?: VisualElement[];
     specialButtons: {
         twitcas: NavButtonConfig;
         support: NavButtonConfig;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
-import { Mode } from './types';
+import { Mode, VisualElement } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
@@ -160,7 +160,7 @@ const App: React.FC = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsInfoBannerVisible(false);
-        }, 4000);
+        }, 6000); // 余裕を持って6秒に
         return () => clearTimeout(timer);
     }, []);
     
@@ -347,6 +347,38 @@ const App: React.FC = () => {
         </div>
     );
 
+    // ビジュアル要素のレンダリング
+    const renderVisualElements = () => {
+        if (!uiConfig.visualElements) return null;
+        return uiConfig.visualElements
+            .filter(el => el.page === mode || el.page === 'all')
+            .map(el => (
+                <div
+                    key={el.id}
+                    style={{
+                        position: 'absolute',
+                        left: `${el.x}%`,
+                        top: `${el.y}%`,
+                        width: `${el.width}%`,
+                        opacity: el.opacity,
+                        transform: `translate(-50%, -50%) rotate(${el.rotation}deg)`,
+                        zIndex: el.zIndex,
+                        pointerEvents: 'none', // 背景装飾なのでクリックを邪魔しない
+                        transition: 'all 0.3s ease-out'
+                    }}
+                >
+                    {el.type === 'image' && el.url && (
+                        <img src={el.url} alt="" className="w-full h-auto drop-shadow-lg" />
+                    )}
+                    {el.type === 'text' && el.content && (
+                        <p style={{ fontSize: `${el.fontSize}px`, color: el.color }} className="whitespace-pre-wrap font-bold drop-shadow-md">
+                            {el.content}
+                        </p>
+                    )}
+                </div>
+            ));
+    };
+
     // ロード中（かつまだ曲データなどが入っていない状態）は全画面ローディング
     if (isLoading && songs.length === 0) {
         return (
@@ -421,10 +453,15 @@ const App: React.FC = () => {
                         )}
                         <div className="fixed inset-0 z-[-2]" style={{ backgroundColor: backgroundFallbackColor }}/>
 
+                        {/* ビジュアルカスタマイズ要素をビューの背面に配置 */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            {renderVisualElements()}
+                        </div>
+
                         {mode !== 'search' && (
                             <button
                                 onClick={() => setMode('search')}
-                                className="flex items-center gap-2 mb-6 text-sm font-semibold transition-opacity hover:opacity-75"
+                                className="flex items-center gap-2 mb-6 text-sm font-semibold transition-opacity hover:opacity-75 relative z-10"
                                 style={{ color: 'var(--primary-color)' }}
                                 aria-label="検索画面に戻る"
                             >
@@ -432,7 +469,9 @@ const App: React.FC = () => {
                                 <span>検索画面に戻る</span>
                             </button>
                         )}
-                        {renderView()}
+                        <div className="relative z-10">
+                            {renderView()}
+                        </div>
                     </main>
                     <footer className="sm:hidden flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-[0_-4px_10px_rgba(0,0,0,0.1)] border-t border-border-light dark:border-border-dark p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex justify-around items-center z-20">
                         <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
@@ -468,6 +507,9 @@ const App: React.FC = () => {
                     onSavePost={onSavePost}
                     onDeletePost={onDeletePost}
                     onSaveUiConfig={onSaveUiConfig}
+                    // 管理画面でのページ切り替えを可能にするために
+                    currentMode={mode}
+                    setMode={setMode}
                 />
             )}
             
