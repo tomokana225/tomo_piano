@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -231,6 +232,7 @@ const App: React.FC = () => {
         root.style.setProperty('--heading-font', uiConfig.headingFontFamily || "'Kiwi Maru', serif");
         root.style.setProperty('--body-font', uiConfig.bodyFontFamily || "'Noto Sans JP', sans-serif");
         root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
+        // FIX: Corrected 'uiApi' typo to 'uiConfig'
         root.style.setProperty('--body-font-scale', String(uiConfig.bodyFontScale || 1));
 
         // 背景色の設定 (画像モードでも色は維持する)
@@ -344,6 +346,12 @@ const App: React.FC = () => {
             </nav>
         </div>
     );
+
+    // ヘッダーに配置された要素があるかチェック（コンテンツのオフセット計算用）
+    const hasHeaderDecorations = useMemo(() => {
+        if (!uiConfig.visualElements) return false;
+        return uiConfig.visualElements.some(el => (el.page === mode || el.page === 'all') && el.placement === 'header');
+    }, [uiConfig.visualElements, mode]);
 
     // ビジュアル要素のレンダリング
     const renderVisualElements = () => {
@@ -477,7 +485,11 @@ const App: React.FC = () => {
                                 <span>検索画面に戻る</span>
                             </button>
                         )}
-                        <div className={`relative z-10 min-h-full ${uiConfig.backgroundType === 'image' ? 'content-glass' : ''}`}>
+                        {/* 
+                            ヘッダー装飾がある場合、被らないように pt-32 (または状況に応じた余白) を追加
+                            ここでは hasHeaderDecorations に基づいて動的にクラスを付与
+                        */}
+                        <div className={`relative z-10 min-h-full ${uiConfig.backgroundType === 'image' ? 'content-glass' : ''} ${hasHeaderDecorations ? 'pt-24 sm:pt-40' : ''}`}>
                             {renderView()}
                         </div>
                     </main>
