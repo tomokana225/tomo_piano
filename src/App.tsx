@@ -342,16 +342,6 @@ const App: React.FC = () => {
                     return null;
                 })}
             </nav>
-            
-            {/* サイドバー下部に常設の管理者ログイン */}
-            <div className="p-4 border-t border-border-light dark:border-border-dark mt-auto bg-black/5 dark:bg-white/5">
-                <NavButton 
-                    onClick={handleAdminLogin} 
-                    IconComponent={CogIcon} 
-                    label={isAdminAuthenticated ? "管理画面を開く" : "管理者ログイン"} 
-                    className="bg-gray-100 dark:bg-gray-800 text-sm opacity-80 hover:opacity-100 transition-opacity"
-                />
-            </div>
         </div>
     );
 
