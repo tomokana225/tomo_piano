@@ -102,8 +102,11 @@ export async function onRequest(context) {
             if (configSnap.exists()) {
                 const config = configSnap.data();
                 if (config.notificationEnabled && config.discordWebhookUrl) {
+                    // メンション用のテキスト（IDが設定されている場合のみ）
+                    const mention = config.discordUserId ? `<@${config.discordUserId}> ` : '';
+                    
                     const message = {
-                        content: null,
+                        content: mention ? `${mention}新しいリクエストが届きました！` : null,
                         embeds: [
                             {
                                 title: "🎵 新しいリクエストが届きました！",

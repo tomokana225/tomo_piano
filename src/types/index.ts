@@ -101,6 +101,7 @@ export interface UiConfig {
     // --- 通知設定 ---
     notificationEnabled?: boolean;
     discordWebhookUrl?: string;
+    discordUserId?: string; // 追加: メンション用のユーザーID
     // --- プロフィール設定 ---
     profileName?: string;
     profileTitle?: string;

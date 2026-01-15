@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { UiConfig, NavButtonConfig } from '../../types';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -197,7 +198,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                     <span className="w-2 h-6 bg-purple-500 rounded-full"></span>
                     通知設定
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-6">
                     <label className="flex items-center gap-3 cursor-pointer">
                         <input
                             type="checkbox"
@@ -208,19 +209,36 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                         />
                         <span className="text-sm font-bold">リクエスト受信時に通知する</span>
                     </label>
-                    <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Discord Webhook URL</label>
-                        <input
-                            type="text"
-                            name="discordWebhookUrl"
-                            value={config.discordWebhookUrl || ''}
-                            onChange={handleInputChange}
-                            placeholder="https://discord.com/api/webhooks/..."
-                            className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm focus:ring-purple-500 focus:border-purple-500"
-                        />
-                        <p className="text-[10px] text-gray-400">
-                            ※Discordのチャンネル設定 &gt; 連携サービス &gt; ウェブフック から取得したURLを貼り付けてください。SlackのWebhookも動作します。
-                        </p>
+                    <div className="space-y-4 border-l-4 border-purple-100 dark:border-purple-900 pl-4 py-2">
+                        <div className="space-y-1">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Discord Webhook URL</label>
+                            <input
+                                type="text"
+                                name="discordWebhookUrl"
+                                value={config.discordWebhookUrl || ''}
+                                onChange={handleInputChange}
+                                placeholder="https://discord.com/api/webhooks/..."
+                                className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm focus:ring-purple-500 focus:border-purple-500"
+                            />
+                            <p className="text-[10px] text-gray-400">
+                                ※Discordのチャンネル設定 &gt; 連携サービス &gt; ウェブフック から取得したURLを貼り付けてください。
+                            </p>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">あなたの Discord ユーザーID (任意)</label>
+                            <input
+                                type="text"
+                                name="discordUserId"
+                                value={config.discordUserId || ''}
+                                onChange={handleInputChange}
+                                placeholder="例: 123456789012345678"
+                                className="w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 text-sm focus:ring-purple-500 focus:border-purple-500"
+                            />
+                            <p className="text-[10px] text-gray-400 leading-relaxed">
+                                ※入力すると、通知時にあなたへメンションを飛ばします（スマホ通知がより確実になります）。<br/>
+                                <strong>IDの取得方法:</strong> Discord設定 > 詳細設定 > 「開発者モード」をONにした後、自分のプロフィールを右クリック（または詳細メニュー）から「ユーザーIDをコピー」を選択してください。
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>
