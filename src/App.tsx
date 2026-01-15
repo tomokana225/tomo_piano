@@ -18,7 +18,7 @@ import {
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon,
     ChevronLeftIcon, XIcon, InformationCircleIcon,
-    CheckCircleIcon, UserGroupIcon, CogIcon, UserIcon
+    CheckCircleIcon, UserGroupIcon, UserIcon
 } from './components/ui/Icons';
 
 
