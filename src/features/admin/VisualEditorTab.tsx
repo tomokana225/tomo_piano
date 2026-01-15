@@ -28,7 +28,7 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
             width: 25,
             opacity: 1,
             rotation: 0,
-            zIndex: 1,
+            zIndex: 0,
             fontSize: type === 'text' ? 18 : undefined,
             color: type === 'text' ? '#000000' : undefined,
         };
@@ -41,6 +41,16 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
 
     const removeElement = (id: string) => {
         setElements(elements.filter(el => el.id !== id));
+    };
+
+    const setAsBanner = (id: string) => {
+        updateElement(id, {
+            width: 100,
+            x: 50,
+            rotation: 0,
+            opacity: 0.8,
+            placement: 'header'
+        });
     };
 
     const handleSave = async () => {
@@ -71,9 +81,9 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                         </button>
                     ))}
                 </div>
-                <p className="mt-4 text-[10px] text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                    選択したページの「ヘッダー付近」または「フッター付近」に画像やテキストを配置できます。<br/>
-                    要素をタップして位置や大きさを調整してください。
+                <p className="mt-4 text-[11px] text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                    選択したページの「背景」として画像やテキストを配置します。<br/>
+                    検索バーなどのUIの背後に表示されるため、操作を邪魔しません。
                 </p>
             </div>
 
@@ -111,6 +121,14 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                                 <span className="font-bold text-sm">{el.type === 'image' ? '画像要素' : 'テキスト要素'}</span>
                             </div>
                             <div className="flex items-center gap-4">
+                                {el.type === 'image' && (
+                                    <button 
+                                        onClick={() => setAsBanner(el.id)}
+                                        className="text-[10px] font-bold bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                                    >
+                                        バナーとして配置
+                                    </button>
+                                )}
                                 <select 
                                     value={el.page} 
                                     onChange={(e) => updateElement(el.id, { page: e.target.value as any })}
@@ -128,7 +146,7 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                             <div className="space-y-4">
                                 {el.type === 'image' ? (
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">画像URL</label>
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">画像URL (横長画像がおすすめ)</label>
                                         <input 
                                             type="text" 
                                             value={el.url || ''} 
@@ -148,19 +166,19 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                                 )}
                                 
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">配置エリア</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">配置エリア (自動フェード適用)</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button 
                                             onClick={() => updateElement(el.id, { placement: 'header' })}
                                             className={`py-2 text-[10px] font-bold rounded-lg transition-all ${el.placement === 'header' ? 'bg-cyan-600 text-white shadow-inner' : 'bg-gray-100 text-gray-500'}`}
                                         >
-                                            ヘッダー付近
+                                            ヘッダー背後
                                         </button>
                                         <button 
                                             onClick={() => updateElement(el.id, { placement: 'footer' })}
                                             className={`py-2 text-[10px] font-bold rounded-lg transition-all ${el.placement === 'footer' ? 'bg-cyan-600 text-white shadow-inner' : 'bg-gray-100 text-gray-500'}`}
                                         >
-                                            フッター付近
+                                            フッター背後
                                         </button>
                                     </div>
                                 </div>
@@ -173,7 +191,7 @@ export const VisualEditorTab: React.FC<VisualEditorTabProps> = ({ uiConfig, onSa
                                         <input type="range" min="0" max="100" value={el.x} onChange={(e) => updateElement(el.id, { x: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">大きさ: {el.width}%</label>
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">大きさ(幅): {el.width}%</label>
                                         <input type="range" min="5" max="100" value={el.width} onChange={(e) => updateElement(el.id, { width: parseInt(e.target.value) })} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
                                     </div>
                                 </div>

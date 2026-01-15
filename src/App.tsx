@@ -215,13 +215,10 @@ const App: React.FC = () => {
         root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
         root.style.setProperty('--body-font-scale', String(uiConfig.bodyFontScale || 1));
 
-        if (uiConfig.backgroundType === 'color') {
-            root.style.setProperty('--background-light', uiConfig.backgroundColor);
-            root.style.setProperty('--background-dark', uiConfig.darkBackgroundColor);
-        } else {
-            root.style.setProperty('--background-light', 'transparent');
-            root.style.setProperty('--background-dark', 'transparent');
-        }
+        // 背景色の設定 (画像モードでも色は維持する)
+        root.style.setProperty('--background-light', uiConfig.backgroundColor);
+        root.style.setProperty('--background-dark', uiConfig.darkBackgroundColor);
+        
     }, [uiConfig]);
 
     const handleSuggestSelect = useCallback((text: string) => {
@@ -306,12 +303,8 @@ const App: React.FC = () => {
             : {};
     
     const backgroundFallbackColor = useMemo(() => {
-        const isDark = document.documentElement.classList.contains('dark');
-        if (uiConfig.backgroundType === 'color') {
-            return isDark ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
-        }
-        return isDark ? '#020617' : '#f1f5f9';
-    }, [uiConfig.backgroundType, uiConfig.backgroundColor, uiConfig.darkBackgroundColor, isDarkMode]);
+        return isDarkMode ? uiConfig.darkBackgroundColor : uiConfig.backgroundColor;
+    }, [uiConfig.backgroundColor, uiConfig.darkBackgroundColor, isDarkMode]);
 
     const SidebarContent = () => (
         <div className="flex flex-col h-full">
@@ -363,15 +356,24 @@ const App: React.FC = () => {
                     width: `${el.width}%`,
                     opacity: el.opacity,
                     transform: `translate(-50%, 0) rotate(${el.rotation}deg)`,
-                    zIndex: el.zIndex,
+                    zIndex: el.zIndex ?? 0, // コンテンツ z-10 よりも低く設定
                     pointerEvents: 'none',
                     transition: 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
                 };
 
                 if (el.placement === 'header') {
-                    style.top = '10px';
+                    style.top = '0px';
+                    // ヘッダー画像の場合、下方向にフェードアウトさせるマスクを適用
+                    if (el.type === 'image') {
+                        style.maskImage = 'linear-gradient(to bottom, black 70%, transparent 100%)';
+                        style.WebkitMaskImage = 'linear-gradient(to bottom, black 70%, transparent 100%)';
+                    }
                 } else {
-                    style.bottom = '10px';
+                    style.bottom = '0px';
+                    if (el.type === 'image') {
+                        style.maskImage = 'linear-gradient(to top, black 70%, transparent 100%)';
+                        style.WebkitMaskImage = 'linear-gradient(to top, black 70%, transparent 100%)';
+                    }
                 }
 
                 return (
@@ -380,7 +382,7 @@ const App: React.FC = () => {
                             <img src={el.url} alt="" className="w-full h-auto drop-shadow-xl" />
                         )}
                         {el.type === 'text' && el.content && (
-                            <p style={{ fontSize: `${el.fontSize}px`, color: el.color }} className="whitespace-pre-wrap font-bold drop-shadow-lg text-center">
+                            <p style={{ fontSize: `${el.fontSize}px`, color: el.color }} className="whitespace-pre-wrap font-bold drop-shadow-lg text-center p-4">
                                 {el.content}
                             </p>
                         )}
@@ -444,14 +446,14 @@ const App: React.FC = () => {
                             </div>
                         </div>
                     </header>
-                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar relative">
+                    <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar relative bg-background-light dark:bg-background-dark">
                          {error && (
                             <div className="mb-4 bg-yellow-100 dark:bg-yellow-900/80 border border-yellow-500 text-yellow-800 dark:text-yellow-200 p-2 text-center text-sm z-20 shadow-md rounded-lg">
                                 <strong>開発用情報:</strong> {error}
                             </div>
                         )}
                         
-                        <div className={`transition-all duration-700 ease-in-out overflow-hidden ${isInfoBannerVisible ? 'max-h-40 opacity-100 mb-6' : 'max-h-0 opacity-0'}`}>
+                        <div className={`transition-all duration-700 ease-in-out overflow-hidden relative z-20 ${isInfoBannerVisible ? 'max-h-40 opacity-100 mb-6' : 'max-h-0 opacity-0'}`}>
                             <div className="bg-blue-100 dark:bg-blue-900/50 border border-blue-500/50 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-start gap-3 text-sm shadow-md">
                                 <InformationCircleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
                                 <span>URLをコピペするか、ツイキャスアプリの右上にある共有ボタンから、ブラウザでサイトを読み込むと大きな画面で閲覧できます。</span>
@@ -464,7 +466,7 @@ const App: React.FC = () => {
                         <div className="fixed inset-0 z-[-2]" style={{ backgroundColor: backgroundFallbackColor }}/>
 
                         {/* ビジュアルカスタマイズ要素をビューの背面に配置 */}
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
                             {renderVisualElements()}
                         </div>
 
@@ -479,7 +481,7 @@ const App: React.FC = () => {
                                 <span>検索画面に戻る</span>
                             </button>
                         )}
-                        <div className="relative z-10">
+                        <div className={`relative z-10 min-h-full ${uiConfig.backgroundType === 'image' ? 'content-glass' : ''}`}>
                             {renderView()}
                         </div>
                     </main>
