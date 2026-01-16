@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Song } from '../../types';
-import { XIcon, YouTubeIcon, DocumentTextIcon, MusicNoteIcon, UserGroupIcon, HeartIcon } from '../../components/ui/Icons';
+import { XIcon, YouTubeIcon, DocumentTextIcon } from '../../components/ui/Icons';
 
 interface SuggestSongModalProps {
     isOpen: boolean;
@@ -116,7 +116,7 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
 
     return (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={onClose}>
-            <div className="bg-card-background-light dark:bg-card-background-dark rounded-3xl shadow-2xl w-full max-w-md text-center p-6 sm:p-8 relative overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-card-background-light dark:bg-card-background-dark rounded-3xl shadow-2xl w-full max-md text-center p-6 sm:p-8 relative overflow-hidden" onClick={e => e.stopPropagation()}>
                 <button 
                     onClick={onClose} 
                     className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-text-secondary-light dark:text-text-secondary-dark z-20"
