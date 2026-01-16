@@ -1,8 +1,9 @@
+
 // This serverless function runs on Cloudflare, not in the user's browser.
-// It logs a user's presence to Firestore.
+// It logs a user's presence to Firestore and tracks daily unique visits.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, setDoc } from 'firebase/firestore/lite';
+import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -64,14 +65,40 @@ export async function onRequest(context) {
             return jsonResponse({ error: "clientId is required." }, 400);
         }
         
+        const now = Date.now();
+        const dateStr = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+        
         const userRef = doc(db, 'activeUsers', clientId.trim());
-        await setDoc(userRef, { lastSeen: Date.now() });
+        const userSnap = await getDoc(userRef);
+        
+        let isFirstSeenToday = true;
+        
+        if (userSnap.exists()) {
+            const lastSeen = userSnap.data().lastSeen || 0;
+            const lastSeenDate = new Date(lastSeen).toISOString().split('T')[0];
+            if (lastSeenDate === dateStr) {
+                isFirstSeenToday = false;
+            }
+        }
+
+        // Update active user status
+        await setDoc(userRef, { lastSeen: now }, { merge: true });
+
+        // If this is the first heartbeat today for this client, increment total daily visits
+        if (isFirstSeenToday) {
+            const statsRef = doc(db, 'dailyStats', dateStr);
+            const statsSnap = await getDoc(statsRef);
+            if (statsSnap.exists()) {
+                await updateDoc(statsRef, { totalVisits: increment(1) });
+            } else {
+                await setDoc(statsRef, { totalVisits: 1, date: dateStr });
+            }
+        }
 
         return jsonResponse({ success: true });
 
     } catch (error) {
         console.warn('Logging presence failed:', error);
-        // Fail silently
         return jsonResponse({ success: true, error: "Internal logging error" });
     }
 }

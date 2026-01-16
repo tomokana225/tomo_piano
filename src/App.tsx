@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -146,7 +145,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose }) => {
 const App: React.FC = () => {
     const { 
         songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
-        isLoading, error, activeUserCount,
+        isLoading, error, activeUserCount, dailyVisitorCount,
         rankingPeriod, setRankingPeriod: setPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
         logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings,
@@ -464,14 +463,20 @@ const App: React.FC = () => {
                                  </h1>
                             </div>
 
-                            {/* Right: Theme Toggle */}
-                            <div className="flex-1 flex justify-end items-center gap-2">
-                                <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
-                                    <UserGroupIcon className="w-4 h-4 sm:w-5 h-5" style={{ color: 'var(--text-secondary-dynamic)' }} />
-                                    <span className="text-xs sm:text-sm font-semibold" style={{ color: 'var(--text-primary-dynamic)' }}>{activeUserCount}</span>
+                            {/* Right: Theme & Stats */}
+                            <div className="flex-1 flex justify-end items-center gap-1 sm:gap-2">
+                                <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-full overflow-hidden whitespace-nowrap" title="現在の訪問者数 | 今日の合計">
+                                    <div className="flex items-center gap-1">
+                                        <UserGroupIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-500" />
+                                        <span className="text-[10px] sm:text-xs font-bold" style={{ color: 'var(--text-primary-dynamic)' }}>{activeUserCount}</span>
+                                    </div>
+                                    <div className="w-[1px] h-3 bg-border-light dark:bg-border-dark"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] sm:text-xs font-bold" style={{ color: 'var(--text-secondary-dynamic)' }}>{dailyVisitorCount}</span>
+                                    </div>
                                 </div>
-                                <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="Toggle dark mode">
-                                    {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
+                                <button onClick={toggleDarkMode} className="p-1.5 sm:p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="Toggle dark mode">
+                                    {isDarkMode ? <SunIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <MoonIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                                 </button>
                             </div>
                         </div>

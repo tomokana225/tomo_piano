@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig, SetlistSuggestion, RankingPeriod } from '../types';
 import { parseSongs } from '../utils/parser';
 
@@ -71,10 +71,23 @@ export const useApi = () => {
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
     const [setlistSuggestions, setSetlistSuggestions] = useState<SetlistSuggestion[]>([]);
     const [rankingPeriod, setRankingPeriod] = useState<RankingPeriod>('all');
-    const [activeUserCount] = useState(0);
+    const [activeUserCount, setActiveUserCount] = useState(1);
+    const [dailyVisitorCount, setDailyVisitorCount] = useState(0);
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const clientIdRef = useRef<string | null>(null);
+
+    // Get or Create Client ID for presence tracking
+    useEffect(() => {
+        let cid = localStorage.getItem('piano_app_client_id');
+        if (!cid) {
+            cid = 'cli_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+            localStorage.setItem('piano_app_client_id', cid);
+        }
+        clientIdRef.current = cid;
+    }, []);
 
     const fetchRankings = useCallback(async (period: RankingPeriod) => {
         try {
@@ -102,6 +115,52 @@ export const useApi = () => {
             setSongLikeRankingList([]);
         }
     }, []);
+
+    const fetchCounts = useCallback(async () => {
+        try {
+            const [activeRes, dailyRes] = await Promise.all([
+                fetch('/api/get-active-users'),
+                fetch('/api/get-daily-stats')
+            ]);
+            if (activeRes.ok) {
+                const data = await activeRes.json();
+                setActiveUserCount(data.count || 1);
+            }
+            if (dailyRes.ok) {
+                const data = await dailyRes.json();
+                setDailyVisitorCount(data.totalVisits || 0);
+            }
+        } catch (err) {
+            console.warn("Failed to fetch visit counts", err);
+        }
+    }, []);
+
+    const sendHeartbeat = useCallback(async () => {
+        if (!clientIdRef.current) return;
+        try {
+            await fetch('/api/presence', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId: clientIdRef.current })
+            });
+        } catch (err) {
+            console.warn("Presence heartbeat failed", err);
+        }
+    }, []);
+
+    // Presence Heartbeat Loop
+    useEffect(() => {
+        sendHeartbeat(); // Initial
+        const interval = setInterval(sendHeartbeat, 60000 * 2); // Every 2 minutes
+        return () => clearInterval(interval);
+    }, [sendHeartbeat]);
+
+    // Active User Polling Loop
+    useEffect(() => {
+        fetchCounts(); // Initial
+        const interval = setInterval(fetchCounts, 30000); // Every 30 seconds
+        return () => clearInterval(interval);
+    }, [fetchCounts]);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -285,22 +344,8 @@ export const useApi = () => {
         fetch('/api/songs?action=getRecentRequests').then(res => res.ok ? res.json() : []).then(data => setRecentRequests(data)).catch(() => {});
     }, [rankingPeriod, fetchRankings, fetchLikeRankings]);
 
-    const sendTestNotification = useCallback(async (webhookUrl: string) => {
-        try {
-            const res = await fetch('/api/songs?action=sendTestNotification', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ webhookUrl }),
-            });
-            return res.ok;
-        } catch (err) {
-            console.error("Test notification failed", err);
-            return false;
-        }
-    }, []);
-
     return {
-        rawSongList, songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests, isLoading, error, activeUserCount,
-        rankingPeriod, setRankingPeriod, onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost, logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings, verifyAdminPassword, sendTestNotification
+        rawSongList, songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests, isLoading, error, activeUserCount, dailyVisitorCount,
+        rankingPeriod, setRankingPeriod, onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost, logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings, verifyAdminPassword
     };
 };
