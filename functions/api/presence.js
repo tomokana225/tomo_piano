@@ -1,6 +1,6 @@
 
 // This serverless function runs on Cloudflare, not in the user's browser.
-// It logs a user's presence to Firestore and tracks daily unique visits.
+// It logs a user's presence to Firestore and tracks daily unique visits based on JST.
 
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from 'firebase/firestore/lite';
@@ -24,18 +24,17 @@ async function getFirebaseApp(env) {
         appId: env.FIREBASE_APP_ID,
         measurementId: env.FIREBASE_MEASUREMENT_ID,
     };
-    
-    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-        throw new Error("Firebase environment variables are not set correctly.");
-    }
-    
     return initializeApp(firebaseConfig);
 }
 
-const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-});
+const getJSTDateStr = () => {
+    return new Intl.DateTimeFormat('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'Asia/Tokyo'
+    }).format(new Date()).replace(/\//g, '-');
+};
 
 export async function onRequest(context) {
     const { request, env } = context;
@@ -52,53 +51,60 @@ export async function onRequest(context) {
     try {
         app = await getFirebaseApp(env);
     } catch (e) {
-        console.warn("Firebase Init Failed:", e.message);
-        return jsonResponse({ success: true, message: "Server config error" });
+        return new Response(JSON.stringify({ success: false, error: "Firebase Init Failed" }), { headers: CORS_HEADERS });
     }
 
     const db = getFirestore(app);
 
     try {
         const { clientId } = await request.json();
+        if (!clientId) return new Response('Missing clientId', { status: 400 });
 
-        if (!clientId || typeof clientId !== 'string' || clientId.trim().length === 0) {
-            return jsonResponse({ error: "clientId is required." }, 400);
-        }
-        
         const now = Date.now();
-        const dateStr = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+        const todayStr = getJSTDateStr();
         
         const userRef = doc(db, 'activeUsers', clientId.trim());
         const userSnap = await getDoc(userRef);
         
-        let isFirstSeenToday = true;
+        let isFirstVisitToday = true;
         
         if (userSnap.exists()) {
             const lastSeen = userSnap.data().lastSeen || 0;
-            const lastSeenDate = new Date(lastSeen).toISOString().split('T')[0];
-            if (lastSeenDate === dateStr) {
-                isFirstSeenToday = false;
+            const lastSeenDate = new Intl.DateTimeFormat('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                timeZone: 'Asia/Tokyo'
+            }).format(new Date(lastSeen)).replace(/\//g, '-');
+            
+            if (lastSeenDate === todayStr) {
+                isFirstVisitToday = false;
             }
         }
 
-        // Update active user status
-        await setDoc(userRef, { lastSeen: now }, { merge: true });
+        // アクティブ状態を更新
+        await setDoc(userRef, { lastSeen: now, clientId: clientId.trim() }, { merge: true });
 
-        // If this is the first heartbeat today for this client, increment total daily visits
-        if (isFirstSeenToday) {
-            const statsRef = doc(db, 'dailyStats', dateStr);
+        // 今日初めてのアクセスなら総訪問者数をカウントアップ
+        if (isFirstVisitToday) {
+            const statsRef = doc(db, 'dailyStats', todayStr);
             const statsSnap = await getDoc(statsRef);
             if (statsSnap.exists()) {
                 await updateDoc(statsRef, { totalVisits: increment(1) });
             } else {
-                await setDoc(statsRef, { totalVisits: 1, date: dateStr });
+                await setDoc(statsRef, { totalVisits: 1, date: todayStr }, { merge: true });
             }
         }
 
-        return jsonResponse({ success: true });
+        return new Response(JSON.stringify({ success: true }), {
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
 
     } catch (error) {
-        console.warn('Logging presence failed:', error);
-        return jsonResponse({ success: true, error: "Internal logging error" });
+        console.error('Presence error:', error);
+        return new Response(JSON.stringify({ success: false, error: error.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
     }
 }

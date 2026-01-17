@@ -440,21 +440,21 @@ const App: React.FC = () => {
                 
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg h-14 sm:h-16 border-b-2 z-20" style={{ borderColor: 'var(--primary-color)' }}>
-                        <div className="h-full flex items-center justify-between px-4 sm:px-6">
-                            {/* Left: Menu Toggle */}
-                            <div className="flex-1 flex justify-start">
-                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors" style={{ color: 'var(--text-primary-dynamic)' }}>
+                        <div className="h-full flex items-center justify-between px-2 sm:px-6">
+                            {/* Left: Menu Toggle - Fixed Width Priority */}
+                            <div className="flex-shrink-0 flex justify-start items-center">
+                                <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-1.5 p-1.5 sm:p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors" style={{ color: 'var(--text-primary-dynamic)' }}>
                                     <MenuIcon className="w-6 h-6 sm:w-7 sm:h-7" />
-                                    <span className="font-semibold hidden sm:inline">メニュー</span>
+                                    <span className="font-semibold hidden sm:inline text-sm sm:text-base">メニュー</span>
                                 </button>
                             </div>
 
-                            {/* Center: Title */}
-                            <div className="flex-[4] sm:flex-[3] text-center px-2 flex items-center justify-center h-full">
+                            {/* Center: Title - Flexible Space */}
+                            <div className="flex-1 min-w-0 text-center px-1 flex items-center justify-center h-full">
                                  <h1 
                                     className={`font-bold truncate leading-tight w-full ${uiConfig.mainTitleColor ? '' : 'text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)]'}`} 
                                     style={{ 
-                                        fontSize: `${Math.min(uiConfig.mainTitleFontSize || 24, 32)}px`,
+                                        fontSize: `${Math.min(uiConfig.mainTitleFontSize || 22, 32)}px`,
                                         color: uiConfig.mainTitleColor || undefined
                                     }}
                                     title={uiConfig.mainTitle}
@@ -463,19 +463,19 @@ const App: React.FC = () => {
                                  </h1>
                             </div>
 
-                            {/* Right: Theme & Stats */}
-                            <div className="flex-1 flex justify-end items-center gap-1 sm:gap-2">
-                                <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-full overflow-hidden whitespace-nowrap" title="現在の訪問者数 | 今日の合計">
-                                    <div className="flex items-center gap-1">
-                                        <UserGroupIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-500" />
-                                        <span className="text-[10px] sm:text-xs font-bold" style={{ color: 'var(--text-primary-dynamic)' }}>{activeUserCount}</span>
+                            {/* Right: Theme & Stats - Fixed Width Priority */}
+                            <div className="flex-shrink-0 flex justify-end items-center gap-1 sm:gap-2">
+                                <div className="flex items-center gap-1.5 sm:gap-2 bg-black/5 dark:bg-white/5 px-1.5 sm:px-2.5 py-1 rounded-full overflow-hidden" title="現在の訪問者数 | 今日の合計">
+                                    <div className="flex items-center gap-0.5 sm:gap-1">
+                                        <UserGroupIcon className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-500" />
+                                        <span className="text-[10px] sm:text-xs font-bold leading-none" style={{ color: 'var(--text-primary-dynamic)' }}>{activeUserCount}</span>
                                     </div>
-                                    <div className="w-[1px] h-3 bg-border-light dark:bg-border-dark"></div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-[10px] sm:text-xs font-bold" style={{ color: 'var(--text-secondary-dynamic)' }}>{dailyVisitorCount}</span>
+                                    <div className="w-[1px] h-2.5 bg-border-light dark:bg-border-dark opacity-50"></div>
+                                    <div className="flex items-center">
+                                        <span className="text-[10px] sm:text-xs font-bold leading-none" style={{ color: 'var(--text-secondary-dynamic)' }}>{dailyVisitorCount}</span>
                                     </div>
                                 </div>
-                                <button onClick={toggleDarkMode} className="p-1.5 sm:p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="Toggle dark mode">
+                                <button onClick={toggleDarkMode} className="p-1 sm:p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10" style={{ color: 'var(--text-secondary-dynamic)' }} aria-label="Toggle dark mode">
                                     {isDarkMode ? <SunIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <MoonIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                                 </button>
                             </div>

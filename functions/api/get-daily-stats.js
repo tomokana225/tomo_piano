@@ -1,6 +1,6 @@
 
 // This serverless function runs on Cloudflare.
-// It retrieves the daily visit statistics from Firestore.
+// It retrieves the daily visit statistics from Firestore based on JST.
 
 import { initializeApp, getApps } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore/lite';
@@ -24,18 +24,17 @@ async function getFirebaseApp(env) {
         appId: env.FIREBASE_APP_ID,
         measurementId: env.FIREBASE_MEASUREMENT_ID,
     };
-    
-    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-        throw new Error("Firebase environment variables are not set correctly.");
-    }
-    
     return initializeApp(firebaseConfig);
 }
 
-const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-});
+const getJSTDateStr = () => {
+    return new Intl.DateTimeFormat('ja-JP', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'Asia/Tokyo'
+    }).format(new Date()).replace(/\//g, '-');
+};
 
 export async function onRequest(context) {
     const { request, env } = context;
@@ -44,23 +43,18 @@ export async function onRequest(context) {
         return new Response(null, { headers: CORS_HEADERS });
     }
 
-    if (request.method !== 'GET') {
-        return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
-    }
-
     let app;
     try {
         app = await getFirebaseApp(env);
     } catch (e) {
-        console.warn("Firebase Init Failed:", e.message);
-        return jsonResponse({ error: "Server configuration error." }, 500);
+        return new Response(JSON.stringify({ error: "Firebase Init Failed" }), { status: 500, headers: CORS_HEADERS });
     }
 
     const db = getFirestore(app);
 
     try {
-        const dateStr = new Date().toISOString().split('T')[0];
-        const statsRef = doc(db, 'dailyStats', dateStr);
+        const todayStr = getJSTDateStr();
+        const statsRef = doc(db, 'dailyStats', todayStr);
         const statsSnap = await getDoc(statsRef);
         
         let totalVisits = 0;
@@ -68,10 +62,15 @@ export async function onRequest(context) {
             totalVisits = statsSnap.data().totalVisits || 0;
         }
 
-        return jsonResponse({ totalVisits, date: dateStr }, 200);
+        return new Response(JSON.stringify({ totalVisits, date: todayStr }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
 
     } catch (error) {
-        console.warn('Get daily stats failed:', error);
-        return jsonResponse({ error: 'Failed to fetch daily statistics.' }, 500);
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
     }
 }
